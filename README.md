@@ -8,6 +8,11 @@ y descargas un **PDF listo para imprimir, guardar o enviar por WhatsApp**.
 > ✅ No hay que instalar nada · ✅ no hay que crear cuenta · ✅ funciona sin internet ·
 > ✅ **tus datos no salen de tu computadora**
 
+### ▶️ Pruébala ahora: **[budgetify-silk.vercel.app](https://budgetify-silk.vercel.app)**
+
+Se abre directo en el navegador, también en el teléfono. *(Es una demostración pública: no
+escribas datos reales de pacientes en ella.)*
+
 ![Pantalla de edición](docs/capturas/edicion.png)
 
 ## ¿Qué hace?
@@ -115,6 +120,8 @@ enviar un *Pull Request*. Si eres desarrollador, mira la
 **Medical Estimates** is a free, open-source web app that helps small clinics and private
 practices in Venezuela create medical cost estimates (quotes): enter the patient's data,
 pick services, and download a ready-to-print **PDF** in USD and VES (BCV rate).
+
+**Live demo:** [budgetify-silk.vercel.app](https://budgetify-silk.vercel.app)
 
 **100 % frontend** — no backend, no sign-up, no tracking. Everything is stored in the
 browser, and it works offline. Built with React, TypeScript, Tailwind and
