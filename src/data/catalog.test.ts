@@ -1,0 +1,130 @@
+import { describe, expect, it } from 'vitest'
+import { computeBudget } from '@/lib/calc'
+import { formatUsd } from '@/lib/money'
+import type { Catalog, Item } from '@/types'
+import {
+  cloneDefaultCatalog,
+  DEFAULT_CATALOG,
+  DEFAULT_SERVICES,
+  migrateCatalogDefaults,
+} from './catalog'
+
+function itemsFromPack(packId: string): Item[] {
+  const pack = DEFAULT_CATALOG.packs.find((entry) => entry.id === packId)
+  if (!pack) throw new Error(`Pack no encontrado: ${packId}`)
+  return pack.services.map((entry, index) => {
+    const service = DEFAULT_SERVICES.find((s) => s.id === entry.serviceId)
+    if (!service) throw new Error(`Servicio no encontrado: ${entry.serviceId}`)
+    return {
+      id: `i${index}`,
+      category: service.category,
+      concept: service.concept,
+      detail: service.detail,
+      formula: structuredClone(service.formula),
+    }
+  })
+}
+
+describe('catálogo por defecto', () => {
+  it('no tiene ids de servicio duplicados', () => {
+    const ids = DEFAULT_CATALOG.services.map((service) => service.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('no repite categorías', () => {
+    const { categories } = DEFAULT_CATALOG
+    expect(new Set(categories).size).toBe(categories.length)
+  })
+
+  it('cada servicio pertenece a una categoría declarada', () => {
+    for (const service of DEFAULT_CATALOG.services) {
+      expect(DEFAULT_CATALOG.categories).toContain(service.category)
+    }
+  })
+
+  it('los packs sólo apuntan a servicios existentes', () => {
+    const ids = new Set(DEFAULT_SERVICES.map((service) => service.id))
+    for (const pack of DEFAULT_CATALOG.packs) {
+      for (const entry of pack.services) {
+        expect(ids.has(entry.serviceId)).toBe(true)
+      }
+    }
+  })
+
+  it('el pack de cirugía mantiene el total del presupuesto real', () => {
+    expect(formatUsd(computeBudget(itemsFromPack('pack_cirugia_base')).totalUsd)).toBe(
+      '$1,375.00',
+    )
+  })
+
+  it('el pack de chequeo general cuadra con sus servicios', () => {
+    // 40 (consulta) + 12 (ECG) + 5 (hematología) + 12 (perfil 20) = 69
+    expect(formatUsd(computeBudget(itemsFromPack('pack_chequeo_general')).totalUsd)).toBe(
+      '$69.00',
+    )
+  })
+})
+
+describe('migrateCatalogDefaults', () => {
+  it('añade los servicios nuevos que falten', () => {
+    const legacy: Catalog = { categories: ['Honorarios Médicos'], services: [], packs: [] }
+
+    const result = migrateCatalogDefaults(legacy)
+
+    expect(result.services).toHaveLength(DEFAULT_SERVICES.length)
+    expect(result.categories).toContain('Estudios y Diagnóstico')
+    expect(result.packs.map((p) => p.id)).toContain('pack_chequeo_general')
+  })
+
+  it('mueve los servicios reorganizados si siguen en la categoría antigua', () => {
+    const legacy: Catalog = {
+      categories: ['Consultas y Procedimientos'],
+      services: [
+        {
+          id: 'svc_ecografia',
+          category: 'Consultas y Procedimientos',
+          concept: 'Ecografía básica',
+          formula: { type: 'fixed', amountUsd: 40 },
+        },
+      ],
+      packs: [],
+    }
+
+    const result = migrateCatalogDefaults(legacy)
+
+    expect(result.services.find((s) => s.id === 'svc_ecografia')!.category).toBe(
+      'Estudios y Diagnóstico',
+    )
+    expect(result.categories).not.toContain('Consultas y Procedimientos')
+  })
+
+  it('respeta la categoría y el precio que el usuario editó', () => {
+    const custom: Catalog = {
+      categories: ['Mi categoría'],
+      services: [
+        {
+          id: 'svc_ecografia',
+          category: 'Mi categoría',
+          concept: 'Ecografía',
+          formula: { type: 'fixed', amountUsd: 99 },
+        },
+      ],
+      packs: [],
+    }
+
+    const result = migrateCatalogDefaults(custom)
+    const service = result.services.find((s) => s.id === 'svc_ecografia')!
+
+    expect(service.category).toBe('Mi categoría')
+    expect(service.formula).toEqual({ type: 'fixed', amountUsd: 99 })
+    expect(result.categories).toContain('Mi categoría')
+  })
+
+  it('no duplica servicios ni packs cuando el catálogo ya está al día', () => {
+    const result = migrateCatalogDefaults(cloneDefaultCatalog())
+
+    expect(result.services).toHaveLength(DEFAULT_SERVICES.length)
+    expect(new Set(result.services.map((s) => s.id)).size).toBe(result.services.length)
+    expect(new Set(result.packs.map((p) => p.id)).size).toBe(result.packs.length)
+  })
+})

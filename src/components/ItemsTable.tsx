@@ -1,0 +1,129 @@
+import { useMemo } from 'react'
+import { ITEM_GRID, ItemRow } from '@/components/ItemRow'
+import type { CalcResult, ComputedItem } from '@/lib/calc'
+import { Decimal, formatUsd, formatVes, usdToVes } from '@/lib/money'
+import { useBudgetStore } from '@/store/useBudgetStore'
+import { cn } from '@/lib/utils'
+
+interface ItemsTableProps {
+  calc: CalcResult
+  rate: number
+}
+
+export function ItemsTable({ calc, rate }: ItemsTableProps) {
+  const updateItem = useBudgetStore((state) => state.updateItem)
+  const updateFormula = useBudgetStore((state) => state.updateFormula)
+  const removeItem = useBudgetStore((state) => state.removeItem)
+  const duplicateItem = useBudgetStore((state) => state.duplicateItem)
+  const moveItem = useBudgetStore((state) => state.moveItem)
+  const catalogCategories = useBudgetStore((state) => state.catalog.categories)
+  const categoryListId = 'row-category-options'
+
+  const concepts = useMemo(
+    () => [...new Set(calc.items.map((item) => item.concept))],
+    [calc.items],
+  )
+  const categories = useMemo(
+    () => [...new Set(calc.items.map((item) => item.category))],
+    [calc.items],
+  )
+  const categoryOptions = useMemo(
+    () => [...new Set([...categories, ...catalogCategories])],
+    [categories, catalogCategories],
+  )
+
+  // Agrupa por categoría respetando el orden de aparición.
+  const groups = useMemo(() => {
+    const map = new Map<string, ComputedItem[]>()
+    for (const item of calc.items) {
+      const list = map.get(item.category)
+      if (list) list.push(item)
+      else map.set(item.category, [item])
+    }
+    return [...map.entries()]
+  }, [calc.items])
+
+  return (
+    <div className="rounded-lg border">
+      <datalist id={categoryListId}>
+        {categoryOptions.map((option) => (
+          <option key={option} value={option} />
+        ))}
+      </datalist>
+
+      {/* Cabecera: sólo en escritorio */}
+      <div
+        className={cn(
+          'hidden border-b bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground sm:grid',
+          ITEM_GRID,
+        )}
+      >
+        <span className="sm:px-2">Concepto / servicio</span>
+        <span className="sm:px-2">Cálculo</span>
+        <span className="text-right sm:px-2">USD</span>
+        <span className="text-right sm:px-2">VES</span>
+        <span className="text-right sm:px-1">Acciones</span>
+      </div>
+
+      {groups.flatMap(([category, items]) => {
+        const label = category || 'Sin categoría'
+        const subtotal =
+          calc.subtotals.find((entry) => entry.category === category)?.amountUsd ??
+          new Decimal(0)
+
+        return [
+          <div key={`category-${category}`} className="bg-muted/60 px-3 py-1.5 font-semibold">
+            {label}
+          </div>,
+
+          // Cada fila se identifica por el id del ítem (estable), así el foco no
+          // se pierde al reagrupar cambiando el nombre de la categoría.
+          ...items.map((item, index) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              rate={rate}
+              concepts={concepts}
+              categories={categories}
+              categoryListId={categoryListId}
+              canMoveUp={index > 0}
+              canMoveDown={index < items.length - 1}
+              onUpdate={(patch) => updateItem(item.id, patch)}
+              onFormulaChange={(formula) => updateFormula(item.id, formula)}
+              onDuplicate={() => duplicateItem(item.id)}
+              onRemove={() => removeItem(item.id)}
+              onMove={(direction) => moveItem(item.id, direction)}
+            />
+          )),
+
+          <div
+            key={`subtotal-${category}`}
+            className={cn(
+              'grid gap-x-3 gap-y-0.5 bg-muted/30 px-3 py-2 sm:gap-0',
+              ITEM_GRID,
+            )}
+          >
+            <span className="text-xs font-medium text-muted-foreground sm:col-span-2 sm:px-2 sm:py-1 sm:text-right">
+              Subtotal {label}
+            </span>
+            <span className="flex items-center justify-between gap-3 font-semibold tabular-nums sm:block sm:px-2 sm:py-1 sm:text-right">
+              <span className="text-xs font-normal text-muted-foreground sm:hidden">
+                USD
+              </span>
+              <span className="whitespace-nowrap">{formatUsd(subtotal)}</span>
+            </span>
+            <span className="flex items-center justify-between gap-3 font-semibold tabular-nums sm:block sm:px-2 sm:py-1 sm:text-right">
+              <span className="text-xs font-normal text-muted-foreground sm:hidden">
+                VES
+              </span>
+              <span className="whitespace-nowrap">
+                {formatVes(usdToVes(subtotal, rate))}
+              </span>
+            </span>
+            <span className="hidden sm:block" />
+          </div>,
+        ]
+      })}
+    </div>
+  )
+}
