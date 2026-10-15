@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Building2, Layers, ListPlus, Plus, Settings2 } from 'lucide-react'
 import { ActionBar } from '@/components/ActionBar'
+import { AppFooter } from '@/components/AppFooter'
 import { CatalogManagerDialog } from '@/components/CatalogManagerDialog'
 import { CatalogPickerDialog } from '@/components/CatalogPickerDialog'
 import { ClinicDialog } from '@/components/ClinicDialog'
@@ -79,9 +80,12 @@ export default function App() {
               <Plus className="size-5" />
             </span>
             <div className="min-w-0">
-              <h1 className="text-lg leading-tight font-semibold">Budgetify</h1>
+              <h1 className="text-lg leading-tight font-semibold">
+                <span className="sm:hidden">Presupuestos</span>
+                <span className="hidden sm:inline">Presupuestos Médicos</span>
+              </h1>
               <p className="hidden text-xs text-muted-foreground sm:block">
-                Presupuestos médicos · precios editables
+                Budgetify · gratis y sin instalar
               </p>
             </div>
           </div>
@@ -110,7 +114,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl gap-4 px-4 pt-4 pb-24 lg:grid-cols-[minmax(0,1fr)_340px] lg:pb-4">
+      <main className="mx-auto grid max-w-6xl gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         <Tabs value={view} onValueChange={(value) => setView(value as View)}>
           <TabsList>
             <TabsTrigger value="edit">Edición</TabsTrigger>
@@ -201,6 +205,8 @@ export default function App() {
           />
         </aside>
       </main>
+
+      <AppFooter />
 
       <MobileActionBar calc={calc} onViewPdf={handleViewPdf} />
 

@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Dependencias de npm (semanal).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # Agrupa las actualizaciones menores para no llenar de PRs.
+      produccion-menor:
+        dependency-type: production
+        update-types: [minor, patch]
+      desarrollo-menor:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  # Acciones de GitHub usadas en el CI.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

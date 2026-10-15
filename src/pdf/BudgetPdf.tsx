@@ -192,7 +192,7 @@ export function BudgetPdf({ budget, calc, clinic, rateMode, pageSize }: BudgetPd
   return (
     <Document
       title={`Presupuesto médico${budget.patient.name ? ` — ${budget.patient.name}` : ''}`}
-      author={clinic.name || 'Budgetify'}
+      author={clinic.name || 'Presupuestos Médicos · Budgetify'}
     >
       <Page size={PDF_SIZE[pageSize]} style={styles.page}>
         <View style={styles.header}>

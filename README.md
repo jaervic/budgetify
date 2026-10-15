@@ -103,6 +103,17 @@ Los precios del catálogo son **orientativos**. Revisa siempre los montos y los 
 documento antes de entregarlo al paciente. Esta herramienta ayuda a armar el presupuesto,
 pero **no sustituye tu criterio médico ni administrativo**.
 
+## 🔒 Privacidad y seguridad
+
+- **No hay servidores**: nada de lo que escribes se envía a internet. No hay cuentas,
+  registro ni base de datos.
+- **Sin rastreadores**: no hay analítica ni cookies de terceros.
+- La **única** conexión externa es la consulta de la tasa del BCV (que no lleva datos
+  tuyos). Si la desmarcas y usas la tasa a mano, no hay ninguna conexión.
+- Los datos quedan guardados **en este navegador**. En una computadora compartida, pulsa
+  **Limpiar** al terminar (o usa una ventana de incógnito).
+- Detalles y cómo reportar un problema: **[política de seguridad](SECURITY.md)**.
+
 ## ¿Quieres colaborar?
 
 ¡Eres bienvenido! Puedes reportar un error o proponer una mejora abriendo un *Issue*, o

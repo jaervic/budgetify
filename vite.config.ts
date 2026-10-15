@@ -1,8 +1,28 @@
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
+
+interface VercelHeaderRule {
+  source: string
+  headers: { key: string; value: string }[]
+}
+
+/**
+ * Reutiliza las cabeceras de seguridad de `vercel.json` en `vite preview`, para
+ * que podamos probar en local exactamente lo que servirá producción.
+ * Así hay una sola fuente de verdad.
+ */
+function vercelPreviewHeaders(): Record<string, string> {
+  const path = fileURLToPath(new URL('./vercel.json', import.meta.url))
+  const config = JSON.parse(readFileSync(path, 'utf8')) as { headers?: VercelHeaderRule[] }
+  const globalRule = config.headers?.find((rule) => rule.source === '/(.*)')
+  return Object.fromEntries(
+    (globalRule?.headers ?? []).map((header) => [header.key, header.value]),
+  )
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,12 +31,12 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'theme-init.js'],
       manifest: {
-        name: 'Budgetify — Presupuestos Médicos',
-        short_name: 'Budgetify',
+        name: 'Presupuestos Médicos · Budgetify',
+        short_name: 'Presupuestos',
         description:
-          'Crea, calcula y exporta presupuestos médicos con precios editables por caso.',
+          'Crea, calcula y descarga presupuestos médicos en PDF, en dólares y bolívares con la tasa BCV.',
         lang: 'es',
         theme_color: '#0284c7',
         background_color: '#f8fafc',
@@ -43,6 +63,9 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+  },
+  preview: {
+    headers: vercelPreviewHeaders(),
   },
   build: {
     // El único chunk que supera este tamaño es el de @react-pdf/renderer, que es

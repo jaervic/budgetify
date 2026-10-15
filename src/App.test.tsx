@@ -10,6 +10,7 @@ import App from '@/App'
 describe('App', () => {
   it('renderiza sin lanzar errores', () => {
     const html = renderToString(<App />)
+    expect(html).toContain('Presupuestos')
     expect(html).toContain('Budgetify')
     expect(html).toContain('Datos del presupuesto')
     expect(html).toContain('Total general')

@@ -6,22 +6,14 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0284c7" />
-    <script>
-      // Aplica el tema guardado antes de pintar, para evitar el destello (FOUC).
-      try {
-        var stored = localStorage.getItem('budgetify:theme') || 'system'
-        var dark =
-          stored === 'dark' ||
-          (stored === 'system' &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches)
-        if (dark) document.documentElement.classList.add('dark')
-      } catch {}
-    </script>
     <meta
       name="description"
-      content="Crea, calcula y exporta presupuestos médicos con precios editables por caso."
+      content="Crea y descarga presupuestos médicos en PDF, en dólares y bolívares con la tasa BCV. Gratis, sin instalar nada y sin enviar tus datos a ningún servidor."
     />
-    <title>Budgetify · Presupuestos Médicos</title>
+    <!-- Aplica el tema guardado antes de pintar para evitar el destello (FOUC).
+         Va en un archivo aparte para poder usar una CSP estricta sin scripts inline. -->
+    <script src="/theme-init.js"></script>
+    <title>Presupuestos Médicos · Budgetify</title>
   </head>
   <body>
     <div id="root"></div>

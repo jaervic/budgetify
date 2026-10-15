@@ -1,5 +1,5 @@
 /**
- * Modelo de datos de Budgetify.
+ * Modelo de datos de Presupuestos Médicos (Budgetify).
  *
  * Se distinguen dos capas:
  *  - El catálogo (`Catalog`): la biblioteca de tarifas de la clínica. Persistente y editable.
