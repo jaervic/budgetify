@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Building2, Layers, ListPlus, Plus, Settings2 } from 'lucide-react'
+import { Building2, Layers, ListPlus, Plus, Settings2, Stethoscope } from 'lucide-react'
 import { ActionBar } from '@/components/ActionBar'
 import { AppFooter } from '@/components/AppFooter'
 import { CatalogManagerDialog } from '@/components/CatalogManagerDialog'
@@ -95,7 +95,7 @@ export default function App() {
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2">
             <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Plus className="size-5" />
+              <Stethoscope className="size-5" />
             </span>
             <div className="min-w-0">
               <h1 className="text-lg leading-tight font-semibold">

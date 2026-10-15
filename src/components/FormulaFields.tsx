@@ -17,6 +17,15 @@ const TYPE_LABELS: Record<FormulaType, string> = {
 
 const TYPES: FormulaType[] = ['fixed', 'qty_unit', 'percent_of_item', 'percent_of_subtotal']
 
+/** Los símbolos que acompañan a un campo; su nombre accesible ya lo dice. */
+function Operator({ children }: { children: string }) {
+  return (
+    <span aria-hidden="true" className="text-sm text-muted-foreground">
+      {children}
+    </span>
+  )
+}
+
 interface FormulaFieldsProps {
   formula: Formula
   onChange: (formula: Formula) => void
@@ -24,6 +33,12 @@ interface FormulaFieldsProps {
   concepts: string[]
   /** Categorías disponibles para un % de categoría. */
   categories: string[]
+  /**
+   * Importe actual del ítem (USD). Al cambiar de tipo se usa para que el monto
+   * no se pierda: pasar de "precio fijo 100" a "cantidad × unitario" deja
+   * 1 × 100, no 1 × 0.
+   */
+  amountUsd?: number
   /**
    * Id del texto con el que se describe la fila (su concepto). Se enlaza con
    * `aria-describedby` para que el lector de pantalla anuncie a qué servicio
@@ -33,27 +48,39 @@ interface FormulaFieldsProps {
   describedBy?: string
 }
 
-/** Editor compacto de la fórmula de precio de un ítem. */
+/**
+ * Editor compacto de la fórmula de precio de un ítem.
+ *
+ * Todos los controles cuelgan directamente del contenedor `flex-wrap` (los
+ * `Select` de Radix no pintan nada propio, así que su disparador es un hijo
+ * más). Envolverlos en un div intermedio rompía el cálculo del ancho: un
+ * `w-full` dentro de un contenedor de ancho por contenido no tiene contra qué
+ * resolverse y acababa desbordando la celda.
+ */
 export function FormulaFields({
   formula,
   onChange,
   concepts,
   categories,
+  amountUsd = 0,
   describedBy,
 }: FormulaFieldsProps) {
   const changeType = (type: FormulaType) => {
     switch (type) {
       case 'fixed':
-        onChange({ type: 'fixed', amountUsd: 0 })
+        onChange({ type: 'fixed', amountUsd })
         break
       case 'qty_unit':
-        onChange({ type: 'qty_unit', qty: 1, unitUsd: 0 })
+        onChange({ type: 'qty_unit', qty: 1, unitUsd: amountUsd })
         break
+      // En los tipos porcentuales el importe depende de la referencia (otro
+      // servicio o una categoría), así que no se puede conservar tal cual:
+      // arrancan al 100 % de esa referencia y el usuario ajusta el porcentaje.
       case 'percent_of_item':
-        onChange({ type: 'percent_of_item', refConcept: concepts[0] ?? '', percent: 0 })
+        onChange({ type: 'percent_of_item', refConcept: concepts[0] ?? '', percent: 100 })
         break
       case 'percent_of_subtotal':
-        onChange({ type: 'percent_of_subtotal', category: categories[0] ?? '', percent: 0 })
+        onChange({ type: 'percent_of_subtotal', category: categories[0] ?? '', percent: 100 })
         break
     }
   }
@@ -62,9 +89,10 @@ export function FormulaFields({
     <div className="flex flex-wrap items-center gap-1.5">
       <Select value={formula.type} onValueChange={(value) => changeType(value as FormulaType)}>
         <SelectTrigger
-          className="h-8 w-full sm:w-[168px]"
+          className="h-8 w-full min-w-0"
           aria-label="Tipo de precio"
           aria-describedby={describedBy}
+          title={TYPE_LABELS[formula.type]}
         >
           <SelectValue />
         </SelectTrigger>
@@ -78,49 +106,49 @@ export function FormulaFields({
       </Select>
 
       {formula.type === 'fixed' && (
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <span aria-hidden="true">$</span>
+        <>
+          <Operator>$</Operator>
           <NumberInput
-            className="h-8 w-24"
+            className="h-8 w-24 min-w-0"
             aria-label="Monto en USD"
             aria-describedby={describedBy}
             decimals={2}
             value={formula.amountUsd}
             onValueChange={(amountUsd) => onChange({ ...formula, amountUsd })}
           />
-        </div>
+        </>
       )}
 
       {formula.type === 'qty_unit' && (
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <>
           <NumberInput
-            className="h-8 w-16"
+            className="h-8 w-16 min-w-0"
             aria-label="Cantidad"
             aria-describedby={describedBy}
             value={formula.qty}
             onValueChange={(qty) => onChange({ ...formula, qty })}
           />
-          <span aria-hidden="true">×</span>
-          <span aria-hidden="true">$</span>
+          <Operator>×</Operator>
+          <Operator>$</Operator>
           <NumberInput
-            className="h-8 w-24"
+            className="h-8 w-24 min-w-0"
             aria-label="Precio unitario en USD"
             aria-describedby={describedBy}
             decimals={2}
             value={formula.unitUsd}
             onValueChange={(unitUsd) => onChange({ ...formula, unitUsd })}
           />
-        </div>
+        </>
       )}
 
       {formula.type === 'percent_of_item' && (
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <>
           <Select
             value={formula.refConcept}
             onValueChange={(refConcept) => onChange({ ...formula, refConcept })}
           >
             <SelectTrigger
-              className="h-8 w-full sm:w-[168px]"
+              className="h-8 w-full min-w-0"
               aria-label="Servicio de referencia"
               aria-describedby={describedBy}
             >
@@ -135,24 +163,24 @@ export function FormulaFields({
             </SelectContent>
           </Select>
           <NumberInput
-            className="h-8 w-16"
+            className="h-8 w-16 min-w-0"
             aria-label="Porcentaje"
             aria-describedby={describedBy}
             value={formula.percent}
             onValueChange={(percent) => onChange({ ...formula, percent })}
           />
-          <span aria-hidden="true">%</span>
-        </div>
+          <Operator>%</Operator>
+        </>
       )}
 
       {formula.type === 'percent_of_subtotal' && (
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+        <>
           <Select
             value={formula.category}
             onValueChange={(category) => onChange({ ...formula, category })}
           >
             <SelectTrigger
-              className="h-8 w-full sm:w-[168px]"
+              className="h-8 w-full min-w-0"
               aria-label="Categoría de referencia"
               aria-describedby={describedBy}
             >
@@ -167,14 +195,14 @@ export function FormulaFields({
             </SelectContent>
           </Select>
           <NumberInput
-            className="h-8 w-16"
+            className="h-8 w-16 min-w-0"
             aria-label="Porcentaje"
             aria-describedby={describedBy}
             value={formula.percent}
             onValueChange={(percent) => onChange({ ...formula, percent })}
           />
-          <span aria-hidden="true">%</span>
-        </div>
+          <Operator>%</Operator>
+        </>
       )}
     </div>
   )

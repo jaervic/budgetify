@@ -21,6 +21,16 @@ if (typeof Element !== 'undefined' && !Element.prototype.setPointerCapture) {
   Element.prototype.releasePointerCapture = () => {}
   Element.prototype.hasPointerCapture = () => false
 }
+// Ni el desplazamiento a la opción seleccionada que hace Radix al abrir un Select.
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {}
+}
+
+/** Elige una opción en un Select de Radix (abre y pulsa la opción). */
+async function chooseOption(trigger: HTMLElement, name: string | RegExp) {
+  await userEvent.click(trigger)
+  await userEvent.click(await screen.findByRole('option', { name }))
+}
 if (typeof window !== 'undefined' && !window.matchMedia) {
   window.matchMedia = ((query: string) => ({
     matches: false,
@@ -157,12 +167,43 @@ describe('App · interacciones', () => {
     render(<App />)
     await addManualLine()
 
-    const category = screen.getByLabelText('Categoría')
-    await userEvent.clear(category)
-    await userEvent.type(category, 'Gastos de Clínica')
+    await chooseOption(screen.getByLabelText('Categoría'), 'Gastos de Clínica')
 
     expect(screen.getAllByText('Gastos de Clínica').length).toBeGreaterThan(0)
     expect(screen.queryByText('Honorarios Médicos')).toBeNull()
+  })
+
+  it('permite crear una categoría nueva desde el selector', async () => {
+    render(<App />)
+    await addManualLine()
+
+    await chooseOption(screen.getByLabelText('Categoría'), /Nueva categoría/)
+    const draft = screen.getByLabelText('Categoría')
+    expect(draft.tagName).toBe('INPUT')
+
+    await userEvent.type(draft, 'Ortodoncia')
+    await userEvent.tab()
+
+    expect(useBudgetStore.getState().budget.items[0].category).toBe('Ortodoncia')
+    expect(screen.getAllByText('Ortodoncia').length).toBeGreaterThan(0)
+  })
+
+  it('conserva el importe al cambiar el tipo de fórmula', async () => {
+    render(<App />)
+    await addManualLine()
+
+    const amount = screen.getByLabelText('Monto en USD')
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '250')
+    expect(screen.getByTestId('total-usd').textContent).toBe('$250.00')
+
+    await chooseOption(screen.getByLabelText('Tipo de precio'), 'Cantidad × unitario')
+
+    // Antes esto ponía el importe a cero y el servicio desaparecía del total.
+    expect(screen.getByTestId('total-usd').textContent).toBe('$250.00')
+    expect(
+      (screen.getByLabelText('Precio unitario en USD') as HTMLInputElement).value,
+    ).toBe('250,00')
   })
 
   it('expone los servicios como tabla y da contexto a cada fila', async () => {

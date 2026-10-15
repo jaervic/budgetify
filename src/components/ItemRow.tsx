@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import { ChevronDown, ChevronUp, Copy, TriangleAlert, Trash2 } from 'lucide-react'
+import { CategorySelect } from '@/components/CategorySelect'
 import { FormulaFields } from '@/components/FormulaFields'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,15 +16,15 @@ import type { Item } from '@/types'
  * cabecera y en los subtotales de `ItemsTable`.
  */
 export const ITEM_GRID =
-  'sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1.5fr)_7rem_8rem_auto]'
+  'sm:grid-cols-[minmax(0,1.7fr)_minmax(0,1.4fr)_5.75rem_7.5rem_auto]'
 
 interface ItemRowProps {
   item: ComputedItem
   rate: number
   concepts: string[]
   categories: string[]
-  /** id del <datalist> compartido con las categorías sugeridas. */
-  categoryListId: string
+  /** Categorías que ofrece el selector (catálogo + las ya en uso). */
+  categoryOptions: string[]
   canMoveUp: boolean
   canMoveDown: boolean
   onUpdate: (patch: Partial<Omit<Item, 'id'>>) => void
@@ -38,7 +39,7 @@ export function ItemRow({
   rate,
   concepts,
   categories,
-  categoryListId,
+  categoryOptions,
   canMoveUp,
   canMoveDown,
   onUpdate,
@@ -69,18 +70,19 @@ export function ItemRow({
         <span id={rowLabelId} className="sr-only">
           {label}
         </span>
-        <Input
-          className="h-8 text-xs text-muted-foreground"
-          aria-label="Categoría"
-          list={categoryListId}
-          placeholder="Categoría"
-          maxLength={LIMITS.category}
+        <CategorySelect
           value={item.category}
-          onChange={(event) => onUpdate({ category: event.target.value })}
+          options={categoryOptions}
+          onChange={(category) => onUpdate({ category })}
+          ariaLabel="Categoría"
+          describedBy={rowLabelId}
+          allowEmpty
+          className="h-8 w-full text-xs text-muted-foreground"
         />
         <Input
           className="h-8 font-medium"
           aria-label="Concepto"
+          title={item.concept}
           maxLength={LIMITS.concept}
           value={item.concept}
           onChange={(event) => onUpdate({ concept: event.target.value })}
@@ -88,6 +90,7 @@ export function ItemRow({
         <Input
           className="h-8 text-xs text-muted-foreground"
           aria-label="Detalle"
+          title={item.detail ?? undefined}
           placeholder="Detalle (opcional)"
           maxLength={LIMITS.detail}
           value={item.detail ?? ''}
@@ -108,6 +111,7 @@ export function ItemRow({
           onChange={onFormulaChange}
           concepts={concepts}
           categories={categories}
+          amountUsd={item.amountUsd.toNumber()}
           describedBy={rowLabelId}
         />
       </div>

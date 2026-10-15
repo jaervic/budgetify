@@ -91,14 +91,67 @@ export async function openPdfInNewTab(
   }
 }
 
-/** Imprimir: abre el PDF en una pestaña nueva para lanzar la impresión desde el visor. */
-export function printBudgetPdf(
+/**
+ * Imprime el PDF en un solo clic.
+ *
+ * Se incrusta en un iframe oculto y se llama a `print()` sobre él: el diálogo
+ * del sistema sale sin pasar por una pestaña nueva y sin que el usuario tenga
+ * que pulsar "imprimir" otra vez. El iframe se mantiene hasta un minuto porque
+ * quitarlo antes de que el usuario termine cancela el diálogo.
+ *
+ * En iOS (iPhone/iPad) los PDFs no se renderizan dentro de un iframe, así que
+ * allí se abre en una pestaña, que es la vía fiable.
+ */
+export async function printBudgetPdf(
   budget: Budget,
   calc: CalcResult,
   clinic: Clinic,
   options: PdfOptions,
 ): Promise<void> {
-  return openPdfInNewTab(budget, calc, clinic, options)
+  if (isAppleMobile()) {
+    await openPdfInNewTab(budget, calc, clinic, options)
+    return
+  }
+
+  const blob = await buildPdfBlob(budget, calc, clinic, options)
+  const url = URL.createObjectURL(blob)
+
+  const cleanup = () => {
+    frame.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  const frame = document.createElement('iframe')
+  frame.setAttribute('aria-hidden', 'true')
+  frame.style.position = 'fixed'
+  frame.style.right = '0'
+  frame.style.bottom = '0'
+  frame.style.width = '0'
+  frame.style.height = '0'
+  frame.style.border = '0'
+  frame.src = url
+  frame.addEventListener('load', () => {
+    const view = frame.contentWindow
+    if (!view) {
+      cleanup()
+      void openPdfInNewTab(budget, calc, clinic, options)
+      return
+    }
+    view.focus()
+    view.print()
+    window.setTimeout(cleanup, 60_000)
+  })
+
+  document.body.append(frame)
+}
+
+/** iPhone/iPad (incluido iPadOS, que se identifica como Mac con táctil). */
+function isAppleMobile(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return (
+    /iP(hone|ad|od)/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  )
 }
 
 /** Resumen de texto corto para compartir por WhatsApp. */

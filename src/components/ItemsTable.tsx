@@ -18,7 +18,6 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
   const duplicateItem = useBudgetStore((state) => state.duplicateItem)
   const moveItem = useBudgetStore((state) => state.moveItem)
   const catalogCategories = useBudgetStore((state) => state.catalog.categories)
-  const categoryListId = 'row-category-options'
 
   const concepts = useMemo(
     () => [...new Set(calc.items.map((item) => item.concept))],
@@ -54,12 +53,6 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
     // Semántica de tabla: sin ella, un lector de pantalla lee una lista plana
     // de ~150 controles sin decir a qué columna ni a qué servicio pertenecen.
     <div role="table" aria-label="Servicios del presupuesto" className="rounded-lg border">
-      <datalist id={categoryListId}>
-        {categoryOptions.map((option) => (
-          <option key={option} value={option} />
-        ))}
-      </datalist>
-
       {/* Cabecera: sólo en escritorio */}
       <div
         role="row"
@@ -112,7 +105,7 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
               rate={rate}
               concepts={concepts}
               categories={categories}
-              categoryListId={categoryListId}
+              categoryOptions={categoryOptions}
               canMoveUp={index > 0}
               canMoveDown={index < items.length - 1}
               onUpdate={(patch) => updateItem(item.id, patch)}

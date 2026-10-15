@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
+import { CategorySelect } from '@/components/CategorySelect'
 import { FormulaFields } from '@/components/FormulaFields'
 import { SpecialtySelect } from '@/components/SpecialtySelect'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,11 @@ export function ServicesPanel() {
 
   const concepts = [...new Set(catalog.services.map((service) => service.concept))]
   const categories = catalog.categories
+  // Todas las categorías conocidas: las del catálogo más las que ya usan los
+  // servicios (por si alguna se quitó de la lista).
+  const categoryOptions = [
+    ...new Set([...categories, ...catalog.services.map((service) => service.category)]),
+  ]
 
   const visible = catalog.services.filter((service) =>
     isServiceInArea(service, areaFilter),
@@ -56,11 +62,6 @@ export function ServicesPanel() {
         <span className="text-xs text-muted-foreground">
           {visible.length} de {catalog.services.length} servicios
         </span>
-        <datalist id="category-options">
-          {categories.map((category) => (
-            <option key={category} value={category} />
-          ))}
-        </datalist>
       </div>
 
       <ScrollArea className="h-[42vh] pr-3">
@@ -114,14 +115,12 @@ export function ServicesPanel() {
               />
 
               <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                <Input
-                  list="category-options"
-                  aria-label="Categoría"
-                  maxLength={LIMITS.category}
+                <CategorySelect
                   value={service.category}
-                  onChange={(event) =>
-                    updateCatalogService(service.id, { category: event.target.value })
-                  }
+                  options={categoryOptions}
+                  onChange={(category) => updateCatalogService(service.id, { category })}
+                  ariaLabel="Categoría"
+                  className="h-8 w-full text-xs"
                 />
                 <FormulaFields
                   formula={service.formula}

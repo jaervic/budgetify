@@ -1,6 +1,10 @@
 /**
  * Genera los iconos PNG de la PWA sin dependencias externas.
  * Uso: node scripts/generate-icons.mjs
+ *
+ * El símbolo es un estetoscopio sobre el cuadrado azul. La geometría de acá
+ * (normalizada 0..1) y la de `public/favicon.svg` (escala 512) son la misma:
+ * si cambias una, cambia la otra.
  */
 import { deflateSync } from 'node:zlib'
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -11,6 +15,81 @@ const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public')
 
 const SKY = [2, 132, 199]
 const WHITE = [255, 255, 255]
+
+// ── Geometría del símbolo (coordenadas normalizadas) ───────────────────────
+const STROKE = 0.06
+const U_CENTER_Y = 0.4
+const U_RADIUS = 0.19
+const LEG_TOP = 0.2
+const STEM_BOTTOM = 0.64
+const CHEST_Y = 0.755
+const CHEST_OUTER = 0.115
+const CHEST_INNER = CHEST_OUTER - STROKE
+const CORNER_RADIUS = 0.2
+
+const clamp = (v, min, max) => Math.min(Math.max(v, min), max)
+
+/** Distancia de (px,py) al segmento (ax,ay)-(bx,by). */
+function segmentDistance(px, py, ax, ay, bx, by) {
+  const dx = bx - ax
+  const dy = by - ay
+  const lengthSquared = dx * dx + dy * dy
+  const t =
+    lengthSquared === 0
+      ? 0
+      : clamp(((px - ax) * dx + (py - ay) * dy) / lengthSquared, 0, 1)
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+}
+
+/** ¿El punto (u,v) cae dentro del trazo del estetoscopio? */
+function inGlyph(u, v) {
+  const half = STROKE / 2
+  const left = 0.5 - U_RADIUS
+  const right = 0.5 + U_RADIUS
+
+  // Arco inferior del tubo (la "∪") y sus dos patas hacia arriba.
+  const ringDistance = Math.abs(Math.hypot(u - 0.5, v - U_CENTER_Y) - U_RADIUS)
+  if (ringDistance <= half && v >= U_CENTER_Y) return true
+  if (segmentDistance(u, v, left, U_CENTER_Y, left, LEG_TOP) <= half) return true
+  if (segmentDistance(u, v, right, U_CENTER_Y, right, LEG_TOP) <= half) return true
+
+  // Vástago que baja del arco hasta el auricular.
+  if (segmentDistance(u, v, 0.5, U_CENTER_Y + U_RADIUS, 0.5, STEM_BOTTOM) <= half) {
+    return true
+  }
+
+  // Auricular: anillo con el centro hueco.
+  const chestDistance = Math.hypot(u - 0.5, v - CHEST_Y)
+  return chestDistance <= CHEST_OUTER && chestDistance >= CHEST_INNER
+}
+
+/** ¿Cae el punto dentro del cuadrado de esquinas redondeadas? */
+function inRoundedRect(u, v, radius) {
+  const cx = clamp(u, radius, 1 - radius)
+  const cy = clamp(v, radius, 1 - radius)
+  return Math.hypot(u - cx, v - cy) <= radius
+}
+
+/**
+ * Cobertura del fondo y del símbolo en el píxel, por supermuestreo 4×4.
+ * El supermuestreo (en vez de una fórmula solo para el borde) es lo que deja el
+ * alfa a 255 dentro de la figura: antes se calculaba únicamente la transición
+ * del borde, así que el icono entero salía casi transparente.
+ */
+function coverageAt(u, v, size, bleed) {
+  let background = 0
+  let glyph = 0
+  const step = 1 / (size * 4)
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      const su = u - 0.5 / size + (i + 0.5) * step
+      const sv = v - 0.5 / size + (j + 0.5) * step
+      if (bleed || inRoundedRect(su, sv, CORNER_RADIUS)) background++
+      if (inGlyph(su, sv)) glyph++
+    }
+  }
+  return { background: background / 16, glyph: glyph / 16 }
+}
 
 const crcTable = (() => {
   const table = new Uint32Array(256)
@@ -37,25 +116,9 @@ function chunk(type, data) {
   return Buffer.concat([length, typeBuffer, data, crc])
 }
 
-const clamp = (v, min, max) => Math.min(Math.max(v, min), max)
-
-/** Cobertura (0..1) de un rectángulo redondeado, para bordes suaves. */
-function roundRectCoverage(x, y, radius) {
-  const cx = clamp(x, radius, 1 - radius)
-  const cy = clamp(y, radius, 1 - radius)
-  const dist = Math.hypot(x - cx, y - cy)
-  return clamp(radius - dist + 0.5 / 512, 0, 1)
-}
-
-/** Diseña el icono: fondo azul + cruz blanca. `bleed` = sin esquinas redondeadas. */
+/** Diseña el icono: fondo azul + estetoscopio. `bleed` = sin esquinas redondeadas. */
 function drawIcon(size, { bleed = false } = {}) {
   const raw = Buffer.alloc(size * (size * 4 + 1))
-  const barLong = 0.56
-  const barThick = 0.18
-  const from = (1 - barLong) / 2
-  const to = (1 + barLong) / 2
-  const thickFrom = (1 - barThick) / 2
-  const thickTo = (1 + barThick) / 2
 
   for (let y = 0; y < size; y++) {
     const rowStart = y * (size * 4 + 1)
@@ -64,16 +127,12 @@ function drawIcon(size, { bleed = false } = {}) {
       const u = (x + 0.5) / size
       const v = (y + 0.5) / size
 
-      const inVertical = u >= thickFrom && u <= thickTo && v >= from && v <= to
-      const inHorizontal = v >= thickFrom && v <= thickTo && u >= from && u <= to
-      const color = inVertical || inHorizontal ? WHITE : SKY
-
-      const coverage = bleed ? 1 : roundRectCoverage(u, v, 0.2)
+      const { background, glyph } = coverageAt(u, v, size, bleed)
       const offset = rowStart + 1 + x * 4
-      raw[offset] = color[0]
-      raw[offset + 1] = color[1]
-      raw[offset + 2] = color[2]
-      raw[offset + 3] = Math.round(coverage * 255)
+      raw[offset] = Math.round(SKY[0] + (WHITE[0] - SKY[0]) * glyph)
+      raw[offset + 1] = Math.round(SKY[1] + (WHITE[1] - SKY[1]) * glyph)
+      raw[offset + 2] = Math.round(SKY[2] + (WHITE[2] - SKY[2]) * glyph)
+      raw[offset + 3] = Math.round(background * 255)
     }
   }
 

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { toast } from 'sonner'
 import type { CalcResult } from '@/lib/calc'
 import {
@@ -8,28 +7,30 @@ import {
   shareByWhatsApp,
 } from '@/pdf/actions'
 import { useBudgetStore } from '@/store/useBudgetStore'
+import { useUiStore } from '@/store/useUiStore'
 
 /**
- * Acciones del PDF compartidas por la barra lateral y la barra inferior de
- * móvil, para no duplicar lógica ni el estado de "generando".
+ * Acciones del PDF compartidas por la barra lateral, la barra inferior de móvil
+ * y la vista previa, para no duplicar lógica ni el estado de "generando".
  */
 export function usePdfActions(calc: CalcResult) {
   const budget = useBudgetStore((state) => state.budget)
   const clinic = useBudgetStore((state) => state.clinic)
   const rateMode = useBudgetStore((state) => state.rateMode)
   const pageSize = useBudgetStore((state) => state.pageSize)
-  const [busy, setBusy] = useState(false)
+  const busy = useUiStore((state) => state.pdfBusy)
+  const setPdfBusy = useUiStore((state) => state.setPdfBusy)
 
   const options = { rateMode, pageSize }
 
   const run = async (action: () => Promise<void>, errorMessage: string) => {
-    setBusy(true)
+    setPdfBusy(true)
     try {
       await action()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : errorMessage)
     } finally {
-      setBusy(false)
+      setPdfBusy(false)
     }
   }
 

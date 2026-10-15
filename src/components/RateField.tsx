@@ -1,4 +1,5 @@
 import { RefreshCw } from 'lucide-react'
+import { toast } from 'sonner'
 import { NumberInput } from '@/components/NumberInput'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -30,6 +31,18 @@ export function RateField() {
 
   const isAuto = rateMode === 'auto'
 
+  const handleAnchor = (checked: boolean) => {
+    setRateMode(checked ? 'auto' : 'manual')
+    // Desanclar es fácil de hacer sin querer y deja el presupuesto colgado de
+    // una tasa que ya no se actualiza: conviene decirlo en el momento.
+    if (!checked) {
+      toast.info('Tasa fijada a mano', {
+        description:
+          'Ya no seguirá al BCV. Vuelve a marcar «Anclar al BCV» para que se actualice sola.',
+      })
+    }
+  }
+
   return (
     <div className="grid gap-2 sm:col-span-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -39,7 +52,7 @@ export function RateField() {
             type="checkbox"
             className="size-4 accent-primary"
             checked={isAuto}
-            onChange={(event) => setRateMode(event.target.checked ? 'auto' : 'manual')}
+            onChange={(event) => handleAnchor(event.target.checked)}
           />
           Anclar al BCV
         </label>
