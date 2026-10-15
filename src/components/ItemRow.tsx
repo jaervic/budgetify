@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { ChevronDown, ChevronUp, Copy, TriangleAlert, Trash2 } from 'lucide-react'
 import { FormulaFields } from '@/components/FormulaFields'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,7 @@ import type { Item } from '@/types'
  * cabecera y en los subtotales de `ItemsTable`.
  */
 export const ITEM_GRID =
-  'sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1.6fr)_7rem_8rem_auto]'
+  'sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1.5fr)_7rem_8rem_auto]'
 
 interface ItemRowProps {
   item: ComputedItem
@@ -46,8 +47,17 @@ export function ItemRow({
   onRemove,
   onMove,
 }: ItemRowProps) {
+  // La fila se nombra con su concepto, y los campos de la fórmula lo referencian:
+  // con lector de pantalla, "Monto en USD" se anuncia como
+  // "Monto en USD, Cirujano Principal". Sin esto, una tabla de trece filas es
+  // innavegable a ciegas.
+  const rowLabelId = useId()
+  const label = item.concept || 'servicio sin concepto'
+
   return (
     <div
+      role="row"
+      aria-labelledby={rowLabelId}
       className={cn(
         'grid gap-2 border-b border-border/60 px-3 py-3 last:border-b-0',
         'sm:items-start sm:gap-0 sm:px-0 sm:py-0',
@@ -55,7 +65,10 @@ export function ItemRow({
       )}
     >
       {/* Categoría, concepto y detalle */}
-      <div className="grid gap-1 sm:px-2 sm:py-2">
+      <div role="cell" className="grid gap-1 sm:px-2 sm:py-2">
+        <span id={rowLabelId} className="sr-only">
+          {label}
+        </span>
         <Input
           className="h-8 text-xs text-muted-foreground"
           aria-label="Categoría"
@@ -89,23 +102,32 @@ export function ItemRow({
       </div>
 
       {/* Fórmula */}
-      <div className="sm:px-2 sm:py-2">
+      <div role="cell" className="sm:px-2 sm:py-2">
         <FormulaFields
           formula={item.formula}
           onChange={onFormulaChange}
           concepts={concepts}
           categories={categories}
+          describedBy={rowLabelId}
         />
       </div>
 
       {/* Montos */}
-      <div className="flex items-center justify-between gap-3 sm:block sm:px-2 sm:py-2 sm:text-right">
+      <div
+        role="cell"
+        aria-label={`Importe en dólares de ${label}`}
+        className="flex items-center justify-between gap-3 sm:block sm:px-2 sm:py-2 sm:text-right"
+      >
         <span className="text-xs text-muted-foreground sm:hidden">USD</span>
         <span className="font-medium tabular-nums whitespace-nowrap">
           {formatUsd(item.amountUsd)}
         </span>
       </div>
-      <div className="flex items-center justify-between gap-3 sm:block sm:px-2 sm:py-2 sm:text-right">
+      <div
+        role="cell"
+        aria-label={`Importe en bolívares de ${label}`}
+        className="flex items-center justify-between gap-3 sm:block sm:px-2 sm:py-2 sm:text-right"
+      >
         <span className="text-xs text-muted-foreground sm:hidden">VES</span>
         <span className="tabular-nums whitespace-nowrap text-muted-foreground">
           {formatVes(usdToVes(item.amountUsd, rate))}
@@ -113,12 +135,12 @@ export function ItemRow({
       </div>
 
       {/* Acciones */}
-      <div className="flex items-center justify-end gap-0.5 sm:px-1 sm:py-1">
+      <div role="cell" className="flex items-center justify-end gap-0.5 sm:px-1 sm:py-1">
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Subir"
+          aria-label={`Subir ${label}`}
           disabled={!canMoveUp}
           onClick={() => onMove(-1)}
         >
@@ -128,7 +150,7 @@ export function ItemRow({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Bajar"
+          aria-label={`Bajar ${label}`}
           disabled={!canMoveDown}
           onClick={() => onMove(1)}
         >
@@ -138,7 +160,7 @@ export function ItemRow({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Duplicar"
+          aria-label={`Duplicar ${label}`}
           onClick={onDuplicate}
         >
           <Copy />
@@ -147,7 +169,7 @@ export function ItemRow({
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Eliminar"
+          aria-label={`Eliminar ${label}`}
           className="text-destructive hover:text-destructive"
           onClick={onRemove}
         >

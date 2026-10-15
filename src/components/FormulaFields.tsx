@@ -24,6 +24,13 @@ interface FormulaFieldsProps {
   concepts: string[]
   /** Categorías disponibles para un % de categoría. */
   categories: string[]
+  /**
+   * Id del texto con el que se describe la fila (su concepto). Se enlaza con
+   * `aria-describedby` para que el lector de pantalla anuncie a qué servicio
+   * pertenece cada importe: sin esto, en una tabla de trece filas no hay forma
+   * de saber qué se está editando.
+   */
+  describedBy?: string
 }
 
 /** Editor compacto de la fórmula de precio de un ítem. */
@@ -32,6 +39,7 @@ export function FormulaFields({
   onChange,
   concepts,
   categories,
+  describedBy,
 }: FormulaFieldsProps) {
   const changeType = (type: FormulaType) => {
     switch (type) {
@@ -53,7 +61,11 @@ export function FormulaFields({
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       <Select value={formula.type} onValueChange={(value) => changeType(value as FormulaType)}>
-        <SelectTrigger className="h-8 w-full sm:w-[168px]" aria-label="Tipo de precio">
+        <SelectTrigger
+          className="h-8 w-full sm:w-[168px]"
+          aria-label="Tipo de precio"
+          aria-describedby={describedBy}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -67,10 +79,11 @@ export function FormulaFields({
 
       {formula.type === 'fixed' && (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <span>$</span>
+          <span aria-hidden="true">$</span>
           <NumberInput
             className="h-8 w-24"
             aria-label="Monto en USD"
+            aria-describedby={describedBy}
             decimals={2}
             value={formula.amountUsd}
             onValueChange={(amountUsd) => onChange({ ...formula, amountUsd })}
@@ -83,14 +96,16 @@ export function FormulaFields({
           <NumberInput
             className="h-8 w-16"
             aria-label="Cantidad"
+            aria-describedby={describedBy}
             value={formula.qty}
             onValueChange={(qty) => onChange({ ...formula, qty })}
           />
-          <span>×</span>
-          <span>$</span>
+          <span aria-hidden="true">×</span>
+          <span aria-hidden="true">$</span>
           <NumberInput
             className="h-8 w-24"
             aria-label="Precio unitario en USD"
+            aria-describedby={describedBy}
             decimals={2}
             value={formula.unitUsd}
             onValueChange={(unitUsd) => onChange({ ...formula, unitUsd })}
@@ -104,7 +119,11 @@ export function FormulaFields({
             value={formula.refConcept}
             onValueChange={(refConcept) => onChange({ ...formula, refConcept })}
           >
-            <SelectTrigger className="h-8 w-full sm:w-[168px]" aria-label="Servicio de referencia">
+            <SelectTrigger
+              className="h-8 w-full sm:w-[168px]"
+              aria-label="Servicio de referencia"
+              aria-describedby={describedBy}
+            >
               <SelectValue placeholder="Elige un servicio" />
             </SelectTrigger>
             <SelectContent>
@@ -118,10 +137,11 @@ export function FormulaFields({
           <NumberInput
             className="h-8 w-16"
             aria-label="Porcentaje"
+            aria-describedby={describedBy}
             value={formula.percent}
             onValueChange={(percent) => onChange({ ...formula, percent })}
           />
-          <span>%</span>
+          <span aria-hidden="true">%</span>
         </div>
       )}
 
@@ -131,7 +151,11 @@ export function FormulaFields({
             value={formula.category}
             onValueChange={(category) => onChange({ ...formula, category })}
           >
-            <SelectTrigger className="h-8 w-full sm:w-[168px]" aria-label="Categoría de referencia">
+            <SelectTrigger
+              className="h-8 w-full sm:w-[168px]"
+              aria-label="Categoría de referencia"
+              aria-describedby={describedBy}
+            >
               <SelectValue placeholder="Elige una categoría" />
             </SelectTrigger>
             <SelectContent>
@@ -145,10 +169,11 @@ export function FormulaFields({
           <NumberInput
             className="h-8 w-16"
             aria-label="Porcentaje"
+            aria-describedby={describedBy}
             value={formula.percent}
             onValueChange={(percent) => onChange({ ...formula, percent })}
           />
-          <span>%</span>
+          <span aria-hidden="true">%</span>
         </div>
       )}
     </div>

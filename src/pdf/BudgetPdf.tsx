@@ -114,7 +114,9 @@ const styles = StyleSheet.create({
   totalBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: SKY,
+    // Azul oscuro (no SKY): con el claro, el texto blanco en negrita se quedaba
+    // en 4,02:1, por debajo del 4,5 que pide AA para este tamaño.
+    backgroundColor: SKY_DARK,
     paddingVertical: 8,
     paddingHorizontal: 6,
     marginTop: 8,

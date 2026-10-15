@@ -51,7 +51,9 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
   }, [calc.items])
 
   return (
-    <div className="rounded-lg border">
+    // Semántica de tabla: sin ella, un lector de pantalla lee una lista plana
+    // de ~150 controles sin decir a qué columna ni a qué servicio pertenecen.
+    <div role="table" aria-label="Servicios del presupuesto" className="rounded-lg border">
       <datalist id={categoryListId}>
         {categoryOptions.map((option) => (
           <option key={option} value={option} />
@@ -60,16 +62,27 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
 
       {/* Cabecera: sólo en escritorio */}
       <div
+        role="row"
         className={cn(
           'hidden border-b bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground sm:grid',
           ITEM_GRID,
         )}
       >
-        <span className="sm:px-2">Concepto / servicio</span>
-        <span className="sm:px-2">Cálculo</span>
-        <span className="text-right sm:px-2">USD</span>
-        <span className="text-right sm:px-2">VES</span>
-        <span className="text-right sm:px-1">Acciones</span>
+        <span role="columnheader" className="sm:px-2">
+          Concepto / servicio
+        </span>
+        <span role="columnheader" className="sm:px-2">
+          Cálculo
+        </span>
+        <span role="columnheader" className="text-right sm:px-2">
+          USD
+        </span>
+        <span role="columnheader" className="text-right sm:px-2">
+          VES
+        </span>
+        <span role="columnheader" className="text-right sm:px-1">
+          Acciones
+        </span>
       </div>
 
       {groups.flatMap(([category, items]) => {
@@ -78,9 +91,16 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
           calc.subtotals.find((entry) => entry.category === category)?.amountUsd ??
           new Decimal(0)
 
+        // Lista plana de filas (sin `rowgroup`): el rol `table` admite filas
+        // directamente, y así las claves siguen siendo estables al reagrupar y
+        // el foco no salta del campo que se está editando.
         return [
-          <div key={`category-${category}`} className="bg-muted/60 px-3 py-1.5 font-semibold">
-            {label}
+          <div
+            key={`category-${category}`}
+            role="row"
+            className="bg-muted/60 px-3 py-1.5 font-semibold"
+          >
+            <span role="cell">{label}</span>
           </div>,
 
           // Cada fila se identifica por el id del ítem (estable), así el foco no
@@ -105,21 +125,33 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
 
           <div
             key={`subtotal-${category}`}
+            role="row"
             className={cn(
               'grid gap-x-3 gap-y-0.5 bg-muted/30 px-3 py-2 sm:gap-0',
               ITEM_GRID,
             )}
           >
-            <span className="text-xs font-medium text-muted-foreground sm:col-span-2 sm:px-2 sm:py-1 sm:text-right">
+            <span
+              role="cell"
+              className="text-xs font-medium text-muted-foreground sm:col-span-2 sm:px-2 sm:py-1 sm:text-right"
+            >
               Subtotal {label}
             </span>
-            <span className="flex items-center justify-between gap-3 font-semibold tabular-nums sm:block sm:px-2 sm:py-1 sm:text-right">
+            <span
+              role="cell"
+              aria-label="Subtotal en dólares"
+              className="flex items-center justify-between gap-3 font-semibold tabular-nums sm:block sm:px-2 sm:py-1 sm:text-right"
+            >
               <span className="text-xs font-normal text-muted-foreground sm:hidden">
                 USD
               </span>
               <span className="whitespace-nowrap">{formatUsd(subtotal)}</span>
             </span>
-            <span className="flex items-center justify-between gap-3 font-semibold tabular-nums sm:block sm:px-2 sm:py-1 sm:text-right">
+            <span
+              role="cell"
+              aria-label="Subtotal en bolívares"
+              className="flex items-center justify-between gap-3 font-semibold tabular-nums sm:block sm:px-2 sm:py-1 sm:text-right"
+            >
               <span className="text-xs font-normal text-muted-foreground sm:hidden">
                 VES
               </span>
@@ -127,7 +159,7 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
                 {formatVes(usdToVes(subtotal, rate))}
               </span>
             </span>
-            <span className="hidden sm:block" />
+            <span role="cell" className="hidden sm:block" />
           </div>,
         ]
       })}

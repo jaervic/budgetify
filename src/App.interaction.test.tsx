@@ -145,7 +145,7 @@ describe('App · interacciones', () => {
     render(<App />)
     await addManualLine()
 
-    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar Nuevo servicio' }))
     expect(useBudgetStore.getState().budget.items).toHaveLength(0)
 
     await userEvent.click(screen.getByRole('button', { name: 'Deshacer' }))
@@ -163,6 +163,23 @@ describe('App · interacciones', () => {
 
     expect(screen.getAllByText('Gastos de Clínica').length).toBeGreaterThan(0)
     expect(screen.queryByText('Honorarios Médicos')).toBeNull()
+  })
+
+  it('expone los servicios como tabla y da contexto a cada fila', async () => {
+    render(<App />)
+    await addManualLine()
+
+    expect(screen.getByRole('table', { name: 'Servicios del presupuesto' })).toBeTruthy()
+    expect(screen.getByRole('columnheader', { name: 'Concepto / servicio' })).toBeTruthy()
+
+    // Cada importe describe a qué servicio pertenece.
+    const amount = screen.getByLabelText('Monto en USD')
+    const describedBy = amount.getAttribute('aria-describedby')
+    expect(describedBy).toBeTruthy()
+    expect(document.getElementById(describedBy as string)?.textContent).toBe('Nuevo servicio')
+
+    // Y los botones de fila se distinguen entre sí.
+    expect(screen.getByRole('button', { name: 'Eliminar Nuevo servicio' })).toBeTruthy()
   })
 
   it('alterna el tema claro/oscuro', async () => {
@@ -219,5 +236,7 @@ describe('App · interacciones', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Todo el catálogo' }))
     expect(screen.getByText('Cirujano Principal')).toBeTruthy()
-  })
+    // Este caso renderiza los ~130 servicios del catálogo: en jsdom tarda
+    // bastante más que el resto y el límite por defecto (5 s) se queda corto.
+  }, 20_000)
 })

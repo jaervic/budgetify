@@ -83,6 +83,14 @@ export default function App() {
 
   return (
     <div className="min-h-svh bg-muted/40">
+      {/* Primer elemento enfocable de la página: sin él hay que tabular por los
+          ~150 controles del formulario para llegar a las acciones del PDF. */}
+      <a
+        href="#acciones"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:ring-3 focus:ring-ring/50"
+      >
+        Saltar a las acciones
+      </a>
       <header className="border-b bg-background">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2">
@@ -206,7 +214,11 @@ export default function App() {
           </TabsContent>
         </Tabs>
 
-        <aside className="grid content-start gap-4 lg:sticky lg:top-4">
+        <aside
+          id="acciones"
+          tabIndex={-1}
+          className="grid content-start gap-4 outline-none lg:sticky lg:top-4"
+        >
           <TotalsPanel calc={calc} rate={budget.rate} />
           <ActionBar
             calc={calc}

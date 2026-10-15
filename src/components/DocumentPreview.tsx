@@ -91,7 +91,7 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
 
         {/* Tabla */}
         {model.sections.length === 0 ? (
-          <p className="mt-6 rounded-md border border-dashed border-slate-300 py-10 text-center text-xs text-slate-400">
+          <p className="mt-6 rounded-md border border-dashed border-slate-300 py-10 text-center text-xs text-slate-500">
             Aún no hay servicios en el presupuesto.
           </p>
         ) : (
@@ -119,11 +119,11 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
                     <span className="font-medium text-slate-700">{row.concept}</span>
                     <span className="text-slate-600">{row.detail}</span>
                     <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right">
-                      <span className="text-slate-400 sm:hidden">USD</span>
+                      <span className="text-slate-500 sm:hidden">USD</span>
                       <span>{row.amountUsd}</span>
                     </span>
                     <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right">
-                      <span className="text-slate-400 sm:hidden">VES</span>
+                      <span className="text-slate-500 sm:hidden">VES</span>
                       <span>{row.amountVes}</span>
                     </span>
                   </div>
@@ -136,11 +136,11 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
                     {section.subtotalLabel}
                   </span>
                   <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right sm:font-bold">
-                    <span className="text-slate-400 sm:hidden">USD</span>
+                    <span className="text-slate-500 sm:hidden">USD</span>
                     <span>{section.subtotalUsd}</span>
                   </span>
                   <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right sm:font-bold">
-                    <span className="text-slate-400 sm:hidden">VES</span>
+                    <span className="text-slate-500 sm:hidden">VES</span>
                     <span>{section.subtotalVes}</span>
                   </span>
                 </div>
@@ -150,7 +150,7 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
         )}
 
         {/* Total */}
-        <div className="mt-3 flex flex-col gap-1.5 bg-sky-600 px-3 py-2 text-white sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="mt-3 flex flex-col gap-1.5 bg-sky-700 px-3 py-2 text-white sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <span className="text-[13px] font-bold">TOTAL GENERAL ESTIMADO:</span>
           <span className="flex flex-wrap gap-x-6 gap-y-0.5 tabular-nums sm:whitespace-nowrap">
             <span className="font-bold">{model.totalUsd}</span>
@@ -167,7 +167,7 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
             <ul className="grid gap-2">
               {model.notes.map((note, index) => (
                 <li key={index} className="flex gap-2 text-[10.5px] text-slate-600">
-                  <span className="text-slate-400">•</span>
+                  <span aria-hidden="true" className="text-slate-500">•</span>
                   <span>
                     {note.label && <b className="text-slate-800">{note.label}: </b>}
                     {note.body}
