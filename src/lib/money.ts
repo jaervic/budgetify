@@ -5,12 +5,6 @@ import Decimal from 'decimal.js'
 Decimal.set({ precision: 30, rounding: Decimal.ROUND_HALF_UP })
 
 export { Decimal }
-export type DecimalValue = Decimal.Value
-
-/** Envuelve cualquier valor numérico en un `Decimal`. */
-export function toDecimal(value: Decimal.Value): Decimal {
-  return new Decimal(value)
-}
 
 /** Convierte un monto en USD a VES aplicando la tasa. */
 export function usdToVes(amountUsd: Decimal.Value, rate: Decimal.Value): Decimal {

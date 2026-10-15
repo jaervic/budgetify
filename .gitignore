@@ -25,3 +25,7 @@ presupuestoejemplo.pdf
 *.njsproj
 *.sln
 *.sw?
+
+# Salidas de Playwright (prueba de humo en navegador)
+playwright-report/
+test-results/

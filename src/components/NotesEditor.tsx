@@ -27,6 +27,13 @@ export function NotesEditor() {
         <CardTitle>Notas y recomendaciones</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3">
+        {/*
+          La clave es el índice a propósito: las notas son texto suelto sin
+          identidad propia y, al escribir, la posición no cambia. Con una clave
+          estable por contenido, cada pulsación cambiaría la clave del campo
+          que se está editando y React lo remontaría, perdiendo el foco a mitad
+          de palabra.
+        */}
         {notes.map((note, index) => (
           <div key={index} className="flex items-start gap-2">
             <Textarea

@@ -44,3 +44,42 @@ jobs:
           name: dist
           path: dist
           retention-days: 7
+
+  e2e:
+    name: Prueba de humo en navegador
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Descargar el build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # Arranca `vite preview` con el dist y comprueba que la app monta y que
+      # los colores llegan al contraste AA. Ver `playwright.config.ts`.
+      - name: Prueba de humo
+        run: npm run test:e2e
+
+      - name: Subir el informe si falla
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7

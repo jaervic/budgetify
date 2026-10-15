@@ -206,6 +206,8 @@ describe('App · interacciones', () => {
     ).toBe('250,00')
   })
 
+  // Recorre tres diálogos y escribe en varios campos: con la suite entera en
+  // paralelo pasa de los 5 s por defecto, así que se le da más aire.
   it('guarda una copia y la recupera desde el historial', async () => {
     render(<App />)
     await addManualLine()
@@ -235,7 +237,7 @@ describe('App · interacciones', () => {
     expect(items).toHaveLength(1)
     expect(items[0].concept).toBe('Limpieza dental')
     expect(screen.getByTestId('total-usd').textContent).toBe('$250.00')
-  })
+  }, 20_000)
 
   it('expone los servicios como tabla y da contexto a cada fila', async () => {
     render(<App />)
