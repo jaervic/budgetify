@@ -1,11 +1,12 @@
 import { toast } from 'sonner'
 import { useBudgetStore } from '@/store/useBudgetStore'
-import type { Budget, Catalog } from '@/types'
+import type { Budget, Catalog, SavedBudget } from '@/types'
 
 /** Estado anterior que se puede restaurar (solo lo que cambia cada acción). */
 export interface UndoSnapshot {
   budget?: Budget
   catalog?: Catalog
+  history?: SavedBudget[]
 }
 
 /**
@@ -33,4 +34,20 @@ export function withUndo<T>(snapshot: UndoSnapshot, message: string, action: () 
     },
   })
   return result
+}
+
+/**
+ * Evita que un diálogo modal se cierre cuando el clic cae en un aviso.
+ *
+ * Radix cierra el diálogo en cuanto detecta un clic fuera de él, y el aviso de
+ * "deshacer" vive fuera (cuelga del `<body>`). Sin esto, deshacer un borrado
+ * hecho desde dentro de un diálogo cerraba el diálogo de golpe: el dato volvía,
+ * pero la lista desaparecía de la vista y había que volver a abrirla para
+ * comprobarlo. Se pasa como `onInteractOutside`.
+ */
+export function keepOpenForToast(event: { target: EventTarget | null; preventDefault: () => void }): void {
+  const target = event.target
+  if (target instanceof Element && target.closest('[data-sonner-toaster]')) {
+    event.preventDefault()
+  }
 }

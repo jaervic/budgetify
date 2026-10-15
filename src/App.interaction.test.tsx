@@ -52,7 +52,7 @@ beforeEach(() => {
   useBudgetStore.getState().clearBudget()
   useBudgetStore.getState().resetCatalog()
   // Modo manual: evita que la app consulte el BCV al montar durante los tests.
-  useBudgetStore.setState({ clinic: cloneDefaultClinic(), rateMode: 'manual' })
+  useBudgetStore.setState({ clinic: cloneDefaultClinic(), rateMode: 'manual', history: [] })
   useThemeStore.setState({ theme: 'system' })
   localStorage.clear()
   document.documentElement.classList.remove('dark')
@@ -204,6 +204,37 @@ describe('App · interacciones', () => {
     expect(
       (screen.getByLabelText('Precio unitario en USD') as HTMLInputElement).value,
     ).toBe('250,00')
+  })
+
+  it('guarda una copia y la recupera desde el historial', async () => {
+    render(<App />)
+    await addManualLine()
+
+    await userEvent.clear(screen.getByLabelText('Paciente'))
+    await userEvent.type(screen.getByLabelText('Paciente'), 'Ana Pérez')
+    const concept = screen.getByLabelText('Concepto')
+    await userEvent.clear(concept)
+    await userEvent.type(concept, 'Limpieza dental')
+    const amount = screen.getByLabelText('Monto en USD')
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '250')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar copia en el historial' }))
+    expect(useBudgetStore.getState().history).toHaveLength(1)
+
+    // Se tira el presupuesto y se recupera la copia desde el historial.
+    await userEvent.click(screen.getByRole('button', { name: 'Limpiar' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Limpiar presupuesto' }))
+    expect(useBudgetStore.getState().budget.items).toHaveLength(0)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Historial' }))
+    expect(await screen.findByText(/Ana Pérez/)).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: /^Abrir la copia/ }))
+
+    const items = useBudgetStore.getState().budget.items
+    expect(items).toHaveLength(1)
+    expect(items[0].concept).toBe('Limpieza dental')
+    expect(screen.getByTestId('total-usd').textContent).toBe('$250.00')
   })
 
   it('expone los servicios como tabla y da contexto a cada fila', async () => {

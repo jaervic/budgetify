@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { downloadJson, fileStamp, parseCatalog, readJsonFile } from '@/lib/io'
-import { withUndo } from '@/lib/undo'
+import { keepOpenForToast, withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 interface CatalogManagerDialogProps {
@@ -52,7 +52,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-3xl" onInteractOutside={keepOpenForToast}>
         <DialogHeader>
           <DialogTitle>Catálogo de la clínica</DialogTitle>
           <DialogDescription>

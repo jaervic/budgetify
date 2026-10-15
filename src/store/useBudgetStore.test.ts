@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DEFAULT_CATALOG } from '@/data/catalog'
 import { cloneDefaultClinic, createEmptyBcvCache, DEFAULT_RATE } from '@/data/defaults'
 import { computeBudget } from '@/lib/calc'
+import { HISTORY_LIMIT } from '@/lib/limits'
 import { formatUsd } from '@/lib/money'
 import { useBudgetStore } from './useBudgetStore'
 
@@ -18,6 +19,7 @@ describe('store del presupuesto', () => {
       clinic: cloneDefaultClinic(),
       rateMode: 'auto',
       bcv: createEmptyBcvCache(),
+      history: [],
     })
     vi.unstubAllGlobals()
   })
@@ -82,6 +84,7 @@ describe('tasa BCV y datos de la clínica', () => {
       clinic: cloneDefaultClinic(),
       rateMode: 'auto',
       bcv: createEmptyBcvCache(),
+      history: [],
     })
     vi.unstubAllGlobals()
   })
@@ -149,5 +152,69 @@ describe('tasa BCV y datos de la clínica', () => {
 
     useBudgetStore.getState().clearClinicLogo()
     expect(useBudgetStore.getState().clinic.logoDataUrl).toBeUndefined()
+  })
+
+  it('guarda una copia del presupuesto en el historial', () => {
+    useBudgetStore.getState().setPatient({ name: 'Ana Pérez' })
+    useBudgetStore.getState().addManualItem('Honorarios Médicos')
+
+    const { saved, dropped } = useBudgetStore.getState().saveToHistory()
+
+    expect(dropped).toBe(0)
+    expect(saved.budget.patient.name).toBe('Ana Pérez')
+    expect(useBudgetStore.getState().history).toHaveLength(1)
+  })
+
+  it('la copia es independiente del borrador en curso', () => {
+    useBudgetStore.getState().setPatient({ name: 'Ana Pérez' })
+    useBudgetStore.getState().saveToHistory()
+
+    useBudgetStore.getState().setPatient({ name: 'Otro paciente' })
+
+    expect(useBudgetStore.getState().history[0].budget.patient.name).toBe('Ana Pérez')
+    expect(useBudgetStore.getState().budget.patient.name).toBe('Otro paciente')
+  })
+
+  it('carga una copia y deja el presupuesto tal como se guardó', () => {
+    useBudgetStore.getState().addManualItem('Honorarios Médicos')
+    const item = useBudgetStore.getState().budget.items[0]
+    useBudgetStore.getState().updateFormula(item.id, { type: 'fixed', amountUsd: 300 })
+    useBudgetStore.getState().saveToHistory()
+    const id = useBudgetStore.getState().history[0].id
+
+    useBudgetStore.getState().clearBudget()
+    expect(useBudgetStore.getState().budget.items).toHaveLength(0)
+
+    expect(useBudgetStore.getState().loadSavedBudget(id)).toBe(true)
+    const items = useBudgetStore.getState().budget.items
+    expect(items).toHaveLength(1)
+    expect(formatUsd(computeBudget(items).totalUsd)).toBe('$300.00')
+  })
+
+  it('avisa si la copia que se intenta cargar ya no existe', () => {
+    expect(useBudgetStore.getState().loadSavedBudget('saved_inexistente')).toBe(false)
+  })
+
+  it('elimina una copia del historial', () => {
+    useBudgetStore.getState().saveToHistory()
+    const id = useBudgetStore.getState().history[0].id
+
+    useBudgetStore.getState().removeSavedBudget(id)
+
+    expect(useBudgetStore.getState().history).toHaveLength(0)
+  })
+
+  it('descarta las copias más antiguas al pasar del tope, y lo dice', () => {
+    for (let i = 0; i < HISTORY_LIMIT + 3; i++) {
+      useBudgetStore.getState().setPatient({ name: `Paciente ${i}` })
+      const { dropped } = useBudgetStore.getState().saveToHistory()
+      expect(dropped).toBe(i < HISTORY_LIMIT ? 0 : 1)
+    }
+
+    const history = useBudgetStore.getState().history
+    expect(history).toHaveLength(HISTORY_LIMIT)
+    // La última guardada va primera; las tres más antiguas se fueron.
+    expect(history[0].budget.patient.name).toBe(`Paciente ${HISTORY_LIMIT + 2}`)
+    expect(history.at(-1)?.budget.patient.name).toBe('Paciente 3')
   })
 })

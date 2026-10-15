@@ -45,6 +45,19 @@ export interface Budget {
   notes: string[]
 }
 
+/**
+ * Presupuesto archivado a mano en el historial del navegador.
+ *
+ * Se guarda el presupuesto completo y nada más: el nombre del paciente o el
+ * total se derivan al mostrarlo, así no hay copias que se queden desfasadas.
+ */
+export interface SavedBudget {
+  id: string
+  /** Cuándo se archivó (ISO completo; también da el orden). */
+  savedAt: string
+  budget: Budget
+}
+
 /** Tamaño de hoja del documento. */
 export type PageSize = 'A4' | 'Letter' | 'Legal'
 

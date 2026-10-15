@@ -9,6 +9,7 @@ import {
 } from '@/data/defaults'
 import { fetchBcvRate } from '@/lib/bcv'
 import { newId } from '@/lib/ids'
+import { HISTORY_LIMIT } from '@/lib/limits'
 import type {
   BcvCache,
   Budget,
@@ -21,6 +22,7 @@ import type {
   PackApplyMode,
   PageSize,
   RateMode,
+  SavedBudget,
 } from '@/types'
 import { migratePersisted } from './migrate'
 import { createDebouncedStorage } from './storage'
@@ -41,6 +43,8 @@ interface AppState {
   bcv: BcvCache
   /** Tamaño de hoja del documento (A4, Carta u Oficio). */
   pageSize: PageSize
+  /** Presupuestos archivados a mano, del más reciente al más antiguo. */
+  history: SavedBudget[]
 
   // ── Presupuesto ──────────────────────────────────────────────────────
   setPatient: (patch: Partial<Budget['patient']>) => void
@@ -58,6 +62,16 @@ interface AppState {
   moveItem: (id: string, direction: -1 | 1) => void
   loadBudget: (budget: Budget) => void
   clearBudget: () => void
+
+  // ── Historial ────────────────────────────────────────────────────────
+  /**
+   * Archiva el presupuesto en curso. Devuelve la entrada creada y cuántas
+   * copias antiguas hubo que descartar por el tope (0 si no se descartó nada).
+   */
+  saveToHistory: () => { saved: SavedBudget; dropped: number }
+  /** Carga una copia del historial. `false` si ya no existe. */
+  loadSavedBudget: (id: string) => boolean
+  removeSavedBudget: (id: string) => void
 
   // ── Catálogo ─────────────────────────────────────────────────────────
   addCatalogService: (service: NewService) => void
@@ -114,6 +128,7 @@ export const useBudgetStore = create<AppState>()(
       rateMode: 'auto',
       bcv: createEmptyBcvCache(),
       pageSize: DEFAULT_PAGE_SIZE,
+      history: [],
 
       // ── Presupuesto ────────────────────────────────────────────────────
       setPatient: (patch) =>
@@ -228,6 +243,34 @@ export const useBudgetStore = create<AppState>()(
       loadBudget: (budget) => set({ budget }),
 
       clearBudget: () => set({ budget: createEmptyBudget() }),
+
+      // ── Historial ──────────────────────────────────────────────────────
+      saveToHistory: () => {
+        const { budget, history } = get()
+        const saved: SavedBudget = {
+          id: newId('saved'),
+          savedAt: new Date().toISOString(),
+          // Copia profunda: el historial no debe seguir los cambios del borrador.
+          budget: structuredClone(budget),
+        }
+        const next = [saved, ...history]
+        const dropped = Math.max(0, next.length - HISTORY_LIMIT)
+        // `slice` corta por delante, así que se van las más antiguas.
+        set({ history: next.slice(0, HISTORY_LIMIT) })
+        return { saved, dropped }
+      },
+
+      loadSavedBudget: (id) => {
+        const entry = get().history.find((item) => item.id === id)
+        if (!entry) return false
+        set({ budget: structuredClone(entry.budget) })
+        return true
+      },
+
+      removeSavedBudget: (id) =>
+        set((state) => ({
+          history: state.history.filter((entry) => entry.id !== id),
+        })),
 
       // ── Catálogo ───────────────────────────────────────────────────────
       addCatalogService: (service) =>
@@ -423,8 +466,8 @@ export const useBudgetStore = create<AppState>()(
     }),
     {
       name: 'budgetify:v1',
-      // v6: áreas de práctica (especialidades) y encabezado de la hoja.
-      version: 6,
+      // v7: historial de presupuestos guardados.
+      version: 7,
       storage: createJSONStorage(() => createDebouncedStorage(500)),
       partialize: (state) => ({
         budget: state.budget,
@@ -433,6 +476,7 @@ export const useBudgetStore = create<AppState>()(
         rateMode: state.rateMode,
         bcv: state.bcv,
         pageSize: state.pageSize,
+        history: state.history,
       }),
       // Migra y valida lo guardado: si el borrador no encaja con el modelo
       // actual (versión antigua o datos corruptos) se usan los valores por

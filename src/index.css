@@ -131,3 +131,17 @@
     @apply font-sans;
     }
 }
+
+/*
+ * Los avisos tienen que poder pulsarse aunque haya un diálogo modal abierto.
+ *
+ * Radix apaga los clics poniendo `pointer-events: none` en el `<body>` mientras
+ * un diálogo modal está abierto. Como `pointer-events` se hereda y el contenedor
+ * de avisos de sonner cuelga del `<body>` (no del diálogo), el botón «Deshacer»
+ * de un aviso quedaba inerte: se veía, pero el clic se lo comía la capa oscura
+ * del diálogo. Se devuelve la interactividad solo al aviso; el resto del
+ * contenedor sigue siendo transparente a los clics.
+ */
+[data-sonner-toast] {
+  pointer-events: auto;
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_CATALOG } from '@/data/catalog'
 import { DEFAULT_CLINIC } from '@/data/defaults'
+import { HISTORY_LIMIT } from '@/lib/limits'
 import { migratePersisted } from './migrate'
 
 /** Estado tal y como lo guardaba la v5: sin áreas ni modo de encabezado. */
@@ -123,6 +124,53 @@ describe('migratePersisted', () => {
     expect(state.rateMode).toBe('auto')
     expect(state.pageSize).toBe('A4')
     expect(state.bcv.status).toBe('idle')
+  })
+
+  it('conserva el historial de presupuestos guardados', () => {
+    const state = migratePersisted({
+      ...V5_STATE,
+      history: [
+        {
+          id: 'saved_1',
+          savedAt: '2026-10-13T18:30:00.000Z',
+          budget: V5_STATE.budget,
+        },
+      ],
+    })
+
+    expect(state.history).toHaveLength(1)
+    expect(state.history[0].budget.patient.name).toBe('Ana Pérez')
+  })
+
+  it('sin historial guardado, arranca con una lista vacía', () => {
+    expect(migratePersisted(V5_STATE).history).toEqual([])
+  })
+
+  it('descarta entradas de historial que no encajan con el modelo', () => {
+    const state = migratePersisted({
+      ...V5_STATE,
+      history: [{ id: 'saved_1', cuando: 'ayer' }, 'no soy una entrada'],
+    })
+
+    expect(state.history).toEqual([])
+  })
+
+  it('recorta un historial pasado de tope', () => {
+    const entrada = {
+      id: 'saved_1',
+      savedAt: '2026-10-13T18:30:00.000Z',
+      budget: V5_STATE.budget,
+    }
+    const state = migratePersisted({
+      ...V5_STATE,
+      history: Array.from({ length: HISTORY_LIMIT + 10 }, (_, i) => ({
+        ...entrada,
+        id: `saved_${i}`,
+      })),
+    })
+
+    // No se cargan 110 en memoria: el esquema rechaza el conjunto entero.
+    expect(state.history).toEqual([])
   })
 
   it('descarta datos corruptos sin romper el arranque', () => {

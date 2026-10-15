@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { LIMITS } from './limits'
+import { LIMITS, HISTORY_LIMIT } from './limits'
 import type { Budget, Catalog } from '@/types'
 
 /**
@@ -139,6 +139,19 @@ export const bcvCacheSchema = z.object({
   status: z.enum(['idle', 'loading', 'ok', 'error']),
   error: z.string().nullable(),
 })
+
+/** Entrada del historial: el presupuesto archivado, con su fecha. */
+export const savedBudgetSchema = z.object({
+  id: z.string().min(1).max(100),
+  savedAt: z.string().max(40),
+  budget: budgetSchema,
+})
+
+/**
+ * El historial entero. El tope también se aplica al leer: si alguien edita el
+ * `localStorage` a mano y mete 10.000 entradas, no se cargan en memoria.
+ */
+export const historySchema = z.array(savedBudgetSchema).max(HISTORY_LIMIT)
 
 /** Primer mensaje de error legible para el usuario. */
 function firstIssue(error: z.ZodError): string {

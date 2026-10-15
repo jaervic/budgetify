@@ -5,8 +5,16 @@ import {
   createEmptyBudget,
   DEFAULT_PAGE_SIZE,
 } from '@/data/defaults'
-import { bcvCacheSchema, budgetSchema, catalogSchema, clinicSchema } from '@/lib/io'
-import type { BcvCache, Budget, Catalog, Clinic, PageSize, RateMode } from '@/types'
+import { bcvCacheSchema, budgetSchema, catalogSchema, clinicSchema, historySchema } from '@/lib/io'
+import type {
+  BcvCache,
+  Budget,
+  Catalog,
+  Clinic,
+  PageSize,
+  RateMode,
+  SavedBudget,
+} from '@/types'
 
 /** Parte del estado que se guarda en el navegador. */
 export interface PersistedState {
@@ -16,6 +24,7 @@ export interface PersistedState {
   rateMode: RateMode
   bcv: BcvCache
   pageSize: PageSize
+  history: SavedBudget[]
 }
 
 /**
@@ -32,6 +41,7 @@ export function migratePersisted(persisted: unknown): PersistedState {
   const catalog = catalogSchema.safeParse(state.catalog)
   const clinic = clinicSchema.safeParse(state.clinic)
   const bcv = bcvCacheSchema.safeParse(state.bcv)
+  const history = historySchema.safeParse(state.history)
 
   return {
     budget: budget.success ? budget.data : createEmptyBudget(),
@@ -47,5 +57,7 @@ export function migratePersisted(persisted: unknown): PersistedState {
     // Nunca se restaura el estado "loading": quedaría colgado.
     bcv:
       bcv.success && bcv.data.status !== 'loading' ? bcv.data : createEmptyBcvCache(),
+    // El historial nació después: los borradores guardados antes no lo traen.
+    history: history.success ? history.data : [],
   }
 }

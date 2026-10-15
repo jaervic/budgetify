@@ -26,3 +26,13 @@ export const LIMITS = {
   doctorName: 120,
   doctorId: 60,
 } as const
+
+/**
+ * Presupuestos que se conservan en el historial local. Al superarlo se borran
+ * los más viejos y se avisa.
+ *
+ * El `localStorage` ronda los 5 MB y un presupuesto ocupa unos pocos KB, así
+ * que 100 entradas se quedan muy por debajo del tope; el límite está para no
+ * acercarse siquiera a la cuota ni volver lenta la app.
+ */
+export const HISTORY_LIMIT = 100

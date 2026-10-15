@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import {
+  BookmarkPlus,
   Download,
   Eraser,
   Eye,
@@ -23,6 +24,7 @@ import { Separator } from '@/components/ui/separator'
 import { usePdfActions } from '@/hooks/usePdfActions'
 import type { CalcResult } from '@/lib/calc'
 import { downloadJson, fileStamp, parseBudget, readJsonFile } from '@/lib/io'
+import { HISTORY_LIMIT } from '@/lib/limits'
 import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { PageSize } from '@/types'
@@ -42,9 +44,23 @@ export function ActionBar({ calc, onBudgetReplaced, onViewPdf }: ActionBarProps)
   const loadBudget = useBudgetStore((state) => state.loadBudget)
   const clearBudget = useBudgetStore((state) => state.clearBudget)
   const syncPricesToCatalog = useBudgetStore((state) => state.syncPricesToCatalog)
+  const saveToHistory = useBudgetStore((state) => state.saveToHistory)
   const fileInput = useRef<HTMLInputElement>(null)
   const [confirmClearOpen, setConfirmClearOpen] = useState(false)
   const { busy, downloadPdf, printPdf, sharePdf } = usePdfActions(calc)
+
+  const handleSaveCopy = () => {
+    const { dropped } = saveToHistory()
+    if (dropped > 0) {
+      toast.success('Copia guardada en el historial', {
+        description: `Se descartaron ${dropped} ${
+          dropped === 1 ? 'copia antigua' : 'copias antiguas'
+        } para no pasar de ${HISTORY_LIMIT}.`,
+      })
+      return
+    }
+    toast.success('Copia guardada en el historial')
+  }
 
   const handleSync = () => {
     const count = syncPricesToCatalog()
@@ -133,6 +149,10 @@ export function ActionBar({ calc, onBudgetReplaced, onViewPdf }: ActionBarProps)
         <Button type="button" variant="outline" size="sm" onClick={handleSync}>
           <Save />
           Guardar tarifas en el catálogo
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={handleSaveCopy}>
+          <BookmarkPlus />
+          Guardar copia en el historial
         </Button>
         <div className="grid grid-cols-2 gap-2">
           <Button

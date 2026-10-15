@@ -1,11 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Building2, Layers, ListPlus, Plus, Settings2, Stethoscope } from 'lucide-react'
+import {
+  Building2,
+  History,
+  Layers,
+  ListPlus,
+  Plus,
+  Settings2,
+  Stethoscope,
+} from 'lucide-react'
 import { ActionBar } from '@/components/ActionBar'
 import { AppFooter } from '@/components/AppFooter'
 import { CatalogManagerDialog } from '@/components/CatalogManagerDialog'
 import { CatalogPickerDialog } from '@/components/CatalogPickerDialog'
 import { ClinicDialog } from '@/components/ClinicDialog'
 import { DataForm } from '@/components/DataForm'
+import { HistoryDialog } from '@/components/HistoryDialog'
 import { DocumentPreview } from '@/components/DocumentPreview'
 import { ItemsTable } from '@/components/ItemsTable'
 import { MobileActionBar } from '@/components/MobileActionBar'
@@ -74,6 +83,7 @@ export default function App() {
   const [managerOpen, setManagerOpen] = useState(false)
   const [packOpen, setPackOpen] = useState(false)
   const [clinicOpen, setClinicOpen] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [pdfOpen, setPdfOpen] = useState(false)
 
   // Ancla la tasa al BCV al arrancar (una sola vez; los demás refrescos son manuales).
@@ -117,6 +127,16 @@ export default function App() {
             >
               <Building2 />
               Clínica
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label="Historial"
+              onClick={() => setHistoryOpen(true)}
+            >
+              <History />
+              <span className="hidden sm:inline">Historial</span>
             </Button>
             <Button
               type="button"
@@ -236,6 +256,11 @@ export default function App() {
       <PackPickerDialog open={packOpen} onOpenChange={setPackOpen} />
       <CatalogManagerDialog open={managerOpen} onOpenChange={setManagerOpen} />
       <ClinicDialog open={clinicOpen} onOpenChange={setClinicOpen} />
+      <HistoryDialog
+        open={historyOpen}
+        onOpenChange={setHistoryOpen}
+        onBudgetReplaced={() => setFormKey((key) => key + 1)}
+      />
       <PdfPreviewDialog open={pdfOpen} onOpenChange={setPdfOpen} />
       <Toaster position="top-center" theme={resolved} />
     </div>
