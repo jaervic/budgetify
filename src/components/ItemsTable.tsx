@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { ITEM_GRID, ItemRow } from '@/components/ItemRow'
 import type { CalcResult, ComputedItem } from '@/lib/calc'
 import { Decimal, formatUsd, formatVes, usdToVes } from '@/lib/money'
+import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import { cn } from '@/lib/utils'
 
@@ -31,6 +32,12 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
     () => [...new Set([...categories, ...catalogCategories])],
     [categories, catalogCategories],
   )
+
+  const removeWithUndo = (item: ComputedItem) => {
+    withUndo({ budget: useBudgetStore.getState().budget }, 'Servicio eliminado', () =>
+      removeItem(item.id),
+    )
+  }
 
   // Agrupa por categoría respetando el orden de aparición.
   const groups = useMemo(() => {
@@ -91,7 +98,7 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
               onUpdate={(patch) => updateItem(item.id, patch)}
               onFormulaChange={(formula) => updateFormula(item.id, formula)}
               onDuplicate={() => duplicateItem(item.id)}
-              onRemove={() => removeItem(item.id)}
+              onRemove={() => removeWithUndo(item)}
               onMove={(direction) => moveItem(item.id, direction)}
             />
           )),

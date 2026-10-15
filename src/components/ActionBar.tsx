@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import {
   Download,
   Eraser,
@@ -10,6 +10,7 @@ import {
   Share2,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -22,6 +23,7 @@ import { Separator } from '@/components/ui/separator'
 import { usePdfActions } from '@/hooks/usePdfActions'
 import type { CalcResult } from '@/lib/calc'
 import { downloadJson, fileStamp, parseBudget, readJsonFile } from '@/lib/io'
+import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { PageSize } from '@/types'
 
@@ -41,6 +43,7 @@ export function ActionBar({ calc, onBudgetReplaced, onViewPdf }: ActionBarProps)
   const clearBudget = useBudgetStore((state) => state.clearBudget)
   const syncPricesToCatalog = useBudgetStore((state) => state.syncPricesToCatalog)
   const fileInput = useRef<HTMLInputElement>(null)
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false)
   const { busy, downloadPdf, printPdf, sharePdf } = usePdfActions(calc)
 
   const handleSync = () => {
@@ -64,12 +67,11 @@ export function ActionBar({ calc, onBudgetReplaced, onViewPdf }: ActionBarProps)
   }
 
   const handleClear = () => {
-    if (!window.confirm('¿Limpiar el presupuesto actual? Esta acción no se puede deshacer.')) {
-      return
-    }
-    clearBudget()
-    onBudgetReplaced()
-    toast.success('Presupuesto limpiado')
+    const before = useBudgetStore.getState().budget
+    withUndo({ budget: before }, 'Presupuesto limpiado', () => {
+      clearBudget()
+      onBudgetReplaced()
+    })
   }
 
   return (
@@ -157,12 +159,27 @@ export function ActionBar({ calc, onBudgetReplaced, onViewPdf }: ActionBarProps)
           variant="ghost"
           size="sm"
           className="text-destructive hover:text-destructive"
-          onClick={handleClear}
+          onClick={() => setConfirmClearOpen(true)}
         >
           <Eraser />
           Limpiar
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={confirmClearOpen}
+        onOpenChange={setConfirmClearOpen}
+        title="¿Limpiar el presupuesto?"
+        description={
+          <p>
+            Se borran los servicios, los datos del paciente y las notas. Podrás
+            deshacerlo desde el aviso que aparece al limpiarlo.
+          </p>
+        }
+        confirmLabel="Limpiar presupuesto"
+        destructive
+        onConfirm={handleClear}
+      />
 
       <input
         ref={fileInput}

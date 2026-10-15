@@ -1,9 +1,10 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Download, RotateCcw, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { CategoriesPanel } from '@/components/catalog/CategoriesPanel'
 import { PacksPanel } from '@/components/catalog/PacksPanel'
 import { ServicesPanel } from '@/components/catalog/ServicesPanel'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,6 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { downloadJson, fileStamp, parseCatalog, readJsonFile } from '@/lib/io'
+import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 interface CatalogManagerDialogProps {
@@ -27,6 +29,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
   const loadCatalog = useBudgetStore((state) => state.loadCatalog)
   const resetCatalog = useBudgetStore((state) => state.resetCatalog)
   const fileInput = useRef<HTMLInputElement>(null)
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false)
 
   const handleExport = () => {
     downloadJson(`catalogo-${fileStamp()}.json`, catalog)
@@ -43,9 +46,8 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
   }
 
   const handleReset = () => {
-    if (!window.confirm('¿Restablecer el catálogo a los valores por defecto?')) return
-    resetCatalog()
-    toast.success('Catálogo restablecido')
+    const before = useBudgetStore.getState().catalog
+    withUndo({ catalog: before }, 'Catálogo restablecido', () => resetCatalog())
   }
 
   return (
@@ -72,10 +74,24 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
             <Upload />
             Importar
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={handleReset}>
+          <Button type="button" variant="outline" size="sm" onClick={() => setConfirmResetOpen(true)}>
             <RotateCcw />
             Restablecer
           </Button>
+          <ConfirmDialog
+            open={confirmResetOpen}
+            onOpenChange={setConfirmResetOpen}
+            title="¿Restablecer el catálogo?"
+            description={
+              <p>
+                Se descartan tus tarifas, categorías, áreas y plantillas editadas y
+                vuelven las de fábrica. Se puede deshacer desde el aviso.
+              </p>
+            }
+            confirmLabel="Restablecer catálogo"
+            destructive
+            onConfirm={handleReset}
+          />
           <input
             ref={fileInput}
             type="file"

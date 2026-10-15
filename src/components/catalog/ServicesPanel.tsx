@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { isServiceInArea } from '@/lib/catalog'
 import { LIMITS } from '@/lib/limits'
+import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 /** Alta, edición y borrado de servicios de la biblioteca. */
@@ -87,7 +88,13 @@ export function ServicesPanel() {
                   size="icon-sm"
                   aria-label="Eliminar servicio"
                   className="text-destructive hover:text-destructive"
-                  onClick={() => removeCatalogService(service.id)}
+                  onClick={() =>
+                    withUndo(
+                      { catalog: useBudgetStore.getState().catalog },
+                      'Servicio eliminado del catálogo',
+                      () => removeCatalogService(service.id),
+                    )
+                  }
                 >
                   <Trash2 />
                 </Button>

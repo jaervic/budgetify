@@ -1,24 +1,41 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { LIMITS } from '@/lib/limits'
+import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 /** Alta, renombrado y reordenado de categorías. */
 export function CategoriesPanel() {
   const categories = useBudgetStore((state) => state.catalog.categories)
+  const services = useBudgetStore((state) => state.catalog.services)
   const addCategory = useBudgetStore((state) => state.addCategory)
   const renameCategory = useBudgetStore((state) => state.renameCategory)
   const removeCategory = useBudgetStore((state) => state.removeCategory)
   const moveCategory = useBudgetStore((state) => state.moveCategory)
   const [draft, setDraft] = useState('')
+  const [pendingRemove, setPendingRemove] = useState<string | null>(null)
+
+  const pendingCount = pendingRemove
+    ? services.filter((service) => service.category === pendingRemove).length
+    : 0
 
   const add = () => {
     if (!draft.trim()) return
     addCategory(draft)
     setDraft('')
+  }
+
+  const confirmRemove = () => {
+    if (!pendingRemove) return
+    const before = useBudgetStore.getState().catalog
+    withUndo({ catalog: before }, `Categoría «${pendingRemove}» eliminada`, () =>
+      removeCategory(pendingRemove),
+    )
+    setPendingRemove(null)
   }
 
   return (
@@ -53,12 +70,30 @@ export function CategoriesPanel() {
               canMoveUp={index > 0}
               canMoveDown={index < categories.length - 1}
               onRename={(value) => renameCategory(category, value)}
-              onRemove={() => removeCategory(category)}
+              onRemove={() => setPendingRemove(category)}
               onMove={(direction) => moveCategory(category, direction)}
             />
           ))}
         </div>
       </ScrollArea>
+
+      <ConfirmDialog
+        open={pendingRemove !== null}
+        onOpenChange={(next) => {
+          if (!next) setPendingRemove(null)
+        }}
+        title={`¿Eliminar la categoría «${pendingRemove ?? ''}»?`}
+        description={
+          <p>
+            {pendingCount === 0
+              ? 'No tiene servicios asociados. Se puede deshacer desde el aviso.'
+              : `Se eliminarán también ${pendingCount} servicio(s) de esa categoría. Se puede deshacer desde el aviso.`}
+          </p>
+        }
+        confirmLabel="Eliminar categoría"
+        destructive
+        onConfirm={confirmRemove}
+      />
     </div>
   )
 }

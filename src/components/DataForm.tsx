@@ -41,6 +41,19 @@ export function DataForm() {
 
   const [ageText, setAgeText] = useState(() => (patient.age ? String(patient.age) : ''))
   const [dateText, setDateText] = useState(issueDate)
+  const [lastAge, setLastAge] = useState(patient.age)
+  const [lastDate, setLastDate] = useState(issueDate)
+
+  // Si el valor cambia desde fuera (importar, limpiar, deshacer), reflejarlo.
+  if (issueDate !== lastDate) {
+    setLastDate(issueDate)
+    if (dateText !== issueDate) setDateText(issueDate)
+  }
+  if (patient.age !== lastAge) {
+    setLastAge(patient.age)
+    const current = ageText === '' ? undefined : Number(ageText)
+    if (current !== patient.age) setAgeText(patient.age ? String(patient.age) : '')
+  }
 
   const ageMessage = ageError(ageText)
   const dateMissing = !/^\d{4}-\d{2}-\d{2}$/.test(dateText)

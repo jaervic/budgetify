@@ -14,6 +14,13 @@ class ResizeObserverStub {
   disconnect() {}
 }
 globalThis.ResizeObserver ??= ResizeObserverStub as unknown as typeof ResizeObserver
+// jsdom tampoco implementa la captura de punteros que usa el gesto de descartar
+// de sonner (los avisos con acción "Deshacer" lo activan).
+if (typeof Element !== 'undefined' && !Element.prototype.setPointerCapture) {
+  Element.prototype.setPointerCapture = () => {}
+  Element.prototype.releasePointerCapture = () => {}
+  Element.prototype.hasPointerCapture = () => false
+}
 if (typeof window !== 'undefined' && !window.matchMedia) {
   window.matchMedia = ((query: string) => ({
     matches: false,
@@ -117,6 +124,33 @@ describe('App · interacciones', () => {
 
     expect(useBudgetStore.getState().budget.patient.name).toBe('')
     expect(useBudgetStore.getState().budget.procedure).toBe('Uno y dos')
+  })
+
+  it('pide confirmación antes de limpiar y ofrece deshacer', async () => {
+    render(<App />)
+    await addManualLine()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Limpiar' }))
+    // Abrir el diálogo todavía no borra nada.
+    expect(useBudgetStore.getState().budget.items).toHaveLength(1)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Limpiar presupuesto' }))
+    expect(useBudgetStore.getState().budget.items).toHaveLength(0)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Deshacer' }))
+    expect(useBudgetStore.getState().budget.items).toHaveLength(1)
+  })
+
+  it('elimina un servicio y permite deshacer', async () => {
+    render(<App />)
+    await addManualLine()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Eliminar' }))
+    expect(useBudgetStore.getState().budget.items).toHaveLength(0)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Deshacer' }))
+    expect(useBudgetStore.getState().budget.items).toHaveLength(1)
+    expect(useBudgetStore.getState().budget.items[0].concept).toBe('Nuevo servicio')
   })
 
   it('reagrupa la línea al cambiar su categoría', async () => {

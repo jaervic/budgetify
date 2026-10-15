@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { LIMITS } from '@/lib/limits'
+import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 /** Notas y recomendaciones que aparecen al pie del presupuesto y del PDF. */
@@ -12,6 +13,12 @@ export function NotesEditor() {
 
   const update = (index: number, value: string) => {
     setNotes(notes.map((note, i) => (i === index ? value : note)))
+  }
+
+  const remove = (index: number) => {
+    withUndo({ budget: useBudgetStore.getState().budget }, 'Nota eliminada', () =>
+      setNotes(notes.filter((_, i) => i !== index)),
+    )
   }
 
   return (
@@ -35,7 +42,7 @@ export function NotesEditor() {
               size="icon"
               aria-label={`Eliminar nota ${index + 1}`}
               className="text-destructive hover:text-destructive"
-              onClick={() => setNotes(notes.filter((_, i) => i !== index))}
+              onClick={() => remove(index)}
             >
               <Trash2 />
             </Button>

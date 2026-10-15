@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { Layers, Plus, RotateCcw } from 'lucide-react'
-import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,6 +11,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { Pack, PackApplyMode } from '@/types'
 
@@ -23,15 +25,23 @@ export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) 
   const packs = useBudgetStore((state) => state.catalog.packs)
   const hasItems = useBudgetStore((state) => state.budget.items.length > 0)
   const applyPack = useBudgetStore((state) => state.addServicesFromPack)
+  const [pendingReplace, setPendingReplace] = useState<Pack | null>(null)
+
+  const summary = (pack: Pack, mode: PackApplyMode) =>
+    `${pack.name}: ${pack.services.length} servicio(s) ${
+      mode === 'replace' ? 'cargados' : 'añadidos'
+    }`
 
   const handleApply = (pack: Pack, mode: PackApplyMode) => {
-    applyPack(pack, mode)
-    toast.success(
-      `${pack.name}: ${pack.services.length} servicio(s) ${
-        mode === 'replace' ? 'cargados' : 'añadidos'
-      }`,
-    )
+    const before = useBudgetStore.getState().budget
+    withUndo({ budget: before }, summary(pack, mode), () => applyPack(pack, mode))
     onOpenChange(false)
+  }
+
+  const handleConfirmReplace = () => {
+    if (!pendingReplace) return
+    handleApply(pendingReplace, 'replace')
+    setPendingReplace(null)
   }
 
   return (
@@ -83,7 +93,7 @@ export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) 
                     size="sm"
                     disabled={!hasItems}
                     title={hasItems ? undefined : 'El presupuesto está vacío'}
-                    onClick={() => handleApply(pack, 'replace')}
+                    onClick={() => setPendingReplace(pack)}
                   >
                     <RotateCcw />
                     Reemplazar
@@ -93,6 +103,23 @@ export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) 
             ))}
           </div>
         </ScrollArea>
+
+        <ConfirmDialog
+          open={pendingReplace !== null}
+          onOpenChange={(next) => {
+            if (!next) setPendingReplace(null)
+          }}
+          title="¿Reemplazar el presupuesto?"
+          description={
+            <p>
+              Se descartan los servicios actuales y se cargan los de{' '}
+              <b>{pendingReplace?.name}</b>. Se puede deshacer desde el aviso.
+            </p>
+          }
+          confirmLabel="Reemplazar presupuesto"
+          destructive
+          onConfirm={handleConfirmReplace}
+        />
       </DialogContent>
     </Dialog>
   )

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { LIMITS } from '@/lib/limits'
+import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { Pack, PackService } from '@/types'
 
@@ -86,7 +87,13 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
           size="icon-sm"
           aria-label="Eliminar plantilla"
           className="text-destructive hover:text-destructive"
-          onClick={onRemove}
+          onClick={() =>
+            withUndo(
+              { catalog: useBudgetStore.getState().catalog },
+              'Plantilla eliminada',
+              () => onRemove(),
+            )
+          }
         >
           <Trash2 />
         </Button>
