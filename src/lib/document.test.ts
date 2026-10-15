@@ -108,3 +108,76 @@ describe('buildDocumentModel', () => {
     expect(PAGE_DIMENSIONS.Legal.height).toBeGreaterThan(PAGE_DIMENSIONS.Letter.height)
   })
 })
+
+describe('encabezado del documento', () => {
+  it('en modo clínica encabeza el nombre de la clínica, sin área', () => {
+    const model = buildDocumentModel(BUDGET, computeBudget(ITEMS), CLINIC, {
+      rateMode: 'auto',
+      pageSize: 'A4',
+    })
+    expect(model.headerTitle).toBe('Clínica Test')
+    expect(model.headerSubtitle).toBeUndefined()
+  })
+
+  it('en modo profesional encabeza el nombre con su título y su área', () => {
+    const model = buildDocumentModel(
+      BUDGET,
+      computeBudget(ITEMS),
+      {
+        ...CLINIC,
+        headerMode: 'professional',
+        doctorTitle: 'Od.',
+        doctorName: 'Ana Rojas',
+        specialtyId: 'odontologia',
+      },
+      { rateMode: 'auto', pageSize: 'A4' },
+    )
+    expect(model.headerTitle).toBe('Od. Ana Rojas')
+    expect(model.headerSubtitle).toBe('Odontología')
+  })
+
+  it('usa el nombre del área que le pasa la app, no solo las de fábrica', () => {
+    const model = buildDocumentModel(
+      BUDGET,
+      computeBudget(ITEMS),
+      { ...CLINIC, headerMode: 'professional', doctorName: 'Ana Rojas', specialtyId: 'x' },
+      { rateMode: 'auto', pageSize: 'A4', specialtyName: 'Área personalizada' },
+    )
+    expect(model.headerSubtitle).toBe('Área personalizada')
+  })
+
+  it('sin nombre de profesional cae en el nombre de la clínica', () => {
+    const model = buildDocumentModel(
+      BUDGET,
+      computeBudget(ITEMS),
+      { ...CLINIC, headerMode: 'professional', doctorTitle: '', doctorName: '' },
+      { rateMode: 'auto', pageSize: 'A4' },
+    )
+    expect(model.headerTitle).toBe('Clínica Test')
+  })
+
+  it('en modo profesional sin clínica propia solo firma el profesional', () => {
+    const model = buildDocumentModel(
+      BUDGET,
+      computeBudget(ITEMS),
+      { ...DEFAULT_CLINIC, headerMode: 'professional', doctorName: 'Ana Rojas' },
+      { rateMode: 'auto', pageSize: 'A4' },
+    )
+    expect(model.signatures.map((s) => s.label)).toEqual([
+      'Firma y Sello del Médico Tratante',
+    ])
+  })
+
+  it('en modo profesional con clínica propia firman los dos', () => {
+    const model = buildDocumentModel(
+      BUDGET,
+      computeBudget(ITEMS),
+      { ...CLINIC, headerMode: 'professional', doctorName: 'Ana Rojas' },
+      { rateMode: 'auto', pageSize: 'A4' },
+    )
+    expect(model.signatures.map((s) => s.label)).toEqual([
+      'Firma y Sello del Médico Tratante',
+      'Firma y Sello de la Clínica',
+    ])
+  })
+})

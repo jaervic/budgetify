@@ -91,7 +91,8 @@ catálogo por defecto cambie.
 src/
 ├─ types.ts                 # Formula, Item, Budget, Catalog, Clinic…
 ├─ data/
-│  ├─ catalog.ts            # catálogo por defecto + migración del catálogo
+│  ├─ specialties.ts        # áreas de práctica (especialidades)       ← tests
+│  ├─ catalog.ts            # catálogo por defecto + migración del catálogo ← tests
 │  └─ defaults.ts           # tasa, notas, clínica de ejemplo, helpers
 ├─ lib/
 │  ├─ calc.ts               # motor de cálculo (toposort + ciclos)   ← tests
@@ -99,12 +100,14 @@ src/
 │  ├─ number.ts             # parseo numérico tolerante (coma/punto) ← tests
 │  ├─ date.ts               # fecha larga en español                 ← tests
 │  ├─ bcv.ts                # consulta de la tasa BCV                ← tests
+│  ├─ catalog.ts            # filtro por área de práctica            ← tests
 │  ├─ document.ts           # modelo compartido vista previa + PDF   ← tests
 │  ├─ logo.ts               # subida y redimensionado de imágenes
 │  ├─ io.ts                 # esquemas Zod + export/import JSON      ← tests
 │  └─ describe.ts  ids.ts  utils.ts
 ├─ store/
 │  ├─ useBudgetStore.ts     # Zustand + persist + migraciones
+│  ├─ migrate.ts            # validación/migración de lo guardado     ← tests
 │  ├─ useThemeStore.ts      # tema claro/oscuro/sistema
 │  └─ storage.ts            # almacenamiento con debounce de 500 ms
 ├─ hooks/                   # useCalc, useTheme, usePdfActions
@@ -120,10 +123,31 @@ vercel.json                 # configuración de despliegue
 
 - El borrador, el catálogo, los datos de la clínica, el modo de tasa y el tamaño de
   hoja se guardan en `localStorage` con **debounce de 500 ms**.
-- La clave es `budgetify:v1` y hay **migraciones versionadas** (`version` + `migrate`)
-  que **validan con Zod** lo guardado y caen a los valores por defecto si algo no encaja.
-- `migrateCatalogDefaults()` añade servicios nuevos y reorganiza categorías **sin pisar**
-  los precios que el usuario haya editado.
+- La clave es `budgetify:v1` y hay **migraciones versionadas** (`version` + `migrate`).
+  Ahora mismo: **v6** (áreas de práctica y encabezado de la hoja). La migración vive en
+  `store/migrate.ts` (`migratePersisted`) para poder probarla sin arrancar la app:
+  **valida con Zod** lo guardado y cae a los valores por defecto de cada parte si algo no
+  encaja, en lugar de romper el arranque.
+- `migrateCatalogDefaults()` añade áreas, categorías, servicios y plantillas nuevas, y
+  etiqueta con su área los servicios conocidos **sin pisar** los precios que el usuario
+  haya editado.
+
+## 🩺 Áreas de práctica
+
+Un `CatalogService.specialtyId` **opcional** indica a qué área pertenece. Las reglas:
+
+- **Con área** → solo aparece en esa área.
+- **Sin área** (transversal) → aparece en todas: enfermería, estudios y diagnóstico,
+  gastos de clínica y procedimientos ambulatorios los necesita cualquier especialista.
+- Sin área seleccionada en el filtro, se ve todo el catálogo.
+
+`lib/catalog.ts` concentra el filtro (`isServiceInArea`, `filterServices`) para que lo
+compartan el selector de servicios y el gestor de catálogo.
+
+El **encabezado** del documento depende de `Clinic.headerMode`: `'clinic'` (nombre de la
+clínica) o `'professional'` (`doctorTitle` + `doctorName` + el área debajo). Las áreas son
+una lista fija en `data/specialties.ts`; la interfaz solo asigna servicios a áreas, no las
+crea.
 
 ## 🧪 Tests
 
@@ -174,3 +198,10 @@ No hace falta backend: la app es estática y la tasa se consulta desde el navega
   (*Guardar tarifas en el catálogo*).
 - `Gastos de Administración` se modela como precio fijo, pero el motor soporta el
   porcentaje de categoría si se cambia la fórmula.
+- Las **áreas de práctica** son una lista fija (no se administran desde la UI): evita que
+  un usuario se quede sin catálogo por renombrar un área, y mantiene el filtro simple.
+- Los precios de las áreas nuevas son **referencias públicas de mercado de Venezuela
+  (2026)**, no tarifas oficiales. Los de cirugía general son los menos documentados: van
+  como punto de partida y están pensados para editarse.
+- En modo **profesional independiente** sin clínica real no se dibuja el bloque de firma
+  de la clínica: el nombre de relleno no vale como identidad para un sello.

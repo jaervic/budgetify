@@ -48,6 +48,21 @@ export interface Budget {
 /** Tamaño de hoja del documento. */
 export type PageSize = 'A4' | 'Letter' | 'Legal'
 
+/**
+ * Área de práctica (especialidad). Agrupa los servicios propios de un tipo de
+ * consulta: odontología, traumatología, pediatría…
+ *
+ * Un servicio **sin** área es transversal y se ofrece a todas las áreas (por
+ * ejemplo enfermería o estudios de diagnóstico, que cualquier especialista
+ * termina necesitando).
+ */
+export interface Specialty {
+  id: string
+  name: string
+  /** Títulos profesionales sugeridos, para no escribirlos a mano. */
+  titles: string[]
+}
+
 /** Servicio de la biblioteca de tarifas de la clínica. */
 export interface CatalogService {
   id: string
@@ -55,6 +70,8 @@ export interface CatalogService {
   concept: string
   detail?: string
   formula: Formula
+  /** Área de práctica a la que pertenece. Sin valor = transversal. */
+  specialtyId?: string
 }
 
 /** Plantilla reutilizable de servicios para un tipo de caso médico. */
@@ -76,10 +93,15 @@ export interface Catalog {
   categories: string[]
   services: CatalogService[]
   packs: Pack[]
+  /** Áreas de práctica disponibles, en el orden en que se muestran. */
+  specialties: Specialty[]
 }
 
 /** Cómo aplicar un pack a un presupuesto que ya tiene ítems. */
 export type PackApplyMode = 'append' | 'replace'
+
+/** Cómo se encabeza el documento. */
+export type HeaderMode = 'clinic' | 'professional'
 
 /** Datos de la clínica que encabezan el documento. */
 export interface Clinic {
@@ -91,6 +113,15 @@ export interface Clinic {
   email?: string
   /** Logo como data URL (PNG/JPG) para incrustarlo en el PDF. */
   logoDataUrl?: string
+  /**
+   * Quién encabeza el documento: la clínica o el profesional por su nombre
+   * (útil para consultorios y profesionales independientes).
+   */
+  headerMode: HeaderMode
+  /** Título del profesional: Dr., Dra., Od., Lcdo.… (texto libre). */
+  doctorTitle?: string
+  /** Área de práctica del profesional (id de `Specialty`). */
+  specialtyId?: string
   /** Médico tratante que firma el documento. */
   doctorName?: string
   /** Colegio de médicos / MPPS del médico tratante. */

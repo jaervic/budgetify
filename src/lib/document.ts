@@ -1,4 +1,6 @@
 import type { Budget, Clinic, PageSize, RateMode } from '@/types'
+import { DEFAULT_CLINIC } from '@/data/defaults'
+import { doctorFullName, specialtyName } from '@/data/specialties'
 import type { CalcResult, ComputedItem } from './calc'
 import { formatLongDate } from './date'
 import { formatRate, formatUsd, formatVes, usdToVes } from './money'
@@ -37,6 +39,10 @@ export interface DocumentSignature {
 export interface DocumentModel {
   clinic: Clinic
   title: string
+  /** Quién encabeza la hoja: la clínica o el profesional por su nombre. */
+  headerTitle: string
+  /** Línea fina bajo el encabezado (el área de práctica del profesional). */
+  headerSubtitle?: string
   procedure: string
   issueDate: string
   rateLabel: string
@@ -53,6 +59,8 @@ export interface DocumentModel {
 export interface DocumentOptions {
   rateMode: RateMode
   pageSize: PageSize
+  /** Nombre del área de práctica del profesional, si eligió una. */
+  specialtyName?: string
 }
 
 /** Concepto con la cantidad cuando la fórmula es cantidad × unitario. */
@@ -82,20 +90,31 @@ function splitNote(note: string): DocumentNote {
 
 function buildSignatures(clinic: Clinic): DocumentSignature[] {
   if (clinic.showSignature === false) return []
-  return [
+  const professional = clinic.headerMode === 'professional'
+  const clinicName = clinic.name?.trim()
+  // En modo profesional, sin una clínica real no se firma "en nombre de" nada:
+  // el nombre de relleno no vale como identidad para el sello.
+  const hasClinicIdentity = Boolean(clinicName && clinicName !== DEFAULT_CLINIC.name)
+
+  const blocks: DocumentSignature[] = [
     {
       label: 'Firma y Sello del Médico Tratante',
       imageDataUrl: clinic.signatureDataUrl,
-      name: clinic.doctorName?.trim() || undefined,
+      name: doctorFullName(clinic.doctorTitle, clinic.doctorName).trim() || undefined,
       extra: clinic.doctorId?.trim() || undefined,
     },
-    {
+  ]
+
+  if (!professional || hasClinicIdentity) {
+    blocks.push({
       label: 'Firma y Sello de la Clínica',
       imageDataUrl: clinic.sealDataUrl,
-      name: clinic.name?.trim() || undefined,
+      name: clinicName || undefined,
       extra: clinic.rif?.trim() ? `RIF: ${clinic.rif.trim()}` : undefined,
-    },
-  ]
+    })
+  }
+
+  return blocks
 }
 
 /**
@@ -137,9 +156,20 @@ export function buildDocumentModel(
     },
   )
 
+  const professional = clinic.headerMode === 'professional'
+  const headerTitle = professional
+    ? doctorFullName(clinic.doctorTitle, clinic.doctorName).trim() ||
+      clinic.name.trim() ||
+      'Presupuesto Médico'
+    : clinic.name.trim() || 'Clínica'
+
   return {
     clinic,
     title: 'Presupuesto Médico',
+    headerTitle,
+    headerSubtitle: professional
+      ? (options.specialtyName ?? specialtyName(clinic.specialtyId))
+      : undefined,
     procedure: budget.procedure?.trim() || '',
     issueDate: formatLongDate(budget.issueDate),
     rateLabel: `${formatRate(budget.rate)} VES/USD${

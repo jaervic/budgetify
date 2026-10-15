@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
-import { ImagePlus, Trash2 } from 'lucide-react'
+import { Building2, ImagePlus, Stethoscope, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { SpecialtySelect } from '@/components/SpecialtySelect'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DOCTOR_TITLES, doctorFullName, specialtyName } from '@/data/specialties'
 import { fileToLogoDataUrl } from '@/lib/logo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import { cn } from '@/lib/utils'
@@ -105,7 +107,9 @@ interface ClinicDialogProps {
 export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
   const clinic = useBudgetStore((state) => state.clinic)
   const setClinic = useBudgetStore((state) => state.setClinic)
+  const catalog = useBudgetStore((state) => state.catalog)
   const [busy, setBusy] = useState(false)
+  const areaName = specialtyName(clinic.specialtyId, catalog.specialties)
 
   const uploadImage =
     (field: 'logoDataUrl' | 'signatureDataUrl' | 'sealDataUrl', success: string) =>
@@ -133,14 +137,47 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
 
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="clinic-name">Nombre de la clínica</Label>
-            <Input
-              id="clinic-name"
-              value={clinic.name}
-              placeholder="Clínica / Centro médico"
-              onChange={(event) => setClinic({ name: event.target.value })}
-            />
+            <Label>El presupuesto es de</Label>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={clinic.headerMode === 'professional' ? 'outline' : 'default'}
+                aria-pressed={clinic.headerMode !== 'professional'}
+                onClick={() => setClinic({ headerMode: 'clinic' })}
+              >
+                <Building2 />
+                Clínica / Centro médico
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={clinic.headerMode === 'professional' ? 'default' : 'outline'}
+                aria-pressed={clinic.headerMode === 'professional'}
+                onClick={() => setClinic({ headerMode: 'professional' })}
+              >
+                <Stethoscope />
+                Profesional independiente
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {clinic.headerMode === 'professional'
+                ? 'La hoja se encabeza con tu nombre, tu título y tu área de práctica.'
+                : 'La hoja se encabeza con el nombre de la clínica.'}
+            </p>
           </div>
+
+          {clinic.headerMode !== 'professional' && (
+            <div className="grid gap-2">
+              <Label htmlFor="clinic-name">Nombre de la clínica</Label>
+              <Input
+                id="clinic-name"
+                value={clinic.name}
+                placeholder="Clínica / Centro médico"
+                onChange={(event) => setClinic({ name: event.target.value })}
+              />
+            </div>
+          )}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
@@ -190,29 +227,70 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
             />
           </div>
 
-          <div className="grid gap-4 border-t pt-4 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <Label htmlFor="clinic-doctor">Médico tratante</Label>
-              <Input
-                id="clinic-doctor"
-                placeholder="Dr(a). Nombre Apellido"
-                value={clinic.doctorName ?? ''}
-                onChange={(event) =>
-                  setClinic({ doctorName: event.target.value || undefined })
-                }
-              />
+          <div className="grid gap-4 border-t pt-4">
+            <div className="grid gap-4 sm:grid-cols-[8rem_minmax(0,1fr)]">
+              <div className="grid gap-2">
+                <Label htmlFor="clinic-doctor-title">Título</Label>
+                <Input
+                  id="clinic-doctor-title"
+                  list="doctor-titles"
+                  placeholder="Dr."
+                  value={clinic.doctorTitle ?? ''}
+                  onChange={(event) =>
+                    setClinic({ doctorTitle: event.target.value || undefined })
+                  }
+                />
+                <datalist id="doctor-titles">
+                  {DOCTOR_TITLES.map((title) => (
+                    <option key={title} value={title} />
+                  ))}
+                </datalist>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="clinic-doctor">Profesional tratante</Label>
+                <Input
+                  id="clinic-doctor"
+                  placeholder="Nombre Apellido"
+                  value={clinic.doctorName ?? ''}
+                  onChange={(event) =>
+                    setClinic({ doctorName: event.target.value || undefined })
+                  }
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="clinic-doctor-id">MPPS / CM</Label>
-              <Input
-                id="clinic-doctor-id"
-                placeholder="MPPS 12345 / CM 6789"
-                value={clinic.doctorId ?? ''}
-                onChange={(event) =>
-                  setClinic({ doctorId: event.target.value || undefined })
-                }
-              />
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="clinic-specialty">Área de práctica</Label>
+                <SpecialtySelect
+                  id="clinic-specialty"
+                  specialties={catalog.specialties}
+                  value={clinic.specialtyId}
+                  noneLabel="Sin área"
+                  onChange={(specialtyId) => setClinic({ specialtyId })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="clinic-doctor-id">MPPS / Colegio</Label>
+                <Input
+                  id="clinic-doctor-id"
+                  placeholder="MPPS 12345 / CM 6789"
+                  value={clinic.doctorId ?? ''}
+                  onChange={(event) =>
+                    setClinic({ doctorId: event.target.value || undefined })
+                  }
+                />
+              </div>
             </div>
+
+            <p className="text-xs text-muted-foreground">
+              {clinic.headerMode === 'professional' ? 'Encabezado: ' : 'Firma: '}
+              <b>{doctorFullName(clinic.doctorTitle, clinic.doctorName) || 'sin nombre'}</b>
+              {areaName ? ` — ${areaName}` : ''}
+              {clinic.headerMode === 'professional'
+                ? '. El catálogo se filtra por esta área.'
+                : '. Pon el título y el nombre del profesional que firma.'}
+            </p>
           </div>
 
           <div className="grid gap-4 border-t pt-4">

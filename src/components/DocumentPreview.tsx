@@ -36,8 +36,13 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
             )}
             <div className="min-w-0">
               <p className="text-base font-bold break-words text-slate-800 uppercase">
-                {clinic.name || 'Clínica'}
+                {model.headerTitle}
               </p>
+              {model.headerSubtitle && (
+                <p className="text-[11px] break-words font-semibold text-sky-700">
+                  {model.headerSubtitle}
+                </p>
+              )}
               {clinic.rif && (
                 <p className="text-[11px] break-words text-slate-600">RIF:{clinic.rif}</p>
               )}

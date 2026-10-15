@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Toaster } from '@/components/ui/sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { specialtyName } from '@/data/specialties'
 import { useCalc } from '@/hooks/useCalc'
 import { usePdfActions } from '@/hooks/usePdfActions'
 import { useTheme } from '@/hooks/useTheme'
@@ -40,6 +41,7 @@ export default function App() {
   const rateMode = useBudgetStore((state) => state.rateMode)
   const pageSize = useBudgetStore((state) => state.pageSize)
   const refreshBcvRate = useBudgetStore((state) => state.refreshBcvRate)
+  const catalog = useBudgetStore((state) => state.catalog)
   const defaultCategory = useBudgetStore((state) => state.catalog.categories[0] ?? 'General')
   const addManualItem = useBudgetStore((state) => state.addManualItem)
   const { resolved } = useTheme()
@@ -53,8 +55,13 @@ export default function App() {
 
   const hasItems = calc.items.length > 0
   const model = useMemo(
-    () => buildDocumentModel(budget, calc, clinic, { rateMode, pageSize }),
-    [budget, calc, clinic, rateMode, pageSize],
+    () =>
+      buildDocumentModel(budget, calc, clinic, {
+        rateMode,
+        pageSize,
+        specialtyName: specialtyName(clinic.specialtyId, catalog.specialties),
+      }),
+    [budget, calc, clinic, rateMode, pageSize, catalog.specialties],
   )
 
   const [view, setView] = useState<View>('edit')

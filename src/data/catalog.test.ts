@@ -63,17 +63,88 @@ describe('catálogo por defecto', () => {
       '$69.00',
     )
   })
+
+  it('cada servicio pertenece a un área declarada', () => {
+    const ids = new Set(DEFAULT_CATALOG.specialties.map((s) => s.id))
+    for (const service of DEFAULT_CATALOG.services) {
+      if (service.specialtyId) expect(ids.has(service.specialtyId)).toBe(true)
+    }
+  })
+
+  it('no repite áreas de práctica', () => {
+    const ids = DEFAULT_CATALOG.specialties.map((s) => s.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('cada área tiene servicios propios', () => {
+    for (const specialty of DEFAULT_CATALOG.specialties) {
+      const count = DEFAULT_CATALOG.services.filter(
+        (service) => service.specialtyId === specialty.id,
+      ).length
+      expect(count, `El área ${specialty.id} no tiene servicios`).toBeGreaterThan(0)
+    }
+  })
+
+  it('el pack de endodoncia suma endodoncia y reconstrucción', () => {
+    // 10 (radiografía) + 120 (endodoncia unirradicular) + 90 (perno) = 220
+    expect(formatUsd(computeBudget(itemsFromPack('pack_odonto_endodoncia')).totalUsd)).toBe(
+      '$220.00',
+    )
+  })
 })
 
 describe('migrateCatalogDefaults', () => {
   it('añade los servicios nuevos que falten', () => {
-    const legacy: Catalog = { categories: ['Honorarios Médicos'], services: [], packs: [] }
+    const legacy: Catalog = {
+      categories: ['Honorarios Médicos'],
+      services: [],
+      packs: [],
+      specialties: [],
+    }
 
     const result = migrateCatalogDefaults(legacy)
 
     expect(result.services).toHaveLength(DEFAULT_SERVICES.length)
     expect(result.categories).toContain('Estudios y Diagnóstico')
     expect(result.packs.map((p) => p.id)).toContain('pack_chequeo_general')
+  })
+
+  it('añade las áreas de práctica que falten sin duplicarlas', () => {
+    const legacy: Catalog = {
+      categories: [],
+      services: [],
+      packs: [],
+      specialties: [{ id: 'cirugia', name: 'Cirugía', titles: ['Dr.'] }],
+    }
+
+    const result = migrateCatalogDefaults(legacy)
+
+    expect(result.specialties.map((s) => s.id)).toContain('odontologia')
+    expect(result.specialties.filter((s) => s.id === 'cirugia')).toHaveLength(1)
+    expect(result.specialties).toHaveLength(DEFAULT_CATALOG.specialties.length)
+  })
+
+  it('etiqueta con su área los servicios conocidos que aún no la tienen', () => {
+    const legacy: Catalog = {
+      categories: ['Honorarios Médicos'],
+      services: [
+        {
+          id: 'svc_cirujano',
+          category: 'Honorarios Médicos',
+          concept: 'Cirujano Principal',
+          formula: { type: 'fixed', amountUsd: 999 },
+        },
+      ],
+      packs: [],
+      specialties: [],
+    }
+
+    const result = migrateCatalogDefaults(legacy)
+    const service = result.services.find((s) => s.id === 'svc_cirujano')!
+
+    expect(service.specialtyId).toBe('cirugia')
+    // El precio editado por el usuario se respeta.
+    expect(service.formula).toEqual({ type: 'fixed', amountUsd: 999 })
   })
 
   it('mueve los servicios reorganizados si siguen en la categoría antigua', () => {
@@ -88,6 +159,7 @@ describe('migrateCatalogDefaults', () => {
         },
       ],
       packs: [],
+      specialties: [],
     }
 
     const result = migrateCatalogDefaults(legacy)
@@ -110,6 +182,7 @@ describe('migrateCatalogDefaults', () => {
         },
       ],
       packs: [],
+      specialties: [],
     }
 
     const result = migrateCatalogDefaults(custom)
@@ -126,5 +199,8 @@ describe('migrateCatalogDefaults', () => {
     expect(result.services).toHaveLength(DEFAULT_SERVICES.length)
     expect(new Set(result.services.map((s) => s.id)).size).toBe(result.services.length)
     expect(new Set(result.packs.map((p) => p.id)).size).toBe(result.packs.length)
+    expect(new Set(result.specialties.map((s) => s.id)).size).toBe(
+      result.specialties.length,
+    )
   })
 })

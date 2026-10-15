@@ -112,4 +112,38 @@ describe('App · interacciones', () => {
     expect(screen.getAllByText('Clínica Test').length).toBeGreaterThan(0)
     expect(screen.getByText('RIF:J-12345678-9')).toBeTruthy()
   })
+
+  it('encabeza la hoja con el profesional en modo independiente', async () => {
+    useBudgetStore.getState().setClinic({
+      headerMode: 'professional',
+      doctorTitle: 'Od.',
+      doctorName: 'Ana Rojas',
+      specialtyId: 'odontologia',
+    })
+    render(<App />)
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Vista previa' }))
+
+    // Aparece en el encabezado y en el bloque de firma del médico.
+    expect(screen.getAllByText('Od. Ana Rojas').length).toBeGreaterThan(0)
+    expect(screen.getByText('Odontología')).toBeTruthy()
+  })
+
+  it('filtra el catálogo por área al agregar servicios', async () => {
+    render(<App />)
+
+    await userEvent.click(screen.getAllByRole('button', { name: 'Agregar servicio' })[0])
+    // Al abrir se ve todo el catálogo.
+    expect(screen.getByText('Cirujano Principal')).toBeTruthy()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Odontología' }))
+
+    expect(screen.queryByText('Cirujano Principal')).toBeNull()
+    expect(screen.getByText('Endodoncia unirradicular')).toBeTruthy()
+    // Los servicios sin área son transversales y siguen disponibles.
+    expect(screen.getByText('Aplicación de vacuna')).toBeTruthy()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Todo el catálogo' }))
+    expect(screen.getByText('Cirujano Principal')).toBeTruthy()
+  })
 })

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { cloneDefaultCatalog, migrateCatalogDefaults } from '@/data/catalog'
+import { cloneDefaultCatalog } from '@/data/catalog'
 import {
   cloneDefaultClinic,
   createEmptyBcvCache,
@@ -9,7 +9,6 @@ import {
 } from '@/data/defaults'
 import { fetchBcvRate } from '@/lib/bcv'
 import { newId } from '@/lib/ids'
-import { bcvCacheSchema, budgetSchema, catalogSchema, clinicSchema } from '@/lib/io'
 import type {
   BcvCache,
   Budget,
@@ -23,6 +22,7 @@ import type {
   PageSize,
   RateMode,
 } from '@/types'
+import { migratePersisted } from './migrate'
 import { createDebouncedStorage } from './storage'
 
 export type NewService = Omit<CatalogService, 'id'>
@@ -423,7 +423,8 @@ export const useBudgetStore = create<AppState>()(
     }),
     {
       name: 'budgetify:v1',
-      version: 5,
+      // v6: áreas de práctica (especialidades) y encabezado de la hoja.
+      version: 6,
       storage: createJSONStorage(() => createDebouncedStorage(500)),
       partialize: (state) => ({
         budget: state.budget,
@@ -436,32 +437,7 @@ export const useBudgetStore = create<AppState>()(
       // Migra y valida lo guardado: si el borrador no encaja con el modelo
       // actual (versión antigua o datos corruptos) se usan los valores por
       // defecto en lugar de romper la app al arrancar.
-      migrate: (persisted) => {
-        const state = (persisted ?? {}) as Record<string, unknown>
-        const budget = budgetSchema.safeParse(state.budget)
-        const catalog = catalogSchema.safeParse(state.catalog)
-        const clinic = clinicSchema.safeParse(state.clinic)
-        const bcv = bcvCacheSchema.safeParse(state.bcv)
-        return {
-          budget: budget.success ? budget.data : createEmptyBudget(),
-          // Añade los servicios nuevos que falten, mueve los reorganizados y no
-          // pisa los precios que el usuario haya editado.
-          catalog: migrateCatalogDefaults(
-            catalog.success ? catalog.data : cloneDefaultCatalog(),
-          ),
-          clinic: clinic.success ? clinic.data : cloneDefaultClinic(),
-          rateMode: state.rateMode === 'manual' ? ('manual' as const) : ('auto' as const),
-          pageSize:
-            state.pageSize === 'Letter' || state.pageSize === 'Legal'
-              ? state.pageSize
-              : DEFAULT_PAGE_SIZE,
-          // Nunca restauramos el estado "loading": quedaría colgado.
-          bcv:
-            bcv.success && bcv.data.status !== 'loading'
-              ? bcv.data
-              : createEmptyBcvCache(),
-        }
-      },
+      migrate: (persisted) => migratePersisted(persisted),
     },
   ),
 )

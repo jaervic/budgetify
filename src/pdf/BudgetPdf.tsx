@@ -41,6 +41,7 @@ const styles = StyleSheet.create({
   headerLeft: { flexDirection: 'row', alignItems: 'center', maxWidth: '68%' },
   logo: { width: 56, height: 56, marginRight: 12 },
   clinicName: { fontSize: 13, fontFamily: 'Helvetica-Bold', color: SLATE_800 },
+  specialtyLine: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: SKY, marginTop: 1.5 },
   clinicLine: { fontSize: 8.5, color: SLATE_600, marginTop: 1.5 },
   headerRight: { textAlign: 'right' },
   muted: { color: SLATE_500 },
@@ -192,14 +193,17 @@ export function BudgetPdf({ budget, calc, clinic, rateMode, pageSize }: BudgetPd
   return (
     <Document
       title={`Presupuesto médico${budget.patient.name ? ` — ${budget.patient.name}` : ''}`}
-      author={clinic.name || 'Presupuestos Médicos · Budgetify'}
+      author={model.headerTitle}
     >
       <Page size={PDF_SIZE[pageSize]} style={styles.page}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             {clinic.logoDataUrl && <Image style={styles.logo} src={clinic.logoDataUrl} />}
             <View>
-              <Text style={styles.clinicName}>{clinic.name || 'Clínica'}</Text>
+              <Text style={styles.clinicName}>{model.headerTitle}</Text>
+              {model.headerSubtitle ? (
+                <Text style={styles.specialtyLine}>{model.headerSubtitle}</Text>
+              ) : null}
               {clinic.rif ? <Text style={styles.clinicLine}>RIF:{clinic.rif}</Text> : null}
               {contact ? <Text style={styles.clinicLine}>{contact}</Text> : null}
             </View>

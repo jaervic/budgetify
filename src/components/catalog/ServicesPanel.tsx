@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { FormulaFields } from '@/components/FormulaFields'
+import { SpecialtySelect } from '@/components/SpecialtySelect'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { isServiceInArea } from '@/lib/catalog'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 /** Alta, edición y borrado de servicios de la biblioteca. */
@@ -11,13 +14,18 @@ export function ServicesPanel() {
   const addCatalogService = useBudgetStore((state) => state.addCatalogService)
   const updateCatalogService = useBudgetStore((state) => state.updateCatalogService)
   const removeCatalogService = useBudgetStore((state) => state.removeCatalogService)
+  const [areaFilter, setAreaFilter] = useState<string | undefined>(undefined)
 
   const concepts = [...new Set(catalog.services.map((service) => service.concept))]
   const categories = catalog.categories
 
+  const visible = catalog.services.filter((service) =>
+    isServiceInArea(service, areaFilter),
+  )
+
   return (
     <div className="grid gap-3">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           type="button"
           size="sm"
@@ -26,12 +34,26 @@ export function ServicesPanel() {
               category: categories[0] ?? 'General',
               concept: 'Nuevo servicio',
               formula: { type: 'fixed', amountUsd: 0 },
+              specialtyId: areaFilter,
             })
           }
         >
           <Plus />
           Nuevo servicio
         </Button>
+        <div className="w-full sm:w-64">
+          <SpecialtySelect
+            specialties={catalog.specialties}
+            value={areaFilter}
+            onChange={setAreaFilter}
+            noneLabel="Todas las áreas"
+            className="h-8 text-xs"
+            ariaLabel="Filtrar servicios por área"
+          />
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {visible.length} de {catalog.services.length} servicios
+        </span>
         <datalist id="category-options">
           {categories.map((category) => (
             <option key={category} value={category} />
@@ -39,14 +61,14 @@ export function ServicesPanel() {
         </datalist>
       </div>
 
-      <ScrollArea className="h-[46vh] pr-3">
+      <ScrollArea className="h-[42vh] pr-3">
         <div className="grid gap-2">
-          {catalog.services.length === 0 && (
+          {visible.length === 0 && (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              El catálogo está vacío.
+              No hay servicios en esta área.
             </p>
           )}
-          {catalog.services.map((service) => (
+          {visible.map((service) => (
             <div key={service.id} className="grid gap-2 rounded-lg border p-3">
               <div className="flex items-center gap-2">
                 <Input
@@ -96,6 +118,22 @@ export function ServicesPanel() {
                   concepts={concepts}
                   categories={categories}
                 />
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-[12rem_minmax(0,1fr)] sm:items-center">
+                <SpecialtySelect
+                  specialties={catalog.specialties}
+                  value={service.specialtyId}
+                  onChange={(specialtyId) =>
+                    updateCatalogService(service.id, { specialtyId })
+                  }
+                  noneLabel="Transversal (todas)"
+                  className="h-8 text-xs"
+                  ariaLabel="Área del servicio"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Un servicio transversal se ofrece en todas las áreas.
+                </p>
               </div>
             </div>
           ))}

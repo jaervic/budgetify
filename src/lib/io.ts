@@ -78,6 +78,7 @@ export const catalogServiceSchema = z.object({
   concept: z.string().min(1).max(120),
   detail: z.string().max(300).optional(),
   formula: formulaSchema,
+  specialtyId: z.string().max(60).optional(),
 })
 
 export const packSchema = z.object({
@@ -94,10 +95,19 @@ export const packSchema = z.object({
     .max(MAX_ITEMS),
 })
 
+export const specialtySchema = z.object({
+  id: z.string().min(1).max(60),
+  name: z.string().min(1).max(80),
+  titles: z.array(z.string().max(40)).max(20),
+})
+
 export const catalogSchema = z.object({
   categories: z.array(shortText.min(1)).max(80),
   services: z.array(catalogServiceSchema).max(MAX_ITEMS),
   packs: z.array(packSchema).max(100),
+  // Por defecto vacío: los catálogos guardados antes de existir las áreas se
+  // completan luego con `migrateCatalogDefaults`.
+  specialties: z.array(specialtySchema).max(50).default([]),
 })
 
 export const clinicSchema = z.object({
@@ -107,6 +117,10 @@ export const clinicSchema = z.object({
   phone: z.string().max(60).optional(),
   email: z.string().max(120).optional(),
   logoDataUrl: imageDataUrl.optional(),
+  // `default` para no perder los datos de clínica guardados antes de este campo.
+  headerMode: z.enum(['clinic', 'professional']).default('clinic'),
+  doctorTitle: z.string().max(40).optional(),
+  specialtyId: z.string().max(60).optional(),
   doctorName: z.string().max(120).optional(),
   doctorId: z.string().max(60).optional(),
   signatureDataUrl: imageDataUrl.optional(),

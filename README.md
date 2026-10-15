@@ -48,8 +48,16 @@ paciente:
 
 ## Para quién es
 
-Médicos, secretarias y personal administrativo de **clínicas pequeñas, consultorios y
+Médicos, odontólogos y personal administrativo de **consultorios, clínicas pequeñas y
 unidades quirúrgicas** que hoy hacen los presupuestos a mano o en Word/Excel.
+
+Elige tu **área de práctica** —Cirugía, Medicina General, Odontología, Traumatología y
+Ortopedia, Pediatría, Ginecología y Obstetricia, o Dermatología— y el catálogo se enfoca en
+lo tuyo sin perder los gastos generales (enfermería, estudios, gastos de clínica), que
+cualquier especialista termina necesitando. Viene con **129 servicios y 12 plantillas**.
+
+También sirve para un **profesional independiente sin clínica propia**: la hoja se encabeza
+con tu nombre y tu título (“Od. Ana Rojas”) y debajo tu área de práctica.
 
 ## Cómo usarlo (paso a paso)
 
@@ -57,10 +65,13 @@ unidades quirúrgicas** que hoy hacen los presupuestos a mano o en Word/Excel.
 2. Escribe el **nombre del paciente**, su cédula y su edad, y el **procedimiento**.
 3. Pulsa **“Agregar servicio”** y elige los que necesites del catálogo, o **“Cargar
    plantilla”** para traer un conjunto ya armado (por ejemplo, una cirugía completa).
+   Arriba del buscador tienes los **chips por área**: elige la tuya para ver solo lo tuyo,
+   o “Todo el catálogo” para ver los 129 servicios.
 4. Revisa y ajusta los precios en la tabla. Todo se recalcula al instante.
 5. Pulsa **“Descargar PDF”**. También puedes **imprimirlo** o **mandarlo por WhatsApp**.
-6. La primera vez, entra en **“Clínica”** y carga el nombre, el RIF, el logo, la firma y
-   el sello para que salgan en el documento.
+6. La primera vez, entra en **“Clínica”**: elige si el presupuesto es de una **clínica** o
+   de un **profesional independiente**, escribe tu **título** (Dr., Dra., Od., Lcda.…) y tu
+   **área de práctica**, y carga el RIF, el logo, la firma y el sello.
 
 ## Preguntas frecuentes
 
@@ -78,14 +89,23 @@ usa **“Exportar JSON”** y luego **“Importar JSON”** en el otro equipo.
 
 **¿Puedo cambiar los precios?**
 Sí. En **“Gestionar catálogo”** puedes editar precios, agregar o borrar servicios, crear
-categorías nuevas y guardar plantillas para los casos que más repites.
+categorías nuevas y guardar plantillas para los casos que más repites. Cada servicio puede
+pertenecer a un **área de práctica** o ser **transversal** (se ofrece en todas).
+
+**¿Sirve para odontología? ¿Y para otras especialidades?**
+Sí. Trae catálogos de arranque para **Cirugía, Medicina General, Odontología** (consulta,
+restauradora, endodoncia, cirugía oral, periodoncia, ortodoncia, estética y odontopediatría),
+**Traumatología y Ortopedia, Pediatría, Ginecología y Obstetricia** y **Dermatología**, con
+precios de referencia de mercado que puedes editar.
 
 **¿Se actualiza el precio del dólar?**
 Sí, toma solo la **tasa oficial del BCV**. Si prefieres, puedes desmarcar *“Anclar al BCV”*
 y escribir la tasa a mano.
 
 **¿Puedo poner el logo, el RIF, la firma y el sello de mi clínica?**
-Sí, en **“Clínica”**. Salen en el encabezado y al pie del documento.
+Sí, en **“Clínica”**. Salen en el encabezado y al pie del documento. Si trabajas por tu
+cuenta, activa **“Profesional independiente”** y la hoja se encabeza con tu nombre, tu
+título y tu área.
 
 **¿Puedo elegir el tamaño de la hoja?**
 Sí: **A4**, Carta u Oficio.
@@ -128,9 +148,15 @@ enviar un *Pull Request*. Si eres desarrollador, mira la
 
 ## English summary
 
-**Medical Estimates** is a free, open-source web app that helps small clinics and private
-practices in Venezuela create medical cost estimates (quotes): enter the patient's data,
-pick services, and download a ready-to-print **PDF** in USD and VES (BCV rate).
+**Medical Estimates** is a free, open-source web app that helps small clinics, sole
+practitioners and dental offices in Venezuela create medical cost estimates (quotes): enter
+the patient's data, pick services, and download a ready-to-print **PDF** in USD and VES
+(BCV rate).
+
+It ships with **practice-area catalogues** (Surgery, General Medicine, Dentistry, Trauma &
+Orthopaedics, Paediatrics, OB-GYN and Dermatology) plus cross-cutting services such as
+nursing and lab work, and the document can be headed either by a clinic or by the
+professional ("Dr. Jane Doe" over her specialty).
 
 **Live demo:** [budgetify-silk.vercel.app](https://budgetify-silk.vercel.app)
 
