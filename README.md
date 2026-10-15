@@ -27,7 +27,9 @@ escribas datos reales de pacientes en ella.)*
   categoría y el total general.
 - **La tasa del dólar (BCV)** se actualiza sola; también la puedes escribir a mano.
 - **Descarga el PDF**, lo imprimes o lo compartes por WhatsApp.
-- **Guarda una copia** de tus presupuestos en un archivo (Exportar / Importar).
+- **Historial**: guarda copias dentro del navegador (hasta 100) y vuelve a abrir
+  cualquier presupuesto anterior cuando el paciente regrese.
+- **Respaldo en archivo**: Exportar / Importar JSON para llevarte todo a otro equipo.
 
 ## El documento que genera
 
@@ -69,6 +71,8 @@ con tu nombre y tu título (“Od. Ana Rojas”) y debajo tu área de práctica.
    o “Todo el catálogo” para ver los 129 servicios.
 4. Revisa y ajusta los precios en la tabla. Todo se recalcula al instante.
 5. Pulsa **“Descargar PDF”**. También puedes **imprimirlo** o **mandarlo por WhatsApp**.
+   Si quieres conservarlo a mano, **“Guardar copia en el historial”** (arriba, en
+   **Historial**, lo vuelves a abrir después).
 6. La primera vez, entra en **“Clínica”**: elige si el presupuesto es de una **clínica** o
    de un **profesional independiente**, escribe tu **título** (Dr., Dra., Od., Lcda.…) y tu
    **área de práctica**, y carga el RIF, el logo, la firma y el sello.
@@ -84,8 +88,15 @@ Sí, son privados. **Nada se envía a ningún servidor**: todo se guarda únicam
 navegador. No hay cuentas, no hay registro y no hay base de datos.
 
 **¿Dónde quedan los presupuestos guardados?**
-En el navegador del equipo donde trabajas. Si cambias de computadora o quieres un respaldo,
-usa **“Exportar JSON”** y luego **“Importar JSON”** en el otro equipo.
+En el navegador del equipo donde trabajas. Además del que estás editando, puedes archivar
+copias en **“Historial”** (se conservan las 100 últimas; al pasar de ahí se descartan las
+más viejas y la app te avisa). Si cambias de computadora o quieres un respaldo, usa
+**“Exportar JSON”** y luego **“Importar JSON”** en el otro equipo.
+
+**Me equivoque, ¿puedo volver atrás?**
+Sí. Al borrar una línea, una nota, una categoría o una copia del historial, o al reemplazar
+el presupuesto, aparece un aviso con **“Deshacer”**. Lo que sí borra de verdad es
+**“Limpiar”**: para eso pide confirmación.
 
 **¿Puedo cambiar los precios?**
 Sí. En **“Gestionar catálogo”** puedes editar precios, agregar o borrar servicios, crear
@@ -130,8 +141,9 @@ pero **no sustituye tu criterio médico ni administrativo**.
 - **Sin rastreadores**: no hay analítica ni cookies de terceros.
 - La **única** conexión externa es la consulta de la tasa del BCV (que no lleva datos
   tuyos). Si la desmarcas y usas la tasa a mano, no hay ninguna conexión.
-- Los datos quedan guardados **en este navegador**. En una computadora compartida, pulsa
-  **Limpiar** al terminar (o usa una ventana de incógnito).
+- Los datos quedan guardados **en este navegador**, incluido el **historial** de copias. En
+  una computadora compartida, pulsa **Limpiar** al terminar, vacía el historial (cada copia
+  se puede borrar) o usa una ventana de incógnito.
 - Detalles y cómo reportar un problema: **[política de seguridad](SECURITY.md)**.
 
 ## ¿Quieres colaborar?
@@ -156,7 +168,8 @@ the patient's data, pick services, and download a ready-to-print **PDF** in USD 
 It ships with **practice-area catalogues** (Surgery, General Medicine, Dentistry, Trauma &
 Orthopaedics, Paediatrics, OB-GYN and Dermatology) plus cross-cutting services such as
 nursing and lab work, and the document can be headed either by a clinic or by the
-professional ("Dr. Jane Doe" over her specialty).
+professional ("Dr. Jane Doe" over her specialty). It keeps a **local history** of up to 100
+estimates you can reopen, and every destructive action offers an undo.
 
 **Live demo:** [budgetify-silk.vercel.app](https://budgetify-silk.vercel.app)
 

@@ -10,11 +10,12 @@ usar la aplicación, mira el [README](../README.md).
 | Build | Vite 8 + TypeScript 6 (`strict`) |
 | UI | React 19 · Tailwind CSS 4 · shadcn/ui (Radix) |
 | Estado | Zustand 5 (+ `persist` con debounce) |
-| Formularios | React Hook Form + Zod 4 |
+| Formularios | Campos controlados + Zod 4 (valida lo guardado y lo importado) |
 | Dinero | `decimal.js` (nunca `float` para cálculos) |
 | PDF | `@react-pdf/renderer` (carga perezosa) |
 | PWA | `vite-plugin-pwa` |
 | Tests | Vitest 5 + Testing Library + jsdom |
+| Navegador | Playwright (prueba de humo y contraste) |
 
 Sin backend, sin login, sin base de datos remota.
 
@@ -31,6 +32,7 @@ npm test           # tests (Vitest)
 npm run typecheck  # sólo comprobación de tipos
 npm run lint       # oxlint
 npm run icons      # regenera los iconos PWA
+npm run test:e2e   # prueba de humo en Chromium (necesita `npm run build` antes)
 ```
 
 ## 💰 Modelo de datos y cálculo
@@ -104,33 +106,68 @@ src/
 │  ├─ document.ts           # modelo compartido vista previa + PDF   ← tests
 │  ├─ logo.ts               # subida y redimensionado de imágenes
 │  ├─ io.ts                 # esquemas Zod + export/import JSON      ← tests
+│  ├─ limits.ts             # límites de longitud y del historial
+│  ├─ undo.ts               # aviso de "deshacer" tras un borrado     ← tests
 │  └─ describe.ts  ids.ts  utils.ts
 ├─ store/
 │  ├─ useBudgetStore.ts     # Zustand + persist + migraciones
 │  ├─ migrate.ts            # validación/migración de lo guardado     ← tests
 │  ├─ useThemeStore.ts      # tema claro/oscuro/sistema
+│  ├─ useUiStore.ts         # estado de interfaz (PDF en curso)
 │  └─ storage.ts            # almacenamiento con debounce de 500 ms
 ├─ hooks/                   # useCalc, useTheme, usePdfActions
 ├─ components/              # UI (formularios, tabla, clínica, vista previa…)
 ├─ pdf/                     # plantilla @react-pdf/renderer + acciones
 └─ styles/shadcn.css        # base de shadcn/ui (vendida)
 scripts/generate-icons.mjs  # genera los iconos PWA (sin dependencias)
-.github/workflows/ci.yml    # CI: lint + tipos + tests + build
+e2e/                        # prueba de humo en navegador + medición de contraste
+playwright.config.ts        # Playwright: sirve `dist` con `vite preview`
+.github/workflows/ci.yml    # CI: lint + tipos + tests + build + prueba de humo
 vercel.json                 # configuración de despliegue
 ```
 
 ## 🗃️ Persistencia y migraciones
 
-- El borrador, el catálogo, los datos de la clínica, el modo de tasa y el tamaño de
-  hoja se guardan en `localStorage` con **debounce de 500 ms**.
+- El borrador, el catálogo, los datos de la clínica, el modo de tasa, el tamaño de
+  hoja y el **historial** se guardan en `localStorage` con **debounce de 500 ms**.
 - La clave es `budgetify:v1` y hay **migraciones versionadas** (`version` + `migrate`).
-  Ahora mismo: **v6** (áreas de práctica y encabezado de la hoja). La migración vive en
+  Ahora mismo: **v7** (historial de presupuestos guardados). La migración vive en
   `store/migrate.ts` (`migratePersisted`) para poder probarla sin arrancar la app:
   **valida con Zod** lo guardado y cae a los valores por defecto de cada parte si algo no
   encaja, en lugar de romper el arranque.
 - `migrateCatalogDefaults()` añade áreas, categorías, servicios y plantillas nuevas, y
   etiqueta con su área los servicios conocidos **sin pisar** los precios que el usuario
   haya editado.
+
+## 🕘 Historial local
+
+`SavedBudget` (`types.ts`) es una entrada del historial: `id`, `savedAt` y el
+**presupuesto entero**. Se guarda la copia completa a propósito —y no una
+referencia— porque un presupuesto entregado hace un mes debe abrirse tal como
+se entregó, aunque el catálogo haya cambiado desde entonces. El nombre del
+paciente, el número de líneas y el total **no** se almacenan: se derivan al
+mostrar la lista (`HistoryDialog`), así no hay datos duplicados que se queden
+desfasados.
+
+- **Tope**: `HISTORY_LIMIT` (100) en `lib/limits.ts`. Al superarlo se descartan
+  las más antiguas y `saveToHistory()` devuelve cuántas se cayeron para que la
+  interfaz lo avise. El mismo tope se aplica **al leer** (`historySchema`): un
+  `localStorage` manipulado a mano con 10.000 entradas no se carga en memoria.
+- Abrir una copia **reemplaza** el borrador en curso, y eso también se puede
+  deshacer.
+
+### Deshacer o confirmar
+
+Dos mecanismos, según lo que se pierde:
+
+- **Deshacer** (`lib/undo.ts`): para lo granular y reversible —borrar una línea,
+  una nota, una categoría o una copia del historial, o cargar otro presupuesto—.
+  El aviso guarda una referencia al estado anterior (el store es inmutable) y lo
+  restaura. Solo hay un aviso de deshacer a la vez, el más reciente.
+- **Confirmación** (`ConfirmDialog`, sobre Radix `AlertDialog`): para lo que
+  reemplaza todo de golpe y no se puede reconstruir de memoria —“Limpiar”,
+  “Restablecer catálogo”, “Reemplazar plantilla”—. Si además es reversible, el
+  diálogo deja deshacer después.
 
 ## 🩺 Áreas de práctica
 
@@ -163,16 +200,37 @@ Cubren:
 - **Documento**: modelo compartido (procedimiento, categorías numeradas, cantidad y
   unitario, notas con etiqueta, firmas) y tamaño de hoja.
 - **Estado**: pack → ítems → total, edición de precios sin tocar el catálogo,
-  sincronización de tarifas, tasa BCV (auto/manual) y datos de la clínica.
+  sincronización de tarifas, tasa BCV (auto/manual), datos de la clínica e
+  historial (guardar, cargar, borrar, copia independiente del borrador y tope).
+- **Migración**: lo guardado por versiones anteriores, datos corruptos y el
+  recorte del historial.
 - **Catálogo**: integridad, packs y migración.
 - **Interfaz** (jsdom + Testing Library): línea manual, recálculo del total, reagrupar
   al cambiar de categoría, tema y vista previa.
 - **Humo**: render de la app completa sin DOM.
+- **Deshacer**: que un clic en un aviso no cierre el diálogo modal.
+
+### Prueba de humo en un navegador de verdad (`npm run test:e2e`)
+
+Playwright sirve `dist` con `vite preview` (que aplica las **mismas cabeceras**
+de `vercel.json`) y comprueba que la app monta, suma una línea, calcula el total
+y **mide el contraste real** de cuatro textos clave (título, botón primario,
+texto secundario y la barra de total del documento), en tema claro y oscuro,
+exigiendo el **4,5:1** de WCAG AA.
+
+El contraste se mide dentro de la página (`e2e/contrast.ts`): Chromium devuelve
+los colores en `oklch()` y desde Node no se pueden convertir, así que se pinta
+cada color en un canvas de 1×1 y se leen los píxeles; el fondo se busca subiendo
+por los antepasados y componiendo las capas semitransparentes. Antes de medir se
+espera a que terminen las transiciones: cambiar de tema las dispara y a mitad de
+camino los colores son intermedios.
 
 ## 🔁 CI
 
 `.github/workflows/ci.yml` ejecuta lint, typecheck, tests y build en cada push/PR a
-`main`, y publica `dist/` como artefacto.
+`main`, y publica `dist/` como artefacto. Un segundo job (`e2e`) descarga ese
+artefacto, instala Chromium y corre la prueba de humo; si falla, sube el informe
+de Playwright.
 
 ## ▲ Despliegue en Vercel
 
@@ -193,6 +251,13 @@ No hace falta backend: la app es estática y la tasa se consulta desde el navega
 ## 🧭 Decisiones de diseño
 
 - Se guardan **fórmulas**, no montos calculados: los totales se **derivan** siempre.
+- Del historial se guarda el **presupuesto entero**, no una referencia al catálogo: una
+  copia de hace un mes tiene que abrirse igual que cuando se entregó. El precio que se
+  paga es el espacio (por eso hay tope), no la fidelidad.
+- Cuando cambias el **tipo de fórmula** de una línea, el importe no se pierde: de
+  “precio fijo” a “cantidad × unitario” se conserva el monto como precio unitario. En los
+  tipos porcentuales el importe depende de la referencia, así que arrancan al 100 % de
+  ella en vez de a cero.
 - El catálogo es una **biblioteca** aparte del presupuesto: editar un precio en un
   presupuesto no lo cambia en la biblioteca salvo que se pida explícitamente
   (*Guardar tarifas en el catálogo*).
