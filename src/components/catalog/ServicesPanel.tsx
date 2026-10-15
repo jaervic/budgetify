@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { isServiceInArea } from '@/lib/catalog'
+import { LIMITS } from '@/lib/limits'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 /** Alta, edición y borrado de servicios de la biblioteca. */
@@ -74,6 +75,7 @@ export function ServicesPanel() {
                 <Input
                   className="font-medium"
                   aria-label="Concepto"
+                  maxLength={LIMITS.concept}
                   value={service.concept}
                   onChange={(event) =>
                     updateCatalogService(service.id, { concept: event.target.value })
@@ -95,6 +97,7 @@ export function ServicesPanel() {
                 className="text-xs"
                 aria-label="Detalle"
                 placeholder="Detalle (opcional)"
+                maxLength={LIMITS.detail}
                 value={service.detail ?? ''}
                 onChange={(event) =>
                   updateCatalogService(service.id, {
@@ -107,6 +110,7 @@ export function ServicesPanel() {
                 <Input
                   list="category-options"
                   aria-label="Categoría"
+                  maxLength={LIMITS.category}
                   value={service.category}
                   onChange={(event) =>
                     updateCatalogService(service.id, { category: event.target.value })

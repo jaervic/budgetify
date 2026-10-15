@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { LIMITS } from './limits'
 import type { Budget, Catalog } from '@/types'
 
 /**
@@ -7,11 +8,14 @@ import type { Budget, Catalog } from '@/types'
  * Además de comprobar tipos, limitan tamaños y longitudes: así un archivo
  * malicioso o corrupto no puede llenar el almacenamiento del navegador ni
  * colgar la app con listas enormes.
+ *
+ * Los máximos de texto salen de `limits.ts`, que también alimenta los
+ * `maxLength` de los formularios.
  */
 
 const MAX_ITEMS = 500
 const MAX_NOTES = 50
-const MAX_NOTE_LENGTH = 1000
+const MAX_NOTE_LENGTH = LIMITS.note
 const MAX_TEXT = 200
 /** ~2,2 MB de imagen real (base64 ocupa ~33 % más). */
 const MAX_IMAGE_CHARS = 3_000_000
@@ -51,21 +55,21 @@ export const formulaSchema = z.discriminatedUnion('type', [
 export const itemSchema = z.object({
   id: z.string().min(1).max(100),
   sourceServiceId: z.string().min(1).max(100).optional(),
-  category: z.string().min(1).max(80),
-  concept: z.string().min(1).max(120),
-  detail: z.string().max(300).optional(),
+  category: z.string().min(1).max(LIMITS.category),
+  concept: z.string().min(1).max(LIMITS.concept),
+  detail: z.string().max(LIMITS.detail).optional(),
   formula: formulaSchema,
 })
 
 export const patientSchema = z.object({
-  name: z.string().max(120),
-  ci: z.string().max(40).optional(),
+  name: z.string().max(LIMITS.patientName),
+  ci: z.string().max(LIMITS.patientCi).optional(),
   age: z.number().int().min(0).max(130).optional(),
 })
 
 export const budgetSchema = z.object({
   patient: patientSchema,
-  procedure: z.string().max(160).optional(),
+  procedure: z.string().max(LIMITS.procedure).optional(),
   issueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida.'),
   rate: z.number().finite().min(0.0001).max(1_000_000),
   items: z.array(itemSchema).max(MAX_ITEMS),
@@ -74,17 +78,17 @@ export const budgetSchema = z.object({
 
 export const catalogServiceSchema = z.object({
   id: z.string().min(1).max(100),
-  category: z.string().min(1).max(80),
-  concept: z.string().min(1).max(120),
-  detail: z.string().max(300).optional(),
+  category: z.string().min(1).max(LIMITS.category),
+  concept: z.string().min(1).max(LIMITS.concept),
+  detail: z.string().max(LIMITS.detail).optional(),
   formula: formulaSchema,
   specialtyId: z.string().max(60).optional(),
 })
 
 export const packSchema = z.object({
   id: z.string().min(1).max(100),
-  name: z.string().min(1).max(120),
-  description: z.string().max(300).optional(),
+  name: z.string().min(1).max(LIMITS.packName),
+  description: z.string().max(LIMITS.packDescription).optional(),
   services: z
     .array(
       z.object({
@@ -111,18 +115,18 @@ export const catalogSchema = z.object({
 })
 
 export const clinicSchema = z.object({
-  name: z.string().max(120),
-  rif: z.string().max(40),
-  address: z.string().max(200).optional(),
-  phone: z.string().max(60).optional(),
-  email: z.string().max(120).optional(),
+  name: z.string().max(LIMITS.clinicName),
+  rif: z.string().max(LIMITS.clinicRif),
+  address: z.string().max(LIMITS.clinicAddress).optional(),
+  phone: z.string().max(LIMITS.clinicPhone).optional(),
+  email: z.string().max(LIMITS.clinicEmail).optional(),
   logoDataUrl: imageDataUrl.optional(),
   // `default` para no perder los datos de clínica guardados antes de este campo.
   headerMode: z.enum(['clinic', 'professional']).default('clinic'),
-  doctorTitle: z.string().max(40).optional(),
+  doctorTitle: z.string().max(LIMITS.doctorTitle).optional(),
   specialtyId: z.string().max(60).optional(),
-  doctorName: z.string().max(120).optional(),
-  doctorId: z.string().max(60).optional(),
+  doctorName: z.string().max(LIMITS.doctorName).optional(),
+  doctorId: z.string().max(LIMITS.doctorId).optional(),
   signatureDataUrl: imageDataUrl.optional(),
   sealDataUrl: imageDataUrl.optional(),
   showSignature: z.boolean().optional(),

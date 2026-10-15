@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { LIMITS } from '@/lib/limits'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 /** Alta, renombrado y reordenado de categorías. */
@@ -25,6 +26,7 @@ export function CategoriesPanel() {
       <div className="flex items-center gap-2">
         <Input
           placeholder="Nueva categoría (ej. Consulta, Emergencia…)"
+          maxLength={LIMITS.category}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => {
@@ -89,6 +91,7 @@ function CategoryRow({
     <div className="flex items-center gap-2 rounded-lg border p-2">
       <Input
         value={value}
+        maxLength={LIMITS.category}
         onChange={(event) => setValue(event.target.value)}
         onBlur={commit}
         onKeyDown={(event) => {

@@ -79,6 +79,46 @@ describe('App · interacciones', () => {
     expect(screen.getByTestId('total-usd').textContent).toBe('$100.00')
   })
 
+  it('muestra el número interpretado al salir del campo', async () => {
+    render(<App />)
+    await addManualLine()
+
+    const amount = screen.getByLabelText('Monto en USD') as HTMLInputElement
+    await userEvent.clear(amount)
+    await userEvent.type(amount, '1.234')
+    await userEvent.tab()
+
+    // "1.234" son mil doscientos treinta y cuatro, y el campo lo deja claro.
+    expect(amount.value).toBe('1.234,00')
+    expect(screen.getByTestId('total-usd').textContent).toBe('$1,234.00')
+  })
+
+  it('guarda el procedimiento aunque falte el nombre del paciente', async () => {
+    render(<App />)
+    // El presupuesto arranca sin nombre: antes eso bloqueaba TODO el guardado.
+    await userEvent.type(screen.getByLabelText('Procedimiento'), 'Colecistectomía')
+
+    expect(useBudgetStore.getState().budget.procedure).toBe('Colecistectomía')
+
+    // Y la hoja dice lo mismo que el formulario.
+    await userEvent.click(screen.getByRole('tab', { name: 'Vista previa' }))
+    expect(screen.getByTestId('document-preview').textContent).toContain('Colecistectomía')
+  })
+
+  it('no descarta los cambios posteriores al vaciar el nombre', async () => {
+    render(<App />)
+    const name = screen.getByLabelText('Paciente')
+    const procedure = screen.getByLabelText('Procedimiento')
+
+    await userEvent.type(name, 'Ana Pérez')
+    await userEvent.type(procedure, 'Uno')
+    await userEvent.clear(name)
+    await userEvent.type(procedure, ' y dos')
+
+    expect(useBudgetStore.getState().budget.patient.name).toBe('')
+    expect(useBudgetStore.getState().budget.procedure).toBe('Uno y dos')
+  })
+
   it('reagrupa la línea al cambiar su categoría', async () => {
     render(<App />)
     await addManualLine()

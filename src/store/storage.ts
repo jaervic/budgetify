@@ -1,12 +1,36 @@
 import type { StateStorage } from 'zustand/middleware'
 
+/** Evento que se dispara cuando el navegador rechaza guardar los cambios. */
+export const STORAGE_ERROR_EVENT = 'budgetify:storage-error'
+
+export interface StorageErrorDetail {
+  /** Clave que no se pudo guardar. */
+  name: string
+  /** Tamaño (caracteres) del valor que se intentó escribir. */
+  size: number
+}
+
 /**
  * Almacenamiento para Zustand `persist` que escribe en localStorage con debounce.
  * Evita golpear el disco en cada tecla mientras se edita el presupuesto.
+ *
+ * Si el navegador rechaza la escritura (cuota llena o modo privado) se emite un
+ * evento para que la app avise al usuario. Antes el error se descartaba en
+ * silencio: se seguía trabajando sobre datos que se perdían al cerrar la
+ * pestaña, sin ninguna señal.
  */
 export function createDebouncedStorage(delay = 500): StateStorage {
   const timers = new Map<string, ReturnType<typeof setTimeout>>()
   const pending = new Map<string, string>()
+
+  const notifyError = (name: string, size: number): void => {
+    if (typeof window === 'undefined') return
+    window.dispatchEvent(
+      new CustomEvent<StorageErrorDetail>(STORAGE_ERROR_EVENT, {
+        detail: { name, size },
+      }),
+    )
+  }
 
   const write = (name: string): void => {
     const value = pending.get(name)
@@ -16,7 +40,8 @@ export function createDebouncedStorage(delay = 500): StateStorage {
     try {
       localStorage.setItem(name, value)
     } catch {
-      // Cuota llena o modo privado: ignoramos silenciosamente.
+      // Cuota llena o modo privado: avisamos en lugar de perderlo en silencio.
+      notifyError(name, value.length)
     }
   }
 

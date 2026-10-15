@@ -2,6 +2,7 @@ import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
+import { LIMITS } from '@/lib/limits'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 /** Notas y recomendaciones que aparecen al pie del presupuesto y del PDF. */
@@ -24,6 +25,7 @@ export function NotesEditor() {
             <Textarea
               value={note}
               rows={2}
+              maxLength={LIMITS.note}
               aria-label={`Nota ${index + 1}`}
               onChange={(event) => update(index, event.target.value)}
             />

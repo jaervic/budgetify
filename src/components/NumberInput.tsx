@@ -9,6 +9,26 @@ interface NumberInputProps
   onValueChange: (value: number) => void
   /** Permite valores negativos (por defecto no). */
   allowNegative?: boolean
+  /**
+   * Decimales con los que se muestra el valor al salir del campo (formato
+   * es-VE). Al fijarlos, el usuario ve cómo se interpretó lo que escribió:
+   * "1.234" pasa a "1.234,00" (mil doscientos) y "1.234" como decimal a "1,23".
+   * Sin este dato el campo se muestra tal cual, como una cantidad o un %.
+   */
+  decimals?: number
+}
+
+const formatters = new Map<number, Intl.NumberFormat>()
+
+function formatterFor(decimals: number): Intl.NumberFormat {
+  const existing = formatters.get(decimals)
+  if (existing) return existing
+  const formatter = new Intl.NumberFormat('es-VE', {
+    minimumFractionDigits: Math.min(2, decimals),
+    maximumFractionDigits: decimals,
+  })
+  formatters.set(decimals, formatter)
+  return formatter
 }
 
 /**
@@ -20,10 +40,14 @@ export function NumberInput({
   value,
   onValueChange,
   allowNegative = false,
+  decimals,
   className,
   ...props
 }: NumberInputProps) {
-  const [text, setText] = useState(() => String(value))
+  const display = (amount: number) =>
+    decimals === undefined ? String(amount) : formatterFor(decimals).format(amount)
+
+  const [text, setText] = useState(() => display(value))
   const [focused, setFocused] = useState(false)
   const [lastValue, setLastValue] = useState(value)
 
@@ -31,7 +55,7 @@ export function NumberInput({
   // Es un ajuste de estado durante el render (patrón recomendado por React).
   if (value !== lastValue) {
     setLastValue(value)
-    if (!focused) setText(String(value))
+    if (!focused) setText(display(value))
   }
 
   const handleChange = (raw: string) => {
@@ -60,7 +84,7 @@ export function NumberInput({
         setFocused(false)
         const parsed = parseLocaleNumber(text)
         const next = Number.isNaN(parsed) ? value : parsed
-        setText(String(next))
+        setText(display(next))
         if (next !== value) onValueChange(next)
         props.onBlur?.(event)
       }}

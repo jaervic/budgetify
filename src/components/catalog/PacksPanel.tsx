@@ -2,6 +2,7 @@ import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { LIMITS } from '@/lib/limits'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { Pack, PackService } from '@/types'
 
@@ -75,6 +76,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
         <Input
           className="font-medium"
           aria-label="Nombre de la plantilla"
+          maxLength={LIMITS.packName}
           value={pack.name}
           onChange={(event) => onChange({ name: event.target.value })}
         />
@@ -94,6 +96,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
         className="text-xs"
         aria-label="Descripción de la plantilla"
         placeholder="Descripción (opcional)"
+        maxLength={LIMITS.packDescription}
         value={pack.description ?? ''}
         onChange={(event) => onChange({ description: event.target.value || undefined })}
       />

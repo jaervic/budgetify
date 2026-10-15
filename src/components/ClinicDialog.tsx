@@ -13,6 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DOCTOR_TITLES, doctorFullName, specialtyName } from '@/data/specialties'
+import { LIMITS } from '@/lib/limits'
 import { fileToLogoDataUrl } from '@/lib/logo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import { cn } from '@/lib/utils'
@@ -172,6 +173,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
               <Label htmlFor="clinic-name">Nombre de la clínica</Label>
               <Input
                 id="clinic-name"
+                maxLength={LIMITS.clinicName}
                 value={clinic.name}
                 placeholder="Clínica / Centro médico"
                 onChange={(event) => setClinic({ name: event.target.value })}
@@ -184,6 +186,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
               <Label htmlFor="clinic-rif">RIF</Label>
               <Input
                 id="clinic-rif"
+                maxLength={LIMITS.clinicRif}
                 placeholder="J-12345678-9"
                 value={clinic.rif}
                 onChange={(event) => setClinic({ rif: event.target.value })}
@@ -193,6 +196,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
               <Label htmlFor="clinic-phone">Teléfono</Label>
               <Input
                 id="clinic-phone"
+                maxLength={LIMITS.clinicPhone}
                 placeholder="0244-3210389"
                 value={clinic.phone ?? ''}
                 onChange={(event) =>
@@ -206,6 +210,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
             <Label htmlFor="clinic-address">Dirección</Label>
             <Input
               id="clinic-address"
+              maxLength={LIMITS.clinicAddress}
               placeholder="Dirección de la clínica"
               value={clinic.address ?? ''}
               onChange={(event) =>
@@ -218,6 +223,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
             <Label htmlFor="clinic-email">Email</Label>
             <Input
               id="clinic-email"
+              maxLength={LIMITS.clinicEmail}
               type="email"
               placeholder="contacto@clinica.com"
               value={clinic.email ?? ''}
@@ -233,6 +239,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
                 <Label htmlFor="clinic-doctor-title">Título</Label>
                 <Input
                   id="clinic-doctor-title"
+                  maxLength={LIMITS.doctorTitle}
                   list="doctor-titles"
                   placeholder="Dr."
                   value={clinic.doctorTitle ?? ''}
@@ -250,6 +257,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
                 <Label htmlFor="clinic-doctor">Profesional tratante</Label>
                 <Input
                   id="clinic-doctor"
+                  maxLength={LIMITS.doctorName}
                   placeholder="Nombre Apellido"
                   value={clinic.doctorName ?? ''}
                   onChange={(event) =>
@@ -274,6 +282,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
                 <Label htmlFor="clinic-doctor-id">MPPS / Colegio</Label>
                 <Input
                   id="clinic-doctor-id"
+                  maxLength={LIMITS.doctorId}
                   placeholder="MPPS 12345 / CM 6789"
                   value={clinic.doctorId ?? ''}
                   onChange={(event) =>

@@ -71,6 +71,7 @@ export function FormulaFields({
           <NumberInput
             className="h-8 w-24"
             aria-label="Monto en USD"
+            decimals={2}
             value={formula.amountUsd}
             onValueChange={(amountUsd) => onChange({ ...formula, amountUsd })}
           />
@@ -90,6 +91,7 @@ export function FormulaFields({
           <NumberInput
             className="h-8 w-24"
             aria-label="Precio unitario en USD"
+            decimals={2}
             value={formula.unitUsd}
             onValueChange={(unitUsd) => onChange({ ...formula, unitUsd })}
           />

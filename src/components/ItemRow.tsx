@@ -3,6 +3,7 @@ import { FormulaFields } from '@/components/FormulaFields'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { ComputedItem } from '@/lib/calc'
+import { LIMITS } from '@/lib/limits'
 import { formatUsd, formatVes, usdToVes } from '@/lib/money'
 import { cn } from '@/lib/utils'
 import type { Item } from '@/types'
@@ -60,12 +61,14 @@ export function ItemRow({
           aria-label="Categoría"
           list={categoryListId}
           placeholder="Categoría"
+          maxLength={LIMITS.category}
           value={item.category}
           onChange={(event) => onUpdate({ category: event.target.value })}
         />
         <Input
           className="h-8 font-medium"
           aria-label="Concepto"
+          maxLength={LIMITS.concept}
           value={item.concept}
           onChange={(event) => onUpdate({ concept: event.target.value })}
         />
@@ -73,6 +76,7 @@ export function ItemRow({
           className="h-8 text-xs text-muted-foreground"
           aria-label="Detalle"
           placeholder="Detalle (opcional)"
+          maxLength={LIMITS.detail}
           value={item.detail ?? ''}
           onChange={(event) => onUpdate({ detail: event.target.value || undefined })}
         />

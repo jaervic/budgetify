@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { specialtyName } from '@/data/specialties'
 import { useCalc } from '@/hooks/useCalc'
 import { usePdfActions } from '@/hooks/usePdfActions'
+import { useStorageWarning } from '@/hooks/useStorageWarning'
 import { useTheme } from '@/hooks/useTheme'
 import { buildDocumentModel } from '@/lib/document'
 import { useBudgetStore } from '@/store/useBudgetStore'
@@ -46,6 +47,8 @@ export default function App() {
   const addManualItem = useBudgetStore((state) => state.addManualItem)
   const { resolved } = useTheme()
   const { openPdf } = usePdfActions(calc)
+  // Avisa si el navegador deja de poder guardar el borrador (cuota llena).
+  useStorageWarning()
 
   // En móvil, "Ver PDF" abre el visor nativo del navegador; en escritorio, el modal.
   const handleViewPdf = () => {

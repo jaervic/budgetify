@@ -50,6 +50,7 @@ export function RateField() {
           id="rate"
           className="max-w-40"
           aria-label="Tasa de cálculo"
+          decimals={4}
           value={rate}
           onValueChange={setRate}
         />
