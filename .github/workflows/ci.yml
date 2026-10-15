@@ -39,7 +39,7 @@ jobs:
         run: npm run build
 
       - name: Subir artefacto del build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
@@ -77,7 +77,7 @@ jobs:
         run: npm run test:e2e
 
       - name: Subir el informe si falla
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report
