@@ -24,7 +24,10 @@ const PDF_SIZE = {
 
 const styles = StyleSheet.create({
   page: {
-    paddingVertical: 34,
+    paddingTop: 34,
+    // Reserva la banda inferior para la firma (fija, en todas las hojas) sin que
+    // el contenido del flujo la pise.
+    paddingBottom: 128,
     paddingHorizontal: 40,
     fontSize: 9,
     fontFamily: 'Helvetica',
@@ -81,7 +84,7 @@ const styles = StyleSheet.create({
   categoryRow: {
     flexDirection: 'row',
     backgroundColor: SKY_LIGHT,
-    paddingVertical: 5.5,
+    paddingVertical: 4.5,
     paddingHorizontal: 6,
   },
   categoryText: { fontFamily: 'Helvetica-Bold', fontSize: 9, color: SKY_DARK },
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderBottomWidth: 1,
     borderBottomColor: SLATE_100,
-    paddingVertical: 6.5,
+    paddingVertical: 5,
     paddingHorizontal: 6,
   },
   cell: { fontSize: 9 },
@@ -99,7 +102,7 @@ const styles = StyleSheet.create({
     backgroundColor: SLATE_50,
     borderBottomWidth: 1,
     borderBottomColor: LINE,
-    paddingVertical: 6,
+    paddingVertical: 5,
     paddingHorizontal: 6,
   },
   subtotalLabel: {
@@ -137,11 +140,11 @@ const styles = StyleSheet.create({
   empty: { paddingVertical: 24, textAlign: 'center', color: SLATE_500, fontSize: 9 },
 
   notes: {
-    marginTop: 14,
+    marginTop: 10,
     borderLeftWidth: 4,
     borderLeftColor: SKY,
     backgroundColor: SLATE_50,
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 10,
   },
   notesTitle: {
@@ -150,13 +153,14 @@ const styles = StyleSheet.create({
     color: SLATE_800,
     marginBottom: 5,
   },
-  note: { fontSize: 8.5, marginBottom: 4, lineHeight: 1.45, color: SLATE_600 },
+  note: { fontSize: 8.5, marginBottom: 3, lineHeight: 1.45, color: SLATE_600 },
   noteLabel: { fontFamily: 'Helvetica-Bold', color: SLATE_800 },
 
-  signatures: { flexDirection: 'row', marginTop: 34 },
+  // Fija al pie de cada hoja (no consume flujo; por eso `page.paddingBottom`).
+  signatures: { flexDirection: 'row', position: 'absolute', left: 40, right: 40, bottom: 42 },
   signatureCol: { flex: 1, paddingHorizontal: 20 },
-  signatureImageBox: { height: 46, alignItems: 'center', justifyContent: 'flex-end' },
-  signatureImage: { maxHeight: 44, maxWidth: 130, objectFit: 'contain' },
+  signatureImageBox: { height: 38, alignItems: 'center', justifyContent: 'flex-end' },
+  signatureImage: { maxHeight: 36, maxWidth: 130, objectFit: 'contain' },
   signatureLine: { borderTopWidth: 1, borderTopColor: SLATE_500, paddingTop: 3 },
   signatureLabel: {
     fontSize: 8.5,
@@ -306,7 +310,7 @@ export function BudgetPdf({ budget, calc, clinic, rateMode, pageSize }: BudgetPd
         )}
 
         {model.signatures.length > 0 && (
-          <View style={styles.signatures} wrap={false}>
+          <View style={styles.signatures} fixed>
             {model.signatures.map((signature) => (
               <View key={signature.label} style={styles.signatureCol}>
                 <View style={styles.signatureImageBox}>
