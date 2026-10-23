@@ -140,6 +140,12 @@ Sí. Al borrar una línea, una nota, una categoría o una copia del historial, o
 el presupuesto, aparece un aviso con **“Deshacer”**. Lo que sí borra de verdad es
 **“Nuevo presupuesto”**: para eso pide confirmación.
 
+**¿Puedo recuperar las notas y condiciones que vienen por defecto?**
+Sí. En **“Notas y recomendaciones”** del presupuesto y en **“Notas y condiciones”** de la
+cotización puedes volver a poner las que faltan, restaurar el texto original de una nota
+editada o reemplazar todo por las predeterminadas (con opción de deshacer). Además puedes
+guardar tus propias notas y condiciones como predeterminadas para los documentos nuevos.
+
 **¿Puedo cambiar los precios?**
 Sí. En **“Catálogo y precios”** puedes editar precios, agregar o borrar servicios, crear
 categorías nuevas y guardar paquetes para los casos que más repites. Cada servicio puede

@@ -10,6 +10,8 @@ export interface UndoSnapshot {
   docMode?: DocMode
   catalog?: Catalog
   history?: SavedDocument[]
+  savedBudgetNotes?: string[] | null
+  savedQuoteTerms?: string | null
 }
 
 /**

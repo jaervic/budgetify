@@ -41,6 +41,12 @@ export const DEFAULT_NOTES: string[] = [
   'Fondo de Imprevistos: Se recomienda disponer de un 10% a 15% adicional para cubrir posibles variaciones en la duración de la cirugía o requerimiento de medicamentos postoperatorios no contemplados en el presupuesto estándar.',
 ]
 
+/** Condiciones por defecto de la cotización (una por línea). Editables y restaurables. */
+export const DEFAULT_QUOTE_TERMS =
+  'Validez: esta cotización vale 15 días desde su fecha de emisión.\n' +
+  'Forma de pago: transferencia o pago móvil a la cuenta de la empresa (edita esta nota con tus datos reales).\n' +
+  'Los precios incluyen IVA según la alícuota de cada producto y pueden cambiar sin previo aviso.'
+
 /** Fecha de hoy en formato ISO corto (yyyy-mm-dd), usada como emisión por defecto. */
 export function todayIso(): string {
   const now = new Date()

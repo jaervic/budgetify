@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { HelpNote } from '@/components/HelpNote'
+import { QuoteTermsActions } from '@/components/QuoteTermsActions'
 import { RateField } from '@/components/RateField'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -322,20 +323,19 @@ export function QuoteDataForm() {
               />
             </div>
 
-            <div className="grid gap-2 sm:col-span-2">
-              <Label htmlFor="quote-terms">Notas y condiciones</Label>
-              <Textarea
-                id="quote-terms"
-                rows={3}
-                maxLength={LIMITS.quoteTerms}
-                placeholder="Formas de pago, tiempo de entrega, garantía, validez…"
-                value={quote.terms ?? ''}
-                onChange={(event) =>
-                  setQuoteMeta({ terms: event.target.value || undefined })
-                }
-              />
-            </div>
           </div>
+        </div>
+
+        <div className="grid gap-2 sm:col-span-2">
+          <Label htmlFor="quote-terms">Notas y condiciones</Label>
+          <Textarea
+            id="quote-terms"
+            rows={4}
+            maxLength={LIMITS.quoteTerms}
+            value={quote.terms ?? ''}
+            onChange={(event) => setQuoteMeta({ terms: event.target.value || undefined })}
+          />
+          <QuoteTermsActions />
         </div>
       </CardContent>
     </Card>

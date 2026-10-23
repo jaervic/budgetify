@@ -14,7 +14,7 @@ import type { Budget, Catalog, Quote } from '@/types'
  */
 
 const MAX_ITEMS = 500
-const MAX_NOTES = 50
+export const MAX_NOTES = 50
 const MAX_NOTE_LENGTH = LIMITS.note
 const MAX_TEXT = 200
 /** ~2,2 MB de imagen real (base64 ocupa ~33 % más). */

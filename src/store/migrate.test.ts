@@ -349,6 +349,24 @@ describe('migratePersisted', () => {
     expect(state.catalog.products).toHaveLength(3)
   })
 
+  it('conserva las notas y condiciones propias y descarta datos que no encajan', () => {
+    const state = migratePersisted({
+      ...V5_STATE,
+      savedBudgetNotes: ['Mi nota'],
+      savedQuoteTerms: 'Mis condiciones',
+    })
+    expect(state.savedBudgetNotes).toEqual(['Mi nota'])
+    expect(state.savedQuoteTerms).toBe('Mis condiciones')
+
+    const invalid = migratePersisted({
+      ...V5_STATE,
+      savedBudgetNotes: ['ok', 42],
+      savedQuoteTerms: 7,
+    })
+    expect(invalid.savedBudgetNotes).toBeNull()
+    expect(invalid.savedQuoteTerms).toBeNull()
+  })
+
   it('respeta un catálogo de productos vacío ya migrado', () => {
     const state = migratePersisted({
       ...V5_STATE,

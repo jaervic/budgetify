@@ -6,14 +6,17 @@ import {
   createEmptyBcvCache,
   createEmptyBudget,
   createEmptyQuote,
+  DEFAULT_NOTES,
   DEFAULT_PAGE_SIZE,
   DEFAULT_QUOTE_PAGE_SIZE,
+  DEFAULT_QUOTE_TERMS,
   formatQuoteNumber,
   quoteNumberValue,
   DEFAULT_TAX_RATE,
 } from '@/data/defaults'
 import { fetchBcvRate } from '@/lib/bcv'
 import { newId } from '@/lib/ids'
+import { restoreMissingNotes, restoreNote } from '@/lib/notes'
 import { HISTORY_LIMIT } from '@/lib/limits'
 import type {
   BcvCache,
@@ -64,6 +67,10 @@ interface AppState {
   quoteCounter: number
   /** Documentos archivados a mano, del más reciente al más antiguo. */
   history: SavedDocument[]
+  /** Notas propias guardadas como predeterminadas (null = las de fábrica). */
+  savedBudgetNotes: string[] | null
+  /** Condiciones propias guardadas como predeterminadas (null = las de fábrica). */
+  savedQuoteTerms: string | null
 
   // ── Presupuesto ──────────────────────────────────────────────────────
   setPatient: (patch: Partial<Budget['patient']>) => void
@@ -71,6 +78,12 @@ interface AppState {
   setIssueDate: (issueDate: string) => void
   setRate: (rate: number) => void
   setNotes: (notes: string[]) => void
+  /** Guarda las notas actuales como predeterminadas para los presupuestos nuevos. */
+  saveBudgetNotesDefault: () => void
+  /** Vuelve a usar las notas de fábrica como predeterminadas. */
+  resetBudgetNotesDefault: () => void
+  /** Restaura todas las notas, las que faltan o solo una (por índice). */
+  restoreBudgetNotes: (mode: 'all' | 'missing' | { index: number }) => void
   addService: (service: CatalogService) => void
   addServicesFromPack: (pack: Pack, mode: PackApplyMode) => void
   addManualItem: (category: string) => void
@@ -103,6 +116,12 @@ interface AppState {
     >,
   ) => void
   setQuoteIssueDate: (issueDate: string) => void
+  /** Guarda las condiciones actuales como predeterminadas para las cotizaciones nuevas. */
+  saveQuoteTermsDefault: () => void
+  /** Vuelve a usar las condiciones de fábrica como predeterminadas. */
+  resetQuoteTermsDefault: () => void
+  /** Restaura el texto predeterminado de las condiciones. */
+  restoreQuoteTerms: () => void
   setQuoteRate: (rate: number) => void
   setQuotePageSize: (pageSize: PageSize) => void
   addQuoteProduct: (product: Product) => void
@@ -157,6 +176,11 @@ interface AppState {
   setPageSize: (pageSize: PageSize) => void
 }
 
+/** Condiciones predeterminadas: vacío si el usuario guardó «sin condiciones». */
+function termsFrom(saved: string | null): string | undefined {
+  return (saved ?? DEFAULT_QUOTE_TERMS) || undefined
+}
+
 /** Crea un ítem del presupuesto a partir de un servicio del catálogo. */
 function itemFromService(service: CatalogService): Item {
   return {
@@ -202,10 +226,12 @@ export const useBudgetStore = create<AppState>()(
       bcv: createEmptyBcvCache(),
       pageSize: DEFAULT_PAGE_SIZE,
       docMode: 'budget',
-      quote: createEmptyQuote(formatQuoteNumber(1)),
+      quote: { ...createEmptyQuote(formatQuoteNumber(1)), terms: DEFAULT_QUOTE_TERMS },
       quotePageSize: DEFAULT_QUOTE_PAGE_SIZE,
       quoteCounter: 1,
       history: [],
+      savedBudgetNotes: null,
+      savedQuoteTerms: null,
 
       // ── Presupuesto ────────────────────────────────────────────────────
       setPatient: (patch) =>
@@ -224,6 +250,24 @@ export const useBudgetStore = create<AppState>()(
         set((state) => ({ rateMode: 'manual', budget: { ...state.budget, rate } })),
 
       setNotes: (notes) => set((state) => ({ budget: { ...state.budget, notes } })),
+
+      saveBudgetNotesDefault: () =>
+        set((state) => ({ savedBudgetNotes: [...state.budget.notes] })),
+
+      resetBudgetNotesDefault: () => set({ savedBudgetNotes: null }),
+
+      restoreBudgetNotes: (mode) =>
+        set((state) => {
+          const defaults = state.savedBudgetNotes ?? DEFAULT_NOTES
+          const current = state.budget.notes
+          const notes =
+            mode === 'all'
+              ? [...defaults]
+              : mode === 'missing'
+                ? restoreMissingNotes(current, defaults)
+                : restoreNote(current, mode.index, defaults)
+          return { budget: { ...state.budget, notes } }
+        }),
 
       addService: (service) =>
         set((state) => ({
@@ -319,7 +363,13 @@ export const useBudgetStore = create<AppState>()(
 
       loadBudget: (budget) => set({ budget, docMode: 'budget' }),
 
-      clearBudget: () => set({ budget: createEmptyBudget() }),
+      clearBudget: () =>
+        set((state) => ({
+          budget: {
+            ...createEmptyBudget(),
+            notes: [...(state.savedBudgetNotes ?? DEFAULT_NOTES)],
+          },
+        })),
 
       setDocMode: (docMode) =>
         set((state) => ({
@@ -350,6 +400,14 @@ export const useBudgetStore = create<AppState>()(
       // Editar la tasa de la cotización también desancla el cálculo del BCV.
       setQuoteRate: (rate) =>
         set((state) => ({ rateMode: 'manual', quote: { ...state.quote, rate } })),
+
+      saveQuoteTermsDefault: () =>
+        set((state) => ({ savedQuoteTerms: state.quote.terms ?? '' })),
+
+      resetQuoteTermsDefault: () => set({ savedQuoteTerms: null }),
+
+      restoreQuoteTerms: () =>
+        set((state) => ({ quote: { ...state.quote, terms: termsFrom(state.savedQuoteTerms) } })),
 
       setQuotePageSize: (quotePageSize) => set({ quotePageSize }),
 
@@ -448,7 +506,11 @@ export const useBudgetStore = create<AppState>()(
               : state.quote.rate
           return {
             quoteCounter: nextCounter,
-            quote: { ...createEmptyQuote(formatQuoteNumber(nextCounter)), rate },
+            quote: {
+              ...createEmptyQuote(formatQuoteNumber(nextCounter)),
+              rate,
+              terms: termsFrom(state.savedQuoteTerms),
+            },
           }
         }),
 
@@ -758,6 +820,8 @@ export const useBudgetStore = create<AppState>()(
         quotePageSize: state.quotePageSize,
         quoteCounter: state.quoteCounter,
         history: state.history,
+        savedBudgetNotes: state.savedBudgetNotes,
+        savedQuoteTerms: state.savedQuoteTerms,
       }),
       // Migra y valida lo guardado: si el borrador no encaja con el modelo
       // actual (versión antigua o datos corruptos) se usan los valores por

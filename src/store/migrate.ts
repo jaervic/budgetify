@@ -4,12 +4,16 @@ import {
   createEmptyBcvCache,
   createEmptyBudget,
   createEmptyQuote,
+  DEFAULT_NOTES,
   DEFAULT_PAGE_SIZE,
   DEFAULT_QUOTE_PAGE_SIZE,
+  DEFAULT_QUOTE_TERMS,
   formatQuoteNumber,
   quoteNumberValue,
 } from '@/data/defaults'
+import { LIMITS } from '@/lib/limits'
 import {
+  MAX_NOTES,
   bcvCacheSchema,
   budgetSchema,
   catalogSchema,
@@ -43,6 +47,8 @@ export interface PersistedState {
   quotePageSize: PageSize
   quoteCounter: number
   history: SavedDocument[]
+  savedBudgetNotes: string[] | null
+  savedQuoteTerms: string | null
 }
 
 /**
@@ -72,6 +78,19 @@ export function migratePersisted(
   const history = historySchema.safeParse(state.history)
   const quote = quoteSchema.safeParse(state.quote)
 
+  // Las notas y condiciones propias son opcionales: si no encajan, se usan las de fábrica.
+  const savedBudgetNotes =
+    Array.isArray(state.savedBudgetNotes) &&
+    state.savedBudgetNotes.every((note) => typeof note === 'string')
+      ? (state.savedBudgetNotes as string[])
+          .slice(0, MAX_NOTES)
+          .map((note) => note.slice(0, LIMITS.note))
+      : null
+  const savedQuoteTerms =
+    typeof state.savedQuoteTerms === 'string'
+      ? state.savedQuoteTerms.slice(0, LIMITS.quoteTerms)
+      : null
+
   const storedCounter =
     typeof state.quoteCounter === 'number' &&
     Number.isFinite(state.quoteCounter) &&
@@ -80,7 +99,7 @@ export function migratePersisted(
       : 1
   const restoredQuote = quote.success
     ? quote.data
-    : createEmptyQuote(formatQuoteNumber(storedCounter))
+    : { ...createEmptyQuote(formatQuoteNumber(storedCounter)), terms: (savedQuoteTerms ?? DEFAULT_QUOTE_TERMS) || undefined }
   const counter = Math.max(storedCounter, quoteNumberValue(restoredQuote.number))
 
   const readPageSize = (value: unknown, fallback: PageSize): PageSize =>
@@ -93,7 +112,9 @@ export function migratePersisted(
     fromStoreVersion !== undefined && fromStoreVersion < PERSIST_VERSION
 
   return {
-    budget: budget.success ? budget.data : createEmptyBudget(),
+    budget: budget.success
+      ? budget.data
+      : { ...createEmptyBudget(), notes: [...(savedBudgetNotes ?? DEFAULT_NOTES)] },
     catalog: migrateCatalogDefaults(
       catalog.success ? catalog.data : cloneDefaultCatalog(),
       { seedProducts: !hadProducts, forceProductMerge },
@@ -110,5 +131,7 @@ export function migratePersisted(
       bcv.success && bcv.data.status !== 'loading' ? bcv.data : createEmptyBcvCache(),
     // El historial nació después: los borradores guardados antes no lo traen.
     history: history.success ? history.data : [],
+    savedBudgetNotes,
+    savedQuoteTerms,
   }
 }
