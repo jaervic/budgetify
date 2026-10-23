@@ -120,6 +120,19 @@ describe('validación de cotizaciones', () => {
     expect(parseQuote(quote).items).toHaveLength(1)
   })
 
+  it('acepta cotizaciones en bolívares', () => {
+    const quote = createEmptyQuote()
+    quote.currency = 'VES'
+    expect(parseQuote(quote).currency).toBe('VES')
+  })
+
+  it('rechaza una moneda desconocida', () => {
+    const quote = createEmptyQuote()
+    // @ts-expect-error probamos un JSON corrupto a propósito
+    quote.currency = 'EUR'
+    expect(() => parseQuote(quote)).toThrow()
+  })
+
   it('rechaza un IVA fuera de 0–100', () => {
     const quote = createEmptyQuote()
     quote.items.push({

@@ -1,7 +1,13 @@
-import type { Clinic, PageSize, Quote } from '@/types'
+import type { Clinic, PageSize, Quote, QuoteCurrency } from '@/types'
 import type { QuoteCalcResult } from './quoteCalc'
 import { formatShortDate } from './date'
-import { formatUsd, formatVes, usdToVes } from './money'
+import { Decimal, formatVes } from './money'
+import {
+  formatQuoteMoney,
+  formatQuoteOtherTotal,
+  quoteCurrencyLabel,
+  quoteOtherTotalLabel,
+} from './quoteMoney'
 
 export interface QuoteDocumentRow {
   id: string
@@ -9,10 +15,11 @@ export interface QuoteDocumentRow {
   description: string
   qty: string
   unit: string
-  unitPriceUsd: string
+  /** Precio unitario en la moneda de la cotización. */
+  unitPrice: string
   taxRate: string
-  taxUsd: string
-  netUsd: string
+  tax: string
+  net: string
 }
 
 /** Estructura común de la vista previa HTML y el PDF de cotización. */
@@ -20,7 +27,7 @@ export interface QuoteDocumentModel {
   clinic: Clinic
   number: string
   title: string
-  currency: string
+  currency: QuoteCurrency
   issueDate: string
   dueDate?: string
   rateLabel: string
@@ -30,11 +37,14 @@ export interface QuoteDocumentModel {
   transport?: string
   purchaseOrder?: string
   description?: string
+  /** Cabecera de la columna de precio, p. ej. «Precio USD» o «Precio Bs.». */
+  priceColumnLabel: string
   rows: QuoteDocumentRow[]
-  subtotalUsd: string
-  taxUsd: string
-  totalUsd: string
-  totalVes: string
+  subtotal: string
+  taxTotal: string
+  total: string
+  totalOtherLabel: string
+  totalOther: string
   pageSize: PageSize
   footerNote: string
 }
@@ -62,6 +72,9 @@ export function buildQuoteDocumentModel(
   clinic: Clinic,
   pageSize: PageSize,
 ): QuoteDocumentModel {
+  const money = (amount: Decimal.Value) =>
+    formatQuoteMoney(amount, quote.currency, quote.rate)
+
   return {
     clinic,
     number: quote.number.trim() || '—',
@@ -83,21 +96,23 @@ export function buildQuoteDocumentModel(
     transport: optionalText(quote.transport),
     purchaseOrder: optionalText(quote.purchaseOrder),
     description: optionalText(quote.description),
+    priceColumnLabel: `Precio ${quoteCurrencyLabel(quote.currency)}`,
     rows: calc.items.map((item) => ({
       id: item.id,
       code: item.code.trim() || '—',
       description: item.description.trim() || '—',
       qty: quantityFormatter.format(item.qty),
       unit: item.unit.trim() || '—',
-      unitPriceUsd: formatUsd(item.unitPriceUsd),
+      unitPrice: money(item.unitPriceUsd),
       taxRate: `${percentFormatter.format(item.taxRate)} %`,
-      taxUsd: formatUsd(item.taxUsd),
-      netUsd: formatUsd(item.netUsd),
+      tax: money(item.taxUsd),
+      net: money(item.netUsd),
     })),
-    subtotalUsd: formatUsd(calc.subtotalUsd),
-    taxUsd: formatUsd(calc.taxUsd),
-    totalUsd: formatUsd(calc.totalUsd),
-    totalVes: formatVes(usdToVes(calc.totalUsd, quote.rate)),
+    subtotal: money(calc.subtotalUsd),
+    taxTotal: money(calc.taxUsd),
+    total: money(calc.totalUsd),
+    totalOtherLabel: quoteOtherTotalLabel(quote.currency),
+    totalOther: formatQuoteOtherTotal(calc.totalUsd, quote.currency, quote.rate),
     pageSize,
     footerNote: 'Cotización de productos — documento generado con Budgetify',
   }

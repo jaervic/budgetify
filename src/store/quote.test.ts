@@ -41,6 +41,14 @@ describe('store de cotizaciones', () => {
     expect(useBudgetStore.getState().quote.items).toHaveLength(3)
   })
 
+  it('cambia la moneda de la cotización', () => {
+    useBudgetStore.getState().setQuoteMeta({ currency: 'VES' })
+    expect(useBudgetStore.getState().quote.currency).toBe('VES')
+
+    useBudgetStore.getState().setQuoteMeta({ currency: 'USD' })
+    expect(useBudgetStore.getState().quote.currency).toBe('USD')
+  })
+
   it('crea una línea manual con IVA por defecto', () => {
     useBudgetStore.getState().addManualQuoteItem()
 

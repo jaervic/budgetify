@@ -5,9 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { LIMITS } from '@/lib/limits'
 import { useBudgetStore } from '@/store/useBudgetStore'
+import type { QuoteCurrency } from '@/types'
 
 /**
  * Datos de la cotización.
@@ -105,10 +113,25 @@ export function QuoteDataForm() {
         </div>
 
         <div className="grid gap-2">
-          <span className="text-sm font-medium">Moneda</span>
-          <div className="flex h-9 items-center rounded-md border bg-muted/40 px-3 text-sm font-medium">
-            USD · dólar estadounidense
-          </div>
+          <Label htmlFor="quote-currency">Moneda</Label>
+          <Select
+            value={quote.currency}
+            onValueChange={(value) =>
+              setQuoteMeta({ currency: value as QuoteCurrency })
+            }
+          >
+            <SelectTrigger id="quote-currency" aria-label="Moneda de la cotización">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="USD">USD · dólar estadounidense</SelectItem>
+              <SelectItem value="VES">VES · bolívares</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            La tabla y el PDF muestran los precios en esta moneda. La tasa convierte los
+            importes a la otra.
+          </p>
         </div>
 
         <RateField />

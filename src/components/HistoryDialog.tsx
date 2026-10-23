@@ -15,6 +15,7 @@ import { formatTimestamp } from '@/lib/date'
 import { formatUsd } from '@/lib/money'
 import { HISTORY_LIMIT } from '@/lib/limits'
 import { computeQuote } from '@/lib/quoteCalc'
+import { formatQuoteMoney } from '@/lib/quoteMoney'
 import { keepOpenForToast, withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { DocMode } from '@/types'
@@ -52,7 +53,11 @@ export function HistoryDialog({
             title: entry.quote.client.name.trim(),
             subtitle: entry.quote.number ? `N.º ${entry.quote.number}` : '',
             count: entry.quote.items.length,
-            total: computeQuote(entry.quote.items).totalUsd,
+            total: formatQuoteMoney(
+              computeQuote(entry.quote.items).totalUsd,
+              entry.quote.currency,
+              entry.quote.rate,
+            ),
           }
         }
         return {
@@ -62,7 +67,7 @@ export function HistoryDialog({
           title: entry.budget.patient.name.trim(),
           subtitle: entry.budget.procedure?.trim() ?? '',
           count: entry.budget.items.length,
-          total: computeBudget(entry.budget.items).totalUsd,
+          total: formatUsd(computeBudget(entry.budget.items).totalUsd),
         }
       }),
     [history],
@@ -138,9 +143,7 @@ export function HistoryDialog({
                       {entry.subtitle ? `${entry.subtitle} · ` : ''}
                       {formatTimestamp(entry.savedAt)} · {entry.count}{' '}
                       {unitLabel(entry.kind, entry.count)} ·{' '}
-                      <span className="font-medium text-foreground">
-                        {formatUsd(entry.total)}
-                      </span>
+                      <span className="font-medium text-foreground">{entry.total}</span>
                     </p>
                   </div>
                   <div className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 import { useRef, type RefObject } from 'react'
 import { QUOTE_ITEM_GRID, QuoteItemRow } from '@/components/QuoteItemRow'
+import { quoteCurrencyLabel } from '@/lib/quoteMoney'
 import type { QuoteCalcResult } from '@/lib/quoteCalc'
 import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
@@ -17,6 +18,8 @@ export function QuoteItemsTable({ calc, emptyFocusRef }: QuoteItemsTableProps) {
   const removeQuoteItem = useBudgetStore((state) => state.removeQuoteItem)
   const duplicateQuoteItem = useBudgetStore((state) => state.duplicateQuoteItem)
   const moveQuoteItem = useBudgetStore((state) => state.moveQuoteItem)
+  const currency = useBudgetStore((state) => state.quote.currency)
+  const rate = useBudgetStore((state) => state.quote.rate)
   const tableRef = useRef<HTMLDivElement>(null)
 
   const removeWithUndo = (id: string, description: string) => {
@@ -50,7 +53,9 @@ export function QuoteItemsTable({ calc, emptyFocusRef }: QuoteItemsTableProps) {
         <span role="columnheader" className="px-2">Descripción</span>
         <span role="columnheader" className="px-2 text-right">Cant.</span>
         <span role="columnheader" className="px-2 text-center">Unidad</span>
-        <span role="columnheader" className="px-2 text-right">Precio USD</span>
+        <span role="columnheader" className="px-2 text-right">
+          Precio {quoteCurrencyLabel(currency)}
+        </span>
         <span role="columnheader" className="px-2 text-right">% IVA</span>
         <span role="columnheader" className="px-2 text-right">IVA</span>
         <span role="columnheader" className="px-2 text-right">Neto</span>
@@ -61,6 +66,8 @@ export function QuoteItemsTable({ calc, emptyFocusRef }: QuoteItemsTableProps) {
         <QuoteItemRow
           key={item.id}
           item={item}
+          currency={currency}
+          rate={rate}
           canMoveUp={index > 0}
           canMoveDown={index < calc.items.length - 1}
           onUpdate={(patch) => updateQuoteItem(item.id, patch)}

@@ -49,6 +49,8 @@ cotización tiene su propio catálogo de productos (código, descripción, unida
 y su propio formato de hoja:
 
 - Se eligen **varios productos a la vez** desde un buscador con casillas.
+- La **moneda** puede ser **USD** o **VES (bolívares)**. La tabla y el PDF muestran los
+  importes en la moneda elegida y el total equivalente en la otra.
 - El **precio es la base sin IVA**; cada producto tiene su porcentaje (16 % por defecto, 0 %
   para exentos).
 - El documento muestra **Código, Descripción, Cantidad, Unidad, Precio, % IVA, IVA y Neto**.

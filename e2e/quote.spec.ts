@@ -21,7 +21,7 @@ test('cambia a cotización, agrega productos y calcula el IVA', async ({ page })
   await page.getByRole('checkbox', { name: /Bata de pacientes/ }).check()
   await page.getByRole('button', { name: 'Agregar (1)' }).click()
 
-  await expect(page.getByTestId('quote-total-usd')).toHaveText('$7.89')
+  await expect(page.getByTestId('quote-total')).toHaveText('$7.89')
   await expect(page.getByLabel('Código').first()).toHaveValue('BAYP')
 
   await page.getByRole('tab', { name: 'Vista previa' }).click()

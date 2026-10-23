@@ -121,7 +121,7 @@ export const quoteSchema = z.object({
   seller: z.string().max(LIMITS.quoteSeller).optional(),
   office: z.string().max(LIMITS.quoteOffice).optional(),
   transport: z.string().max(LIMITS.quoteTransport).optional(),
-  currency: z.literal('USD'),
+  currency: z.enum(['USD', 'VES']),
   issueDate: isoDate,
   dueDate: isoDate.optional(),
   purchaseOrder: z.string().max(LIMITS.quotePurchaseOrder).optional(),

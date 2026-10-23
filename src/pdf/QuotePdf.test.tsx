@@ -148,6 +148,17 @@ describe('paginación del PDF de cotización', () => {
     }
   }, 30_000)
 
+  it('emite la cotización en bolívares con el equivalente en dólares', async () => {
+    const q = quote(8)
+    q.currency = 'VES'
+    const pages = await pagesText(await renderQuotePdf(q, 'Letter'))
+
+    expect(pages[0]).toContain('Moneda: VES')
+    expect(pages[0]).toContain('Precio Bs.')
+    expect(pages[0]).toContain('Total en dólares')
+    expect(pages[0]).toContain('Bs.')
+  }, 30_000)
+
   it('los campos opcionales largos no rompen la cabecera', async () => {
     const q = quote(40)
     q.client.address = 'A'.repeat(200)

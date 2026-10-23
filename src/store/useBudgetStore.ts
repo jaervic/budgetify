@@ -89,7 +89,13 @@ interface AppState {
     patch: Partial<
       Pick<
         Quote,
-        'seller' | 'office' | 'transport' | 'dueDate' | 'purchaseOrder' | 'description'
+        | 'seller'
+        | 'office'
+        | 'transport'
+        | 'currency'
+        | 'dueDate'
+        | 'purchaseOrder'
+        | 'description'
       >
     >,
   ) => void

@@ -174,14 +174,14 @@ interface QuotePdfProps {
   pageSize: PageSize
 }
 
-function TableHeader() {
+function TableHeader({ priceColumnLabel }: { priceColumnLabel: string }) {
   return (
     <View style={styles.tableHeader}>
       <Text style={[styles.thText, styles.colCode]}>Código</Text>
       <Text style={[styles.thText, styles.colDescription]}>Descripción</Text>
       <Text style={[styles.thText, styles.colQty]}>Cant.</Text>
       <Text style={[styles.thText, styles.colUnit]}>Unidad</Text>
-      <Text style={[styles.thText, styles.colPrice]}>Precio USD</Text>
+      <Text style={[styles.thText, styles.colPrice]}>{priceColumnLabel}</Text>
       <Text style={[styles.thText, styles.colTaxRate]}>% IVA</Text>
       <Text style={[styles.thText, styles.colTax]}>IVA</Text>
       <Text style={[styles.thText, styles.colNet]}>Neto</Text>
@@ -369,10 +369,14 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
         <View
           style={styles.repeatedTableHeader}
           fixed
-          render={({ pageNumber }) => (pageNumber > 1 ? <TableHeader /> : null)}
+          render={({ pageNumber }) =>
+            pageNumber > 1 ? (
+              <TableHeader priceColumnLabel={model.priceColumnLabel} />
+            ) : null
+          }
         />
 
-        <TableHeader />
+        <TableHeader priceColumnLabel={model.priceColumnLabel} />
 
         {model.rows.length === 0 ? (
           <Text style={styles.empty}>Aún no hay productos en la cotización.</Text>
@@ -383,10 +387,10 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
               <Text style={[styles.cell, styles.colDescription]}>{row.description}</Text>
               <Text style={[styles.cell, styles.colQty]}>{row.qty}</Text>
               <Text style={[styles.cell, styles.colUnit]}>{row.unit}</Text>
-              <Text style={[styles.cell, styles.colPrice]}>{row.unitPriceUsd}</Text>
+              <Text style={[styles.cell, styles.colPrice]}>{row.unitPrice}</Text>
               <Text style={[styles.cell, styles.colTaxRate]}>{row.taxRate}</Text>
-              <Text style={[styles.cell, styles.colTax]}>{row.taxUsd}</Text>
-              <Text style={[styles.cell, styles.cellStrong, styles.colNet]}>{row.netUsd}</Text>
+              <Text style={[styles.cell, styles.colTax]}>{row.tax}</Text>
+              <Text style={[styles.cell, styles.cellStrong, styles.colNet]}>{row.net}</Text>
             </View>
           ))
         )}
@@ -398,8 +402,8 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
               {model.rateLabel}
             </Text>
             <Text style={styles.rateLine}>
-              <Text style={styles.rateStrong}>Total en bolívares: </Text>
-              {model.totalVes}
+              <Text style={styles.rateStrong}>{model.totalOtherLabel}: </Text>
+              {model.totalOther}
             </Text>
             <Text style={styles.rateLine}>
               <Text style={styles.rateStrong}>Moneda: </Text>
@@ -410,15 +414,15 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
           <View style={styles.totalsBox}>
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>Sub-Total</Text>
-              <Text style={styles.totalsValue}>{model.subtotalUsd}</Text>
+              <Text style={styles.totalsValue}>{model.subtotal}</Text>
             </View>
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>IVA</Text>
-              <Text style={styles.totalsValue}>{model.taxUsd}</Text>
+              <Text style={styles.totalsValue}>{model.taxTotal}</Text>
             </View>
             <View style={styles.totalsFinal}>
               <Text style={styles.totalsFinalLabel}>Neto</Text>
-              <Text style={styles.totalsFinalValue}>{model.totalUsd}</Text>
+              <Text style={styles.totalsFinalValue}>{model.total}</Text>
             </View>
           </View>
         </View>

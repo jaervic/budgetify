@@ -4,6 +4,7 @@ import type { CalcResult } from '@/lib/calc'
 import { downloadBlob } from '@/lib/io'
 import { formatUsd, formatVes, usdToVes } from '@/lib/money'
 import type { QuoteCalcResult } from '@/lib/quoteCalc'
+import { formatQuoteMoney, formatQuoteOtherTotal } from '@/lib/quoteMoney'
 import type { Budget, Clinic, PageSize, Quote, RateMode } from '@/types'
 
 /** Opciones del documento que afectan a su render. */
@@ -319,20 +320,25 @@ export function buildQuoteWhatsAppText(quote: Quote, calc: QuoteCalcResult): str
     `N.º: ${quote.number || '—'}`,
     `Cliente: ${quote.client.name || '—'}`,
     `Fecha: ${quote.issueDate}`,
+    `Moneda: ${quote.currency}`,
     '',
   ]
   for (const item of calc.items) {
     lines.push(
-      `${item.code ? `${item.code} · ` : ''}${item.description}: ${item.qty} × ${formatUsd(
+      `${item.code ? `${item.code} · ` : ''}${item.description}: ${item.qty} × ${formatQuoteMoney(
         item.unitPriceUsd,
-      )} = ${formatUsd(item.netUsd)}`,
+        quote.currency,
+        quote.rate,
+      )} = ${formatQuoteMoney(item.netUsd, quote.currency, quote.rate)}`,
     )
   }
   lines.push('')
-  lines.push(`Sub-Total: ${formatUsd(calc.subtotalUsd)}`)
-  lines.push(`IVA: ${formatUsd(calc.taxUsd)}`)
-  lines.push(`Neto: ${formatUsd(calc.totalUsd)}`)
-  lines.push(formatVes(usdToVes(calc.totalUsd, quote.rate)))
+  lines.push(
+    `Sub-Total: ${formatQuoteMoney(calc.subtotalUsd, quote.currency, quote.rate)}`,
+  )
+  lines.push(`IVA: ${formatQuoteMoney(calc.taxUsd, quote.currency, quote.rate)}`)
+  lines.push(`Neto: ${formatQuoteMoney(calc.totalUsd, quote.currency, quote.rate)}`)
+  lines.push(formatQuoteOtherTotal(calc.totalUsd, quote.currency, quote.rate))
   lines.push(`(Tasa Bs. ${quote.rate} por $1)`)
   return lines.join('\n')
 }

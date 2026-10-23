@@ -354,12 +354,27 @@ describe('App · interacciones', () => {
     expect(items[0].code).toBe('BAYP')
     expect(screen.getByRole('table', { name: 'Productos de la cotización' })).toBeTruthy()
     // $6.80 + 16 % IVA = $7.89
-    expect(screen.getByTestId('quote-total-usd').textContent).toBe('$7.89')
+    expect(screen.getByTestId('quote-total').textContent).toBe('$7.89')
 
     await userEvent.click(screen.getByRole('tab', { name: 'Vista previa' }))
     const preview = screen.getByTestId('quote-preview')
     expect(preview.getAttribute('aria-label')).toBe('Vista previa de la cotización')
     expect(preview.textContent).toContain('BAYP')
     expect(preview.textContent).toContain('$7.89')
+  }, 30_000)
+
+  it('cotiza en bolívares y convierte los importes con la tasa', async () => {
+    render(<App />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cotización' }))
+    await chooseOption(screen.getByLabelText('Moneda'), 'VES · bolívares')
+
+    await userEvent.click(screen.getAllByRole('button', { name: 'Agregar productos' })[0])
+    await userEvent.click(screen.getByRole('checkbox', { name: /Bata de pacientes/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Agregar (1)' }))
+
+    // $7.89 × 876,8 = Bs. 6.917,95
+    expect(screen.getByTestId('quote-total').textContent).toBe('Bs. 6.917,95')
+    expect(screen.getByText(/Total en dólares: \$7\.89/)).toBeTruthy()
   }, 30_000)
 })

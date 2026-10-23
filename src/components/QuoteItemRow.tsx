@@ -5,9 +5,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { ComputedQuoteItem } from '@/lib/quoteCalc'
 import { LIMITS } from '@/lib/limits'
-import { formatUsd } from '@/lib/money'
+import {
+  formatQuoteMoney,
+  fromQuoteCurrency,
+  quoteCurrencyLabel,
+  toQuoteCurrency,
+} from '@/lib/quoteMoney'
 import { cn } from '@/lib/utils'
-import type { QuoteItem } from '@/types'
+import type { QuoteCurrency, QuoteItem } from '@/types'
 
 /**
  * Columnas de la tabla de cotización a partir de `lg`. En pantallas menores la
@@ -18,6 +23,8 @@ export const QUOTE_ITEM_GRID =
 
 interface QuoteItemRowProps {
   item: ComputedQuoteItem
+  currency: QuoteCurrency
+  rate: number
   canMoveUp: boolean
   canMoveDown: boolean
   onUpdate: (patch: Partial<Omit<QuoteItem, 'id'>>) => void
@@ -28,6 +35,8 @@ interface QuoteItemRowProps {
 
 export function QuoteItemRow({
   item,
+  currency,
+  rate,
   canMoveUp,
   canMoveDown,
   onUpdate,
@@ -99,13 +108,19 @@ export function QuoteItemRow({
       </div>
 
       <div role="cell" className="grid gap-1 lg:px-2 lg:py-2">
-        <span className="text-xs text-muted-foreground lg:hidden">Precio USD</span>
+        <span className="text-xs text-muted-foreground lg:hidden">
+          Precio {quoteCurrencyLabel(currency)}
+        </span>
         <NumberInput
           className="h-8"
-          aria-label="Precio unitario en USD"
+          aria-label={`Precio unitario en ${quoteCurrencyLabel(currency)}`}
           decimals={2}
-          value={item.unitPriceUsd}
-          onValueChange={(unitPriceUsd) => onUpdate({ unitPriceUsd })}
+          value={toQuoteCurrency(item.unitPriceUsd, currency, rate).toNumber()}
+          onValueChange={(value) =>
+            onUpdate({
+              unitPriceUsd: fromQuoteCurrency(value, currency, rate).toNumber(),
+            })
+          }
         />
       </div>
 
@@ -126,7 +141,9 @@ export function QuoteItemRow({
         className="flex items-center justify-between gap-3 lg:block lg:px-2 lg:py-2 lg:text-right"
       >
         <span className="text-xs text-muted-foreground lg:hidden">IVA</span>
-        <span className="tabular-nums whitespace-nowrap">{formatUsd(item.taxUsd)}</span>
+        <span className="tabular-nums whitespace-nowrap">
+          {formatQuoteMoney(item.taxUsd, currency, rate)}
+        </span>
       </div>
 
       <div
@@ -135,7 +152,9 @@ export function QuoteItemRow({
         className="flex items-center justify-between gap-3 font-medium lg:block lg:px-2 lg:py-2 lg:text-right"
       >
         <span className="text-xs font-normal text-muted-foreground lg:hidden">Neto</span>
-        <span className="tabular-nums whitespace-nowrap">{formatUsd(item.netUsd)}</span>
+        <span className="tabular-nums whitespace-nowrap">
+          {formatQuoteMoney(item.netUsd, currency, rate)}
+        </span>
       </div>
 
       <div role="cell" className="flex items-center justify-end gap-0.5 lg:px-1 lg:py-1">

@@ -48,6 +48,9 @@ export interface Budget {
 /** Tipo de documento que se está editando o que se guardó en el historial. */
 export type DocMode = 'budget' | 'quote'
 
+/** Moneda en la que se expresa una cotización. */
+export type QuoteCurrency = 'USD' | 'VES'
+
 export interface QuoteClient {
   name: string
   /** Código interno del cliente. Opcional en el documento. */
@@ -85,8 +88,8 @@ export interface Quote {
   seller?: string
   office?: string
   transport?: string
-  /** Moneda del documento. Por ahora siempre USD, como en la referencia. */
-  currency: 'USD'
+  /** Moneda del documento: dólares o bolívares. */
+  currency: QuoteCurrency
   issueDate: string
   dueDate?: string
   purchaseOrder?: string

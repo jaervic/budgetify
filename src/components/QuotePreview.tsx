@@ -100,7 +100,7 @@ export function QuotePreview({ model }: QuotePreviewProps) {
               <span>Descripción</span>
               <span className="text-right">Cant.</span>
               <span className="text-center">Unidad</span>
-              <span className="text-right">Precio USD</span>
+              <span className="text-right">{model.priceColumnLabel}</span>
               <span className="text-right">% IVA</span>
               <span className="text-right">IVA</span>
               <span className="text-right">Neto</span>
@@ -123,7 +123,7 @@ export function QuotePreview({ model }: QuotePreviewProps) {
                 </span>
                 <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right">
                   <span className="text-slate-500 sm:hidden">Precio</span>
-                  <span>{row.unitPriceUsd}</span>
+                  <span>{row.unitPrice}</span>
                 </span>
                 <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right">
                   <span className="text-slate-500 sm:hidden">% IVA</span>
@@ -131,11 +131,11 @@ export function QuotePreview({ model }: QuotePreviewProps) {
                 </span>
                 <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right">
                   <span className="text-slate-500 sm:hidden">IVA</span>
-                  <span>{row.taxUsd}</span>
+                  <span>{row.tax}</span>
                 </span>
                 <span className="flex justify-between gap-2 font-medium tabular-nums sm:block sm:text-right">
                   <span className="font-normal text-slate-500 sm:hidden">Neto</span>
-                  <span>{row.netUsd}</span>
+                  <span>{row.net}</span>
                 </span>
               </div>
             ))}
@@ -149,23 +149,23 @@ export function QuotePreview({ model }: QuotePreviewProps) {
               {model.rateLabel}
             </p>
             <p>
-              <span className="font-semibold text-slate-800">Total en Bs.: </span>
-              {model.totalVes}
+              <span className="font-semibold text-slate-800">{model.totalOtherLabel}: </span>
+              {model.totalOther}
             </p>
           </div>
 
           <div className="grid w-full gap-0 text-[11px] sm:w-52">
             <div className="flex justify-between border-b border-slate-200 bg-slate-50 px-2 py-1">
               <span className="text-slate-600">Sub-Total</span>
-              <span className="font-semibold text-slate-800">{model.subtotalUsd}</span>
+              <span className="font-semibold text-slate-800">{model.subtotal}</span>
             </div>
             <div className="flex justify-between border-b border-slate-200 bg-slate-50 px-2 py-1">
               <span className="text-slate-600">IVA</span>
-              <span className="font-semibold text-slate-800">{model.taxUsd}</span>
+              <span className="font-semibold text-slate-800">{model.taxTotal}</span>
             </div>
             <div className="flex justify-between bg-sky-700 px-2 py-1.5 text-white">
               <span className="font-bold">Neto</span>
-              <span className="font-bold">{model.totalUsd}</span>
+              <span className="font-bold">{model.total}</span>
             </div>
           </div>
         </div>
