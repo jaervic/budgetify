@@ -72,8 +72,8 @@ export function WelcomeDialog({ open, onOpenChange }: WelcomeDialogProps) {
         onOpenChange(next)
       }}
     >
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="grid-cols-[minmax(0,1fr)] sm:max-w-lg">
+        <DialogHeader className="pr-8">
           <DialogTitle>Cómo hacer un documento en 3 pasos</DialogTitle>
           <DialogDescription>
             Puedes cerrar esta guía y volver a abrirla con el botón «Ayuda».
@@ -98,7 +98,7 @@ export function WelcomeDialog({ open, onOpenChange }: WelcomeDialogProps) {
                     key={option.value}
                     type="button"
                     variant="outline"
-                    className="h-auto justify-start gap-3 p-4 text-left"
+                    className="h-auto w-full justify-start gap-3 p-4 text-left whitespace-normal"
                     aria-pressed={active}
                     onClick={() => {
                       setDocMode(option.value)
@@ -106,7 +106,7 @@ export function WelcomeDialog({ open, onOpenChange }: WelcomeDialogProps) {
                     }}
                   >
                     <Icon className="size-5 shrink-0" aria-hidden="true" />
-                    <span>
+                    <span className="min-w-0">
                       <span className="block text-sm font-semibold">{option.title}</span>
                       <span className="block text-sm font-normal text-muted-foreground">
                         {option.description}

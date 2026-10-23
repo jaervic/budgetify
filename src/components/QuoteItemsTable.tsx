@@ -41,25 +41,25 @@ export function QuoteItemsTable({ calc, emptyFocusRef }: QuoteItemsTableProps) {
       tabIndex={-1}
       role="table"
       aria-label="Productos de la cotización"
-      className="rounded-lg border outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="@container rounded-lg border outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <div
         role="row"
         className={cn(
-          'hidden border-b bg-muted/50 px-3 py-2 text-sm font-medium text-muted-foreground xl:grid',
+          'hidden border-b bg-muted/50 py-2 text-sm font-medium text-muted-foreground @min-[56rem]:grid',
           QUOTE_ITEM_GRID,
         )}
       >
-        <span role="columnheader" className="px-2">Código</span>
-        <span role="columnheader" className="px-2">Descripción</span>
-        <span role="columnheader" className="px-2 text-right">Cant.</span>
-        <span role="columnheader" className="px-2 text-center">Unidad</span>
-        <span role="columnheader" className="px-2 text-right">
+        <span role="columnheader" className="px-1.5">Código</span>
+        <span role="columnheader" className="px-1.5">Descripción</span>
+        <span role="columnheader" className="px-1.5 text-right">Cant.</span>
+        <span role="columnheader" className="px-1.5 text-center">Unidad</span>
+        <span role="columnheader" className="px-1.5 text-right">
           {showBothCurrencies ? 'Precio' : `Precio ${quoteCurrencyLabel(currency)}`}
         </span>
-        <span role="columnheader" className="px-2 text-right">% IVA</span>
-        <span role="columnheader" className="px-2 text-right">IVA</span>
-        <span role="columnheader" className="px-2 text-right">Neto</span>
+        <span role="columnheader" className="px-1.5 text-right">% IVA</span>
+        <span role="columnheader" className="px-1.5 text-right">IVA</span>
+        <span role="columnheader" className="px-1.5 text-right">Neto</span>
         <span role="columnheader" className="px-1 text-right">Acciones</span>
       </div>
 

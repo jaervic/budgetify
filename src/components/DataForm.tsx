@@ -86,7 +86,7 @@ export function DataForm() {
       <CardHeader>
         <CardTitle>Datos del presupuesto</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 sm:grid-cols-2">
+      <CardContent className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
         <div className="grid gap-2 sm:col-span-2">
           <Label htmlFor="patient-name">Paciente</Label>
           <Input

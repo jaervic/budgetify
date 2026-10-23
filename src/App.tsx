@@ -74,7 +74,7 @@ export default function App() {
         Saltar a las acciones
       </a>
       <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-3">
           <div className="flex min-w-0 items-center gap-2">
             <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
               <Stethoscope className="size-5" />
@@ -132,12 +132,12 @@ export default function App() {
             </Button>
           </div>
         </div>
-        <div className="mx-auto max-w-6xl px-4 pb-3">
+        <div className="mx-auto max-w-7xl px-4 pb-3">
           <DocumentModeSwitch />
         </div>
       </header>
 
-      <main className="mx-auto grid max-w-6xl gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <main className="mx-auto grid max-w-7xl gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_300px]">
         {docMode === 'quote' ? (
           <QuoteWorkspace
             formKey={formKey}

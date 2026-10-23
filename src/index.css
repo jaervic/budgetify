@@ -106,3 +106,9 @@
 [data-sonner-toast] {
   pointer-events: auto;
 }
+/* Los campos que se enfocan o se alcanzan con scroll no quedan bajo la barra inferior de móvil. */
+@media (max-width: 1023px) {
+  html {
+    scroll-padding-bottom: 6rem;
+  }
+}

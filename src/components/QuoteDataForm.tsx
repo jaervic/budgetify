@@ -68,7 +68,7 @@ export function QuoteDataForm() {
       <CardHeader>
         <CardTitle>Datos de la cotización</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-4 sm:grid-cols-2">
+      <CardContent className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="quote-number">N.º de cotización</Label>
           <Input
@@ -177,12 +177,13 @@ export function QuoteDataForm() {
           los convierte a Bs.; al cambiarlo, los importes se recalculan.
         </p>
 
-        <div className="sm:col-span-2">
+        <div className="min-w-0 sm:col-span-2">
           <Button
             id="quote-extra-toggle"
             type="button"
             variant="outline"
             size="sm"
+            className="h-auto min-h-9 py-1.5 text-left whitespace-normal"
             onClick={() => setExtraOpen((open) => !open)}
             aria-expanded={extraOpen}
             aria-controls="quote-extra"
