@@ -48,6 +48,9 @@ describe('store de cotizaciones', () => {
     useBudgetStore.getState().setQuoteMeta({ showBothCurrencies: true })
     expect(useBudgetStore.getState().quote.showBothCurrencies).toBe(true)
 
+    useBudgetStore.getState().setQuoteMeta({ terms: 'Pago a 30 días' })
+    expect(useBudgetStore.getState().quote.terms).toBe('Pago a 30 días')
+
     useBudgetStore.getState().setQuoteMeta({ currency: 'USD' })
     expect(useBudgetStore.getState().quote.currency).toBe('USD')
   })

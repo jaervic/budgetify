@@ -97,6 +97,7 @@ interface AppState {
         | 'dueDate'
         | 'purchaseOrder'
         | 'description'
+        | 'terms'
       >
     >,
   ) => void

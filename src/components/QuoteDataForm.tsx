@@ -129,14 +129,13 @@ export function QuoteDataForm() {
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            La tabla y el PDF muestran los precios en esta moneda. La tasa convierte los
-            importes a la otra.
+            La tabla y el PDF muestran los precios en esta moneda.
           </p>
         </div>
 
         <label
           htmlFor="quote-show-both"
-          className="flex cursor-pointer items-start gap-2 text-sm sm:col-span-2"
+          className="flex cursor-pointer items-start gap-2 text-sm sm:pt-7"
         >
           <input
             id="quote-show-both"
@@ -148,16 +147,19 @@ export function QuoteDataForm() {
             }
           />
           <span>
-            Mostrar también los importes en{' '}
+            Mostrar también en{' '}
             {quote.currency === 'USD' ? 'bolívares (VES)' : 'dólares (USD)'}
             <span className="block text-xs text-muted-foreground">
-              Añade el equivalente en la otra moneda en cada producto, en los totales y en
-              el PDF.
+              Añade el equivalente en cada producto, en los totales y en el PDF.
             </span>
           </span>
         </label>
 
         <RateField />
+        <p className="text-xs text-muted-foreground sm:col-span-2">
+          Los precios se guardan en USD. Si cotizas en bolívares, la tasa los convierte a
+          Bs.; al cambiar la tasa, los importes en Bs. se recalculan.
+        </p>
 
         <div className="sm:col-span-2">
           <Button
@@ -301,6 +303,20 @@ export function QuoteDataForm() {
                 value={quote.description ?? ''}
                 onChange={(event) =>
                   setQuoteMeta({ description: event.target.value || undefined })
+                }
+              />
+            </div>
+
+            <div className="grid gap-2 sm:col-span-2">
+              <Label htmlFor="quote-terms">Notas y condiciones</Label>
+              <Textarea
+                id="quote-terms"
+                rows={3}
+                maxLength={LIMITS.quoteTerms}
+                placeholder="Formas de pago, tiempo de entrega, garantía, validez…"
+                value={quote.terms ?? ''}
+                onChange={(event) =>
+                  setQuoteMeta({ terms: event.target.value || undefined })
                 }
               />
             </div>

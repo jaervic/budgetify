@@ -41,6 +41,7 @@ export const LIMITS = {
   quoteTransport: 120,
   quotePurchaseOrder: 60,
   quoteDescription: 300,
+  quoteTerms: 1000,
 } as const
 
 /**

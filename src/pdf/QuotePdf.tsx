@@ -161,6 +161,22 @@ const styles = StyleSheet.create({
   totalsFinalValue: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#ffffff' },
   totalsFinalValueOther: { fontSize: 7.2, color: '#e0f2fe' },
 
+  terms: {
+    marginTop: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: SKY,
+    backgroundColor: SLATE_50,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+  },
+  termsTitle: {
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: SLATE_800,
+    marginBottom: 2,
+  },
+  termsText: { fontSize: 7.4, lineHeight: 1.35, color: SLATE_600 },
+
   footer: {
     position: 'absolute',
     bottom: 20,
@@ -470,6 +486,13 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
             </View>
           </View>
         </View>
+
+        {model.terms && (
+          <View style={styles.terms} wrap={false}>
+            <Text style={styles.termsTitle}>Notas y condiciones</Text>
+            <Text style={styles.termsText}>{model.terms}</Text>
+          </View>
+        )}
 
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>

@@ -128,6 +128,7 @@ export const quoteSchema = z.object({
   dueDate: isoDate.optional(),
   purchaseOrder: z.string().max(LIMITS.quotePurchaseOrder).optional(),
   description: z.string().max(LIMITS.quoteDescription).optional(),
+  terms: z.string().max(LIMITS.quoteTerms).optional(),
   rate: z.number().finite().min(0.0001).max(1_000_000),
   items: z.array(quoteItemSchema).max(MAX_ITEMS),
 })

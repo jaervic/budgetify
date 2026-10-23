@@ -107,6 +107,7 @@ interface ClinicDialogProps {
 /** Datos de la clínica (identificación, contacto, logo, firma y sello). */
 export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
   const clinic = useBudgetStore((state) => state.clinic)
+  const docMode = useBudgetStore((state) => state.docMode)
   const setClinic = useBudgetStore((state) => state.setClinic)
   const catalog = useBudgetStore((state) => state.catalog)
   const [busy, setBusy] = useState(false)
@@ -132,44 +133,47 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
         <DialogHeader>
           <DialogTitle>Datos de la empresa</DialogTitle>
           <DialogDescription>
-            Encabezan el presupuesto, la cotización y el PDF. Se guardan solo en este
-            navegador.
+            {docMode === 'quote'
+              ? 'Encabezan la cotización y su PDF. Se guardan solo en este navegador.'
+              : 'Encabezan el presupuesto y su PDF. Se guardan solo en este navegador.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label>El documento es de</Label>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant={clinic.headerMode === 'professional' ? 'outline' : 'default'}
-                aria-pressed={clinic.headerMode !== 'professional'}
-                onClick={() => setClinic({ headerMode: 'clinic' })}
-              >
-                <Building2 />
-                Clínica / Centro médico
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={clinic.headerMode === 'professional' ? 'default' : 'outline'}
-                aria-pressed={clinic.headerMode === 'professional'}
-                onClick={() => setClinic({ headerMode: 'professional' })}
-              >
-                <Stethoscope />
-                Profesional independiente
-              </Button>
+          {docMode === 'budget' && (
+            <div className="grid gap-2">
+              <Label>El documento es de</Label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={clinic.headerMode === 'professional' ? 'outline' : 'default'}
+                  aria-pressed={clinic.headerMode !== 'professional'}
+                  onClick={() => setClinic({ headerMode: 'clinic' })}
+                >
+                  <Building2 />
+                  Clínica / Centro médico
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={clinic.headerMode === 'professional' ? 'default' : 'outline'}
+                  aria-pressed={clinic.headerMode === 'professional'}
+                  onClick={() => setClinic({ headerMode: 'professional' })}
+                >
+                  <Stethoscope />
+                  Profesional independiente
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {clinic.headerMode === 'professional'
+                  ? 'La hoja se encabeza con tu nombre, tu título y tu área de práctica.'
+                  : 'La hoja se encabeza con el nombre de la clínica o empresa.'}
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {clinic.headerMode === 'professional'
-                ? 'La hoja se encabeza con tu nombre, tu título y tu área de práctica.'
-                : 'La hoja se encabeza con el nombre de la clínica o empresa.'}
-            </p>
-          </div>
+          )}
 
-          {clinic.headerMode !== 'professional' && (
+          {(docMode === 'quote' || clinic.headerMode !== 'professional') && (
             <div className="grid gap-2">
               <Label htmlFor="clinic-name">Nombre de la clínica o empresa</Label>
               <Input
@@ -234,10 +238,11 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
             />
           </div>
 
-          <div className="grid gap-4 border-t pt-4">
-            <div className="grid gap-4 sm:grid-cols-[8rem_minmax(0,1fr)]">
-              <div className="grid gap-2">
-                <Label htmlFor="clinic-doctor-title">Título</Label>
+          {docMode === 'budget' && (
+            <div className="grid gap-4 border-t pt-4">
+              <div className="grid gap-4 sm:grid-cols-[8rem_minmax(0,1fr)]">
+                <div className="grid gap-2">
+                  <Label htmlFor="clinic-doctor-title">Título</Label>
                 <Input
                   id="clinic-doctor-title"
                   maxLength={LIMITS.doctorTitle}
@@ -300,8 +305,9 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
               {clinic.headerMode === 'professional'
                 ? '. El catálogo se filtra por esta área.'
                 : '. Pon el título y el nombre del profesional que firma.'}
-            </p>
-          </div>
+              </p>
+            </div>
+          )}
 
           <div className="grid gap-4 border-t pt-4">
             <ImageUpload
@@ -312,32 +318,38 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
               onClear={() => setClinic({ logoDataUrl: undefined })}
             />
 
-            <ImageUpload
-              label="Firma del médico (PNG o JPG)"
-              value={clinic.signatureDataUrl}
-              busy={busy}
-              previewClassName="h-16 w-40"
-              onFile={uploadImage('signatureDataUrl', 'Firma actualizada')}
-              onClear={() => setClinic({ signatureDataUrl: undefined })}
-            />
+            {docMode === 'budget' && (
+              <>
+                <ImageUpload
+                  label="Firma del médico (PNG o JPG)"
+                  value={clinic.signatureDataUrl}
+                  busy={busy}
+                  previewClassName="h-16 w-40"
+                  onFile={uploadImage('signatureDataUrl', 'Firma actualizada')}
+                  onClear={() => setClinic({ signatureDataUrl: undefined })}
+                />
 
-            <ImageUpload
-              label="Sello de la clínica (PNG o JPG)"
-              value={clinic.sealDataUrl}
-              busy={busy}
-              onFile={uploadImage('sealDataUrl', 'Sello actualizado')}
-              onClear={() => setClinic({ sealDataUrl: undefined })}
-            />
+                <ImageUpload
+                  label="Sello de la clínica (PNG o JPG)"
+                  value={clinic.sealDataUrl}
+                  busy={busy}
+                  onFile={uploadImage('sealDataUrl', 'Sello actualizado')}
+                  onClear={() => setClinic({ sealDataUrl: undefined })}
+                />
 
-            <label className="flex w-fit cursor-pointer items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                className="size-4 accent-primary"
-                checked={clinic.showSignature !== false}
-                onChange={(event) => setClinic({ showSignature: event.target.checked })}
-              />
-              Mostrar bloque de firmas en el documento
-            </label>
+                <label className="flex w-fit cursor-pointer items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    className="size-4 accent-primary"
+                    checked={clinic.showSignature !== false}
+                    onChange={(event) =>
+                      setClinic({ showSignature: event.target.checked })
+                    }
+                  />
+                  Mostrar bloque de firmas en el documento
+                </label>
+              </>
+            )}
           </div>
         </div>
       </DialogContent>

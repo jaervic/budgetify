@@ -170,6 +170,15 @@ describe('paginación del PDF de cotización', () => {
     expect(pages[0]).toContain('Bs.')
   }, 30_000)
 
+  it('incluye las notas y condiciones al final', async () => {
+    const q = quote(8)
+    q.terms = 'Pago a 30 días. Garantía de 6 meses.'
+    const pages = await pagesText(await renderQuotePdf(q, 'Letter'))
+
+    expect(pages[0]).toContain('Notas y condiciones')
+    expect(pages[0]).toContain('Garantía de 6 meses')
+  }, 30_000)
+
   it('los campos opcionales largos no rompen la cabecera', async () => {
     const q = quote(40)
     q.client.address = 'A'.repeat(200)

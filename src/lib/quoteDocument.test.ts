@@ -97,6 +97,7 @@ describe('modelo de la cotización', () => {
       dueDate: todayIso(),
       purchaseOrder: 'OC-1',
       description: 'Entrega inmediata',
+      terms: 'Pago a 30 días. Garantía de 6 meses.',
       client: {
         name: 'Ana Pérez',
         code: 'CL-01',
@@ -113,6 +114,7 @@ describe('modelo de la cotización', () => {
     expect(model.dueDate).toBeDefined()
     expect(model.purchaseOrder).toBe('OC-1')
     expect(model.description).toBe('Entrega inmediata')
+    expect(model.terms).toBe('Pago a 30 días. Garantía de 6 meses.')
     expect(model.client.code).toBe('CL-01')
     expect(model.client.address).toBe('Av. Principal')
   })

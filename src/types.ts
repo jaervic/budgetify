@@ -96,6 +96,8 @@ export interface Quote {
   dueDate?: string
   purchaseOrder?: string
   description?: string
+  /** Notas y condiciones: pago, entrega, garantía, validez… */
+  terms?: string
   /** Tasa de cálculo: bolívares por cada dólar. */
   rate: number
   items: QuoteItem[]

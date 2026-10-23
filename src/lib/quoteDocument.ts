@@ -44,6 +44,7 @@ export interface QuoteDocumentModel {
   transport?: string
   purchaseOrder?: string
   description?: string
+  terms?: string
   /** Cabecera de la columna de precio, p. ej. «Precio USD» o «Precio Bs.». */
   priceColumnLabel: string
   rows: QuoteDocumentRow[]
@@ -111,6 +112,7 @@ export function buildQuoteDocumentModel(
     transport: optionalText(quote.transport),
     purchaseOrder: optionalText(quote.purchaseOrder),
     description: optionalText(quote.description),
+    terms: optionalText(quote.terms),
     priceColumnLabel: quote.showBothCurrencies
       ? 'Precio'
       : `Precio ${quoteCurrencyLabel(quote.currency)}`,

@@ -7,7 +7,7 @@ import type { QuoteCalcResult } from '@/lib/quoteCalc'
 import {
   formatQuoteMoney,
   formatQuoteOtherMoney,
-  quoteOtherTotalLabel,
+  quoteOtherCurrency,
 } from '@/lib/quoteMoney'
 import type { Budget, Clinic, PageSize, Quote, RateMode } from '@/types'
 
@@ -324,7 +324,11 @@ export function buildQuoteWhatsAppText(quote: Quote, calc: QuoteCalcResult): str
     `N.º: ${quote.number || '—'}`,
     `Cliente: ${quote.client.name || '—'}`,
     `Fecha: ${quote.issueDate}`,
-    `Moneda: ${quote.currency}`,
+    `Moneda: ${
+      quote.showBothCurrencies
+        ? `${quote.currency} / ${quoteOtherCurrency(quote.currency)}`
+        : quote.currency
+    }`,
     '',
   ]
   const other = (amountUsd: number) =>
@@ -348,14 +352,21 @@ export function buildQuoteWhatsAppText(quote: Quote, calc: QuoteCalcResult): str
       calc.subtotalUsd.toNumber(),
     )}`,
   )
-  lines.push(`IVA: ${formatQuoteMoney(calc.taxUsd, quote.currency, quote.rate)}`)
+  lines.push(
+    `IVA: ${formatQuoteMoney(calc.taxUsd, quote.currency, quote.rate)}${other(
+      calc.taxUsd.toNumber(),
+    )}`,
+  )
   lines.push(
     `Neto: ${formatQuoteMoney(calc.totalUsd, quote.currency, quote.rate)}${other(
       calc.totalUsd.toNumber(),
     )}`,
   )
-  if (quote.showBothCurrencies) lines.push(quoteOtherTotalLabel(quote.currency))
   lines.push(`(Tasa Bs. ${quote.rate} por $1)`)
+  if (quote.terms?.trim()) {
+    lines.push('')
+    lines.push(quote.terms.trim())
+  }
   return lines.join('\n')
 }
 

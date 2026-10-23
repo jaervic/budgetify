@@ -25,7 +25,7 @@ test('cambia a cotización, agrega productos y calcula el IVA', async ({ page })
   await expect(page.getByLabel('Código').first()).toHaveValue('BAYP')
 
   const bothCurrencies = page.getByRole('checkbox', {
-    name: /Mostrar también los importes en bolívares/,
+    name: /Mostrar también en bolívares/,
   })
   await bothCurrencies.check()
   await expect(bothCurrencies).toBeChecked()

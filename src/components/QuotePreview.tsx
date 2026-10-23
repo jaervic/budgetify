@@ -212,6 +212,15 @@ export function QuotePreview({ model }: QuotePreviewProps) {
           </div>
         </div>
 
+        {model.terms && (
+          <section className="mt-3 rounded-md border-l-4 border-sky-600 bg-slate-50 px-3 py-2">
+            <h3 className="text-[10.5px] font-bold text-slate-800">Notas y condiciones</h3>
+            <p className="mt-0.5 whitespace-pre-line text-[9.5px] text-slate-600">
+              {model.terms}
+            </p>
+          </section>
+        )}
+
         <div className="mt-5 flex flex-col gap-1 border-t border-slate-200 pt-2 text-[8.5px] text-slate-500 sm:flex-row sm:justify-between">
           <span>
             Cotización N.º {model.number} · {model.footerNote}

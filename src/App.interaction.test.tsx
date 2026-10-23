@@ -380,7 +380,7 @@ describe('App · interacciones', () => {
     // en los totales, sin cambiar la moneda principal.
     await userEvent.click(
       screen.getByRole('checkbox', {
-        name: /Mostrar también los importes en dólares/,
+        name: /Mostrar también en dólares/,
       }),
     )
     expect(screen.getByTestId('quote-total').textContent).toBe('Bs. 6.917,95')

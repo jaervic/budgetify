@@ -20,7 +20,7 @@ import type { QuoteCurrency, QuoteItem } from '@/types'
  * fila se apila como una tarjeta, igual que la tabla del presupuesto médico.
  */
 export const QUOTE_ITEM_GRID =
-  'lg:grid-cols-[5.25rem_minmax(0,1.8fr)_4.25rem_4.25rem_5.75rem_4.25rem_5.25rem_5.75rem_auto]'
+  'xl:grid-cols-[5.25rem_minmax(0,1.8fr)_4.25rem_4.25rem_5.75rem_4.25rem_5.25rem_5.75rem_auto]'
 
 interface QuoteItemRowProps {
   item: ComputedQuoteItem
@@ -56,15 +56,15 @@ export function QuoteItemRow({
       aria-labelledby={rowLabelId}
       className={cn(
         'grid gap-2 border-b border-border/60 px-3 py-3 last:border-b-0',
-        'lg:items-start lg:gap-0 lg:px-0 lg:py-0',
+        'xl:items-start xl:gap-0 xl:px-0 xl:py-0',
         QUOTE_ITEM_GRID,
       )}
     >
-      <div role="cell" className="grid gap-1 lg:px-2 lg:py-2">
+      <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
         <span id={rowLabelId} className="sr-only">
           {label}
         </span>
-        <span className="text-xs text-muted-foreground lg:hidden">Código</span>
+        <span className="text-xs text-muted-foreground xl:hidden">Código</span>
         <Input
           className="h-8"
           aria-label="Código"
@@ -75,8 +75,8 @@ export function QuoteItemRow({
         />
       </div>
 
-      <div role="cell" className="grid gap-1 lg:px-2 lg:py-2">
-        <span className="text-xs text-muted-foreground lg:hidden">Descripción</span>
+      <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
+        <span className="text-xs text-muted-foreground xl:hidden">Descripción</span>
         <Input
           className="h-8 font-medium"
           aria-label="Descripción"
@@ -87,8 +87,8 @@ export function QuoteItemRow({
         />
       </div>
 
-      <div role="cell" className="grid gap-1 lg:px-2 lg:py-2">
-        <span className="text-xs text-muted-foreground lg:hidden">Cantidad</span>
+      <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
+        <span className="text-xs text-muted-foreground xl:hidden">Cantidad</span>
         <NumberInput
           className="h-8"
           aria-label="Cantidad"
@@ -98,8 +98,8 @@ export function QuoteItemRow({
         />
       </div>
 
-      <div role="cell" className="grid gap-1 lg:px-2 lg:py-2">
-        <span className="text-xs text-muted-foreground lg:hidden">Unidad</span>
+      <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
+        <span className="text-xs text-muted-foreground xl:hidden">Unidad</span>
         <Input
           className="h-8 text-center"
           aria-label="Unidad"
@@ -110,8 +110,8 @@ export function QuoteItemRow({
         />
       </div>
 
-      <div role="cell" className="grid gap-1 lg:px-2 lg:py-2">
-        <span className="text-xs text-muted-foreground lg:hidden">
+      <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
+        <span className="text-xs text-muted-foreground xl:hidden">
           Precio {quoteCurrencyLabel(currency)}
         </span>
         <NumberInput
@@ -132,8 +132,8 @@ export function QuoteItemRow({
         )}
       </div>
 
-      <div role="cell" className="grid gap-1 lg:px-2 lg:py-2">
-        <span className="text-xs text-muted-foreground lg:hidden">% IVA</span>
+      <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
+        <span className="text-xs text-muted-foreground xl:hidden">% IVA</span>
         <NumberInput
           className="h-8"
           aria-label="Porcentaje de IVA"
@@ -146,10 +146,10 @@ export function QuoteItemRow({
       <div
         role="cell"
         aria-label={`IVA de ${label}`}
-        className="flex items-center justify-between gap-3 lg:block lg:px-2 lg:py-2 lg:text-right"
+        className="flex items-center justify-between gap-3 xl:block xl:px-2 xl:py-2 xl:text-right"
       >
-        <span className="text-xs text-muted-foreground lg:hidden">IVA</span>
-        <span className="flex flex-col tabular-nums whitespace-nowrap lg:items-end">
+        <span className="text-xs text-muted-foreground xl:hidden">IVA</span>
+        <span className="flex flex-col tabular-nums whitespace-nowrap xl:items-end">
           <span>{formatQuoteMoney(item.taxUsd, currency, rate)}</span>
           {showBothCurrencies && (
             <span className="text-xs text-muted-foreground">
@@ -162,10 +162,10 @@ export function QuoteItemRow({
       <div
         role="cell"
         aria-label={`Neto de ${label}`}
-        className="flex items-center justify-between gap-3 font-medium lg:block lg:px-2 lg:py-2 lg:text-right"
+        className="flex items-center justify-between gap-3 font-medium xl:block xl:px-2 xl:py-2 xl:text-right"
       >
-        <span className="text-xs font-normal text-muted-foreground lg:hidden">Neto</span>
-        <span className="flex flex-col tabular-nums whitespace-nowrap lg:items-end">
+        <span className="text-xs font-normal text-muted-foreground xl:hidden">Neto</span>
+        <span className="flex flex-col tabular-nums whitespace-nowrap xl:items-end">
           <span>{formatQuoteMoney(item.netUsd, currency, rate)}</span>
           {showBothCurrencies && (
             <span className="text-xs font-normal text-muted-foreground">
@@ -175,7 +175,7 @@ export function QuoteItemRow({
         </span>
       </div>
 
-      <div role="cell" className="flex items-center justify-end gap-0.5 lg:px-1 lg:py-1">
+      <div role="cell" className="flex items-center justify-end gap-0.5 xl:px-1 xl:py-1">
         <Button
           type="button"
           variant="ghost"

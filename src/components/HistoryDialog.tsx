@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { FolderOpen, History, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -41,6 +41,8 @@ export function HistoryDialog({
   const history = useBudgetStore((state) => state.history)
   const loadSavedDocument = useBudgetStore((state) => state.loadSavedDocument)
   const removeSavedBudget = useBudgetStore((state) => state.removeSavedBudget)
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   const entries = useMemo(
     () =>
@@ -96,6 +98,10 @@ export function HistoryDialog({
     const before = useBudgetStore.getState().history
     withUndo({ history: before }, 'Copia eliminada del historial', () => {
       removeSavedBudget(id)
+      // El botón de borrar desaparece: si quedan copias, el foco va a la
+      // lista; si era la última, al propio diálogo.
+      const target = before.length <= 1 ? dialogRef.current : listRef.current
+      requestAnimationFrame(() => target?.focus())
     })
   }
 
@@ -106,7 +112,12 @@ export function HistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl" onInteractOutside={keepOpenForToast}>
+      <DialogContent
+        ref={dialogRef}
+        tabIndex={-1}
+        className="max-w-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        onInteractOutside={keepOpenForToast}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <History className="size-4" />
@@ -126,7 +137,13 @@ export function HistoryDialog({
           </p>
         ) : (
           <ScrollArea className="max-h-[55vh] pr-2">
-            <ul className="grid gap-2">
+            <div
+              ref={listRef}
+              tabIndex={-1}
+              aria-label="Documentos guardados"
+              className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <ul className="grid gap-2">
               {entries.map((entry) => (
                 <li
                   key={entry.id}
@@ -170,7 +187,8 @@ export function HistoryDialog({
                   </div>
                 </li>
               ))}
-            </ul>
+              </ul>
+            </div>
           </ScrollArea>
         )}
       </DialogContent>

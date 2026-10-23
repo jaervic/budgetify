@@ -2,9 +2,9 @@ import { useRef, useState } from 'react'
 import {
   BookmarkPlus,
   Download,
-  Eraser,
   Eye,
   FileDown,
+  FilePlus2,
   FileUp,
   Printer,
   Share2,
@@ -91,7 +91,7 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
     const state = useBudgetStore.getState()
     withUndo(
       { quote: state.quote, quoteCounter: state.quoteCounter },
-      'Cotización limpiada',
+      'Nueva cotización creada',
       () => {
         clearQuote()
         onDocumentReplaced()
@@ -197,22 +197,22 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
           className="text-destructive hover:text-destructive"
           onClick={() => setConfirmClearOpen(true)}
         >
-          <Eraser />
-          Limpiar
+          <FilePlus2 />
+          Nueva cotización
         </Button>
       </div>
 
       <ConfirmDialog
         open={confirmClearOpen}
         onOpenChange={setConfirmClearOpen}
-        title="¿Limpiar la cotización?"
+        title="¿Empezar una nueva cotización?"
         description={
           <p>
-            Se borran los productos y los datos del cliente. Podrás deshacerlo desde el aviso
-            que aparece al limpiarla.
+            Se crea una cotización vacía con el siguiente número correlativo. La actual se
+            puede recuperar desde el aviso de deshacer.
           </p>
         }
-        confirmLabel="Limpiar cotización"
+        confirmLabel="Nueva cotización"
         destructive
         onConfirm={handleClear}
       />

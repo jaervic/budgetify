@@ -59,7 +59,10 @@ y su propio formato de hoja:
 - El tamaño por defecto es **Carta**. Si el contenido pasa de una hoja, la cabecera, los
   datos del cliente y la cabecera de la tabla se repiten en las hojas siguientes.
 - Los datos opcionales (código y RIF del cliente, teléfonos, dirección, vendedor, oficina,
-  transporte, vencimiento, orden de compra y descripción) solo se imprimen si tienen valor.
+  transporte, vencimiento, orden de compra, descripción y notas/condiciones) solo se imprimen
+  si tienen valor.
+- El botón **Nueva cotización** crea un documento vacío con el siguiente número correlativo,
+  sin perder la copia anterior (se puede deshacer).
 - Los productos se gestionan en **Gestionar catálogo → Productos** y se incluyen en el
   respaldo JSON del catálogo.
 - El **historial** guarda presupuestos y cotizaciones juntos, con un distintivo de tipo.
