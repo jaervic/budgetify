@@ -122,6 +122,8 @@ export const quoteSchema = z.object({
   office: z.string().max(LIMITS.quoteOffice).optional(),
   transport: z.string().max(LIMITS.quoteTransport).optional(),
   currency: z.enum(['USD', 'VES']),
+  // Las cotizaciones guardadas antes de esta opción se leen en una sola moneda.
+  showBothCurrencies: z.boolean().default(false),
   issueDate: isoDate,
   dueDate: isoDate.optional(),
   purchaseOrder: z.string().max(LIMITS.quotePurchaseOrder).optional(),

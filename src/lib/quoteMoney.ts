@@ -37,11 +37,16 @@ export function formatQuoteMoney(
     : formatUsd(amountUsd)
 }
 
+/** La moneda contraria a la principal. */
+export function quoteOtherCurrency(currency: QuoteCurrency): QuoteCurrency {
+  return currency === 'VES' ? 'USD' : 'VES'
+}
+
 /**
  * Importe equivalente en la otra moneda. Si la cotización es en USD, devuelve
- * el total en bolívares; si es en VES, devuelve el total en dólares.
+ * el importe en bolívares; si es en VES, lo devuelve en dólares.
  */
-export function formatQuoteOtherTotal(
+export function formatQuoteOtherMoney(
   amountUsd: Decimal.Value,
   currency: QuoteCurrency,
   rate: number,

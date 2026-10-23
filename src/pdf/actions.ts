@@ -4,7 +4,11 @@ import type { CalcResult } from '@/lib/calc'
 import { downloadBlob } from '@/lib/io'
 import { formatUsd, formatVes, usdToVes } from '@/lib/money'
 import type { QuoteCalcResult } from '@/lib/quoteCalc'
-import { formatQuoteMoney, formatQuoteOtherTotal } from '@/lib/quoteMoney'
+import {
+  formatQuoteMoney,
+  formatQuoteOtherMoney,
+  quoteOtherTotalLabel,
+} from '@/lib/quoteMoney'
 import type { Budget, Clinic, PageSize, Quote, RateMode } from '@/types'
 
 /** Opciones del documento que afectan a su render. */
@@ -323,22 +327,34 @@ export function buildQuoteWhatsAppText(quote: Quote, calc: QuoteCalcResult): str
     `Moneda: ${quote.currency}`,
     '',
   ]
+  const other = (amountUsd: number) =>
+    quote.showBothCurrencies
+      ? ` (${formatQuoteOtherMoney(amountUsd, quote.currency, quote.rate)})`
+      : ''
   for (const item of calc.items) {
     lines.push(
       `${item.code ? `${item.code} · ` : ''}${item.description}: ${item.qty} × ${formatQuoteMoney(
         item.unitPriceUsd,
         quote.currency,
         quote.rate,
-      )} = ${formatQuoteMoney(item.netUsd, quote.currency, quote.rate)}`,
+      )} = ${formatQuoteMoney(item.netUsd, quote.currency, quote.rate)}${other(
+        item.netUsd.toNumber(),
+      )}`,
     )
   }
   lines.push('')
   lines.push(
-    `Sub-Total: ${formatQuoteMoney(calc.subtotalUsd, quote.currency, quote.rate)}`,
+    `Sub-Total: ${formatQuoteMoney(calc.subtotalUsd, quote.currency, quote.rate)}${other(
+      calc.subtotalUsd.toNumber(),
+    )}`,
   )
   lines.push(`IVA: ${formatQuoteMoney(calc.taxUsd, quote.currency, quote.rate)}`)
-  lines.push(`Neto: ${formatQuoteMoney(calc.totalUsd, quote.currency, quote.rate)}`)
-  lines.push(formatQuoteOtherTotal(calc.totalUsd, quote.currency, quote.rate))
+  lines.push(
+    `Neto: ${formatQuoteMoney(calc.totalUsd, quote.currency, quote.rate)}${other(
+      calc.totalUsd.toNumber(),
+    )}`,
+  )
+  if (quote.showBothCurrencies) lines.push(quoteOtherTotalLabel(quote.currency))
   lines.push(`(Tasa Bs. ${quote.rate} por $1)`)
   return lines.join('\n')
 }

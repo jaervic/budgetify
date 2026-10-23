@@ -108,7 +108,12 @@ const styles = StyleSheet.create({
     paddingVertical: 3.2,
     paddingHorizontal: 4,
   },
+  // Con dos monedas cada importe ocupa dos líneas: se aprieta un poco el
+  // renglón para que una cotización larga siga cabiendo en dos hojas Carta.
+  rowBoth: { paddingVertical: 2 },
   cell: { fontSize: 7.7, lineHeight: 1.25 },
+  cellOther: { fontSize: 6.4, lineHeight: 1.05, color: SLATE_500 },
+  amountCol: { flexDirection: 'column', alignItems: 'flex-end' },
   cellStrong: { fontFamily: 'Helvetica-Bold', color: SLATE_800 },
 
   empty: { paddingVertical: 22, textAlign: 'center', color: SLATE_500, fontSize: 8.5 },
@@ -142,7 +147,9 @@ const styles = StyleSheet.create({
     backgroundColor: SLATE_50,
   },
   totalsLabel: { fontSize: 8.5, color: SLATE_700 },
+  totalsValues: { flexDirection: 'column', alignItems: 'flex-end' },
   totalsValue: { fontSize: 8.5, fontFamily: 'Helvetica-Bold', color: SLATE_800 },
+  totalsValueOther: { fontSize: 7, color: SLATE_500 },
   totalsFinal: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -152,6 +159,7 @@ const styles = StyleSheet.create({
   },
   totalsFinalLabel: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#ffffff' },
   totalsFinalValue: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#ffffff' },
+  totalsFinalValueOther: { fontSize: 7.2, color: '#e0f2fe' },
 
   footer: {
     position: 'absolute',
@@ -352,7 +360,7 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
                 <Text style={styles.docMetaStrong}>N.º {model.number}</Text>
               </Text>
               <Text style={styles.docMeta}>Emisión: {model.issueDate}</Text>
-              <Text style={styles.docMeta}>Moneda: {model.currency}</Text>
+              <Text style={styles.docMeta}>Moneda: {model.currencyDisplay}</Text>
             </View>
           </View>
 
@@ -382,15 +390,34 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
           <Text style={styles.empty}>Aún no hay productos en la cotización.</Text>
         ) : (
           model.rows.map((row) => (
-            <View key={row.id} style={styles.row} wrap={false}>
+            <View
+              key={row.id}
+              style={[styles.row, model.showBothCurrencies ? styles.rowBoth : undefined]}
+              wrap={false}
+            >
               <Text style={[styles.cell, styles.colCode]}>{row.code}</Text>
               <Text style={[styles.cell, styles.colDescription]}>{row.description}</Text>
               <Text style={[styles.cell, styles.colQty]}>{row.qty}</Text>
               <Text style={[styles.cell, styles.colUnit]}>{row.unit}</Text>
-              <Text style={[styles.cell, styles.colPrice]}>{row.unitPrice}</Text>
+              <View style={[styles.colPrice, styles.amountCol]}>
+                <Text style={styles.cell}>{row.unitPrice}</Text>
+                {model.showBothCurrencies && (
+                  <Text style={styles.cellOther}>{row.unitPriceOther}</Text>
+                )}
+              </View>
               <Text style={[styles.cell, styles.colTaxRate]}>{row.taxRate}</Text>
-              <Text style={[styles.cell, styles.colTax]}>{row.tax}</Text>
-              <Text style={[styles.cell, styles.cellStrong, styles.colNet]}>{row.net}</Text>
+              <View style={[styles.colTax, styles.amountCol]}>
+                <Text style={styles.cell}>{row.tax}</Text>
+                {model.showBothCurrencies && (
+                  <Text style={styles.cellOther}>{row.taxOther}</Text>
+                )}
+              </View>
+              <View style={[styles.colNet, styles.amountCol]}>
+                <Text style={[styles.cell, styles.cellStrong]}>{row.net}</Text>
+                {model.showBothCurrencies && (
+                  <Text style={styles.cellOther}>{row.netOther}</Text>
+                )}
+              </View>
             </View>
           ))
         )}
@@ -401,28 +428,45 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
               <Text style={styles.rateStrong}>Tasa de cálculo: </Text>
               {model.rateLabel}
             </Text>
-            <Text style={styles.rateLine}>
-              <Text style={styles.rateStrong}>{model.totalOtherLabel}: </Text>
-              {model.totalOther}
-            </Text>
+            {model.showBothCurrencies && (
+              <Text style={styles.rateLine}>
+                <Text style={styles.rateStrong}>{model.totalOtherLabel}: </Text>
+                {model.totalOther}
+              </Text>
+            )}
             <Text style={styles.rateLine}>
               <Text style={styles.rateStrong}>Moneda: </Text>
-              {model.currency}
+              {model.currencyDisplay}
             </Text>
           </View>
 
           <View style={styles.totalsBox}>
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>Sub-Total</Text>
-              <Text style={styles.totalsValue}>{model.subtotal}</Text>
+              <View style={styles.totalsValues}>
+                <Text style={styles.totalsValue}>{model.subtotal}</Text>
+                {model.showBothCurrencies && (
+                  <Text style={styles.totalsValueOther}>{model.subtotalOther}</Text>
+                )}
+              </View>
             </View>
             <View style={styles.totalsRow}>
               <Text style={styles.totalsLabel}>IVA</Text>
-              <Text style={styles.totalsValue}>{model.taxTotal}</Text>
+              <View style={styles.totalsValues}>
+                <Text style={styles.totalsValue}>{model.taxTotal}</Text>
+                {model.showBothCurrencies && (
+                  <Text style={styles.totalsValueOther}>{model.taxTotalOther}</Text>
+                )}
+              </View>
             </View>
             <View style={styles.totalsFinal}>
               <Text style={styles.totalsFinalLabel}>Neto</Text>
-              <Text style={styles.totalsFinalValue}>{model.total}</Text>
+              <View style={styles.totalsValues}>
+                <Text style={styles.totalsFinalValue}>{model.total}</Text>
+                {model.showBothCurrencies && (
+                  <Text style={styles.totalsFinalValueOther}>{model.totalOther}</Text>
+                )}
+              </View>
             </View>
           </View>
         </View>

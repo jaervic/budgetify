@@ -88,8 +88,10 @@ export interface Quote {
   seller?: string
   office?: string
   transport?: string
-  /** Moneda del documento: dólares o bolívares. */
+  /** Moneda principal del documento: dólares o bolívares. */
   currency: QuoteCurrency
+  /** Mostrar también los importes equivalentes en la otra moneda. */
+  showBothCurrencies: boolean
   issueDate: string
   dueDate?: string
   purchaseOrder?: string

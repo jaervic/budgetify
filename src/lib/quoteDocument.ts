@@ -4,8 +4,9 @@ import { formatShortDate } from './date'
 import { Decimal, formatVes } from './money'
 import {
   formatQuoteMoney,
-  formatQuoteOtherTotal,
+  formatQuoteOtherMoney,
   quoteCurrencyLabel,
+  quoteOtherCurrency,
   quoteOtherTotalLabel,
 } from './quoteMoney'
 
@@ -17,9 +18,12 @@ export interface QuoteDocumentRow {
   unit: string
   /** Precio unitario en la moneda de la cotización. */
   unitPrice: string
+  unitPriceOther: string
   taxRate: string
   tax: string
+  taxOther: string
   net: string
+  netOther: string
 }
 
 /** Estructura común de la vista previa HTML y el PDF de cotización. */
@@ -28,6 +32,9 @@ export interface QuoteDocumentModel {
   number: string
   title: string
   currency: QuoteCurrency
+  /** «USD», «VES» o «USD / VES» cuando se muestran ambas. */
+  currencyDisplay: string
+  showBothCurrencies: boolean
   issueDate: string
   dueDate?: string
   rateLabel: string
@@ -41,7 +48,9 @@ export interface QuoteDocumentModel {
   priceColumnLabel: string
   rows: QuoteDocumentRow[]
   subtotal: string
+  subtotalOther: string
   taxTotal: string
+  taxTotalOther: string
   total: string
   totalOtherLabel: string
   totalOther: string
@@ -74,12 +83,18 @@ export function buildQuoteDocumentModel(
 ): QuoteDocumentModel {
   const money = (amount: Decimal.Value) =>
     formatQuoteMoney(amount, quote.currency, quote.rate)
+  const moneyOther = (amount: Decimal.Value) =>
+    formatQuoteOtherMoney(amount, quote.currency, quote.rate)
 
   return {
     clinic,
     number: quote.number.trim() || '—',
     title: 'Cotización',
     currency: quote.currency,
+    currencyDisplay: quote.showBothCurrencies
+      ? `${quote.currency} / ${quoteOtherCurrency(quote.currency)}`
+      : quote.currency,
+    showBothCurrencies: quote.showBothCurrencies,
     issueDate: formatShortDate(quote.issueDate),
     dueDate: quote.dueDate ? formatShortDate(quote.dueDate) : undefined,
     rateLabel: `${formatVes(quote.rate)} por $1`,
@@ -96,7 +111,9 @@ export function buildQuoteDocumentModel(
     transport: optionalText(quote.transport),
     purchaseOrder: optionalText(quote.purchaseOrder),
     description: optionalText(quote.description),
-    priceColumnLabel: `Precio ${quoteCurrencyLabel(quote.currency)}`,
+    priceColumnLabel: quote.showBothCurrencies
+      ? 'Precio'
+      : `Precio ${quoteCurrencyLabel(quote.currency)}`,
     rows: calc.items.map((item) => ({
       id: item.id,
       code: item.code.trim() || '—',
@@ -104,15 +121,20 @@ export function buildQuoteDocumentModel(
       qty: quantityFormatter.format(item.qty),
       unit: item.unit.trim() || '—',
       unitPrice: money(item.unitPriceUsd),
+      unitPriceOther: moneyOther(item.unitPriceUsd),
       taxRate: `${percentFormatter.format(item.taxRate)} %`,
       tax: money(item.taxUsd),
+      taxOther: moneyOther(item.taxUsd),
       net: money(item.netUsd),
+      netOther: moneyOther(item.netUsd),
     })),
     subtotal: money(calc.subtotalUsd),
+    subtotalOther: moneyOther(calc.subtotalUsd),
     taxTotal: money(calc.taxUsd),
+    taxTotalOther: moneyOther(calc.taxUsd),
     total: money(calc.totalUsd),
     totalOtherLabel: quoteOtherTotalLabel(quote.currency),
-    totalOther: formatQuoteOtherTotal(calc.totalUsd, quote.currency, quote.rate),
+    totalOther: moneyOther(calc.totalUsd),
     pageSize,
     footerNote: 'Cotización de productos — documento generado con Budgetify',
   }

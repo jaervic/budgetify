@@ -64,7 +64,7 @@ export function QuotePreview({ model }: QuotePreviewProps) {
             </p>
             <p>
               <span className="text-slate-500">Moneda: </span>
-              <span className="text-slate-800">{model.currency}</span>
+              <span className="text-slate-800">{model.currencyDisplay}</span>
             </p>
           </div>
         </header>
@@ -123,7 +123,12 @@ export function QuotePreview({ model }: QuotePreviewProps) {
                 </span>
                 <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right">
                   <span className="text-slate-500 sm:hidden">Precio</span>
-                  <span>{row.unitPrice}</span>
+                  <span className="flex flex-col sm:items-end">
+                    <span>{row.unitPrice}</span>
+                    {model.showBothCurrencies && (
+                      <span className="text-[9px] text-slate-500">{row.unitPriceOther}</span>
+                    )}
+                  </span>
                 </span>
                 <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right">
                   <span className="text-slate-500 sm:hidden">% IVA</span>
@@ -131,11 +136,23 @@ export function QuotePreview({ model }: QuotePreviewProps) {
                 </span>
                 <span className="flex justify-between gap-2 tabular-nums sm:block sm:text-right">
                   <span className="text-slate-500 sm:hidden">IVA</span>
-                  <span>{row.tax}</span>
+                  <span className="flex flex-col sm:items-end">
+                    <span>{row.tax}</span>
+                    {model.showBothCurrencies && (
+                      <span className="text-[9px] text-slate-500">{row.taxOther}</span>
+                    )}
+                  </span>
                 </span>
                 <span className="flex justify-between gap-2 font-medium tabular-nums sm:block sm:text-right">
                   <span className="font-normal text-slate-500 sm:hidden">Neto</span>
-                  <span>{row.net}</span>
+                  <span className="flex flex-col sm:items-end">
+                    <span>{row.net}</span>
+                    {model.showBothCurrencies && (
+                      <span className="text-[9px] font-normal text-slate-500">
+                        {row.netOther}
+                      </span>
+                    )}
+                  </span>
                 </span>
               </div>
             ))}
@@ -148,24 +165,49 @@ export function QuotePreview({ model }: QuotePreviewProps) {
               <span className="font-semibold text-slate-800">Tasa: </span>
               {model.rateLabel}
             </p>
-            <p>
-              <span className="font-semibold text-slate-800">{model.totalOtherLabel}: </span>
-              {model.totalOther}
-            </p>
+            {model.showBothCurrencies && (
+              <p>
+                <span className="font-semibold text-slate-800">
+                  {model.totalOtherLabel}:{' '}
+                </span>
+                {model.totalOther}
+              </p>
+            )}
           </div>
 
           <div className="grid w-full gap-0 text-[11px] sm:w-52">
             <div className="flex justify-between border-b border-slate-200 bg-slate-50 px-2 py-1">
               <span className="text-slate-600">Sub-Total</span>
-              <span className="font-semibold text-slate-800">{model.subtotal}</span>
+              <span className="flex flex-col items-end font-semibold text-slate-800">
+                <span>{model.subtotal}</span>
+                {model.showBothCurrencies && (
+                  <span className="text-[9px] font-normal text-slate-500">
+                    {model.subtotalOther}
+                  </span>
+                )}
+              </span>
             </div>
             <div className="flex justify-between border-b border-slate-200 bg-slate-50 px-2 py-1">
               <span className="text-slate-600">IVA</span>
-              <span className="font-semibold text-slate-800">{model.taxTotal}</span>
+              <span className="flex flex-col items-end font-semibold text-slate-800">
+                <span>{model.taxTotal}</span>
+                {model.showBothCurrencies && (
+                  <span className="text-[9px] font-normal text-slate-500">
+                    {model.taxTotalOther}
+                  </span>
+                )}
+              </span>
             </div>
             <div className="flex justify-between bg-sky-700 px-2 py-1.5 text-white">
               <span className="font-bold">Neto</span>
-              <span className="font-bold">{model.total}</span>
+              <span className="flex flex-col items-end font-bold">
+                <span>{model.total}</span>
+                {model.showBothCurrencies && (
+                  <span className="text-[9px] font-normal text-sky-100">
+                    {model.totalOther}
+                  </span>
+                )}
+              </span>
             </div>
           </div>
         </div>

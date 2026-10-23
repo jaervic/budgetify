@@ -4,9 +4,8 @@ import { formatRate } from '@/lib/money'
 import type { QuoteCalcResult } from '@/lib/quoteCalc'
 import {
   formatQuoteMoney,
-  formatQuoteOtherTotal,
+  formatQuoteOtherMoney,
   quoteCurrencyLabel,
-  quoteOtherTotalLabel,
 } from '@/lib/quoteMoney'
 import type { QuoteCurrency } from '@/types'
 
@@ -14,9 +13,15 @@ interface QuoteTotalsPanelProps {
   calc: QuoteCalcResult
   rate: number
   currency: QuoteCurrency
+  showBothCurrencies: boolean
 }
 
-export function QuoteTotalsPanel({ calc, rate, currency }: QuoteTotalsPanelProps) {
+export function QuoteTotalsPanel({
+  calc,
+  rate,
+  currency,
+  showBothCurrencies,
+}: QuoteTotalsPanelProps) {
   return (
     <Card>
       <CardHeader>
@@ -31,14 +36,24 @@ export function QuoteTotalsPanel({ calc, rate, currency }: QuoteTotalsPanelProps
           <div className="grid gap-2 text-sm">
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-muted-foreground">Sub-Total</span>
-              <span className="font-medium tabular-nums">
-                {formatQuoteMoney(calc.subtotalUsd, currency, rate)}
+              <span className="flex flex-col items-end font-medium tabular-nums">
+                <span>{formatQuoteMoney(calc.subtotalUsd, currency, rate)}</span>
+                {showBothCurrencies && (
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {formatQuoteOtherMoney(calc.subtotalUsd, currency, rate)}
+                  </span>
+                )}
               </span>
             </div>
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-muted-foreground">IVA</span>
-              <span className="font-medium tabular-nums">
-                {formatQuoteMoney(calc.taxUsd, currency, rate)}
+              <span className="flex flex-col items-end font-medium tabular-nums">
+                <span>{formatQuoteMoney(calc.taxUsd, currency, rate)}</span>
+                {showBothCurrencies && (
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {formatQuoteOtherMoney(calc.taxUsd, currency, rate)}
+                  </span>
+                )}
               </span>
             </div>
           </div>
@@ -49,16 +64,18 @@ export function QuoteTotalsPanel({ calc, rate, currency }: QuoteTotalsPanelProps
         <div className="grid gap-1" aria-live="polite" aria-atomic="true">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-sm font-semibold tracking-wide uppercase">Neto</span>
-            <span
-              className="text-xl font-bold tabular-nums"
-              data-testid="quote-total"
-            >
-              {formatQuoteMoney(calc.totalUsd, currency, rate)}
+            <span className="flex flex-col items-end">
+              <span className="text-xl font-bold tabular-nums" data-testid="quote-total">
+                {formatQuoteMoney(calc.totalUsd, currency, rate)}
+              </span>
+              {showBothCurrencies && (
+                <span className="text-sm font-medium tabular-nums text-primary">
+                  {formatQuoteOtherMoney(calc.totalUsd, currency, rate)}
+                </span>
+              )}
             </span>
           </div>
-          <span className="text-right text-sm font-medium tabular-nums text-primary">
-            {quoteOtherTotalLabel(currency)}: {formatQuoteOtherTotal(calc.totalUsd, currency, rate)}
-          </span>
+
         </div>
 
         <p className="text-xs text-muted-foreground">

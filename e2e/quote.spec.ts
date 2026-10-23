@@ -24,6 +24,12 @@ test('cambia a cotización, agrega productos y calcula el IVA', async ({ page })
   await expect(page.getByTestId('quote-total')).toHaveText('$7.89')
   await expect(page.getByLabel('Código').first()).toHaveValue('BAYP')
 
+  const bothCurrencies = page.getByRole('checkbox', {
+    name: /Mostrar también los importes en bolívares/,
+  })
+  await bothCurrencies.check()
+  await expect(bothCurrencies).toBeChecked()
+
   await page.getByRole('tab', { name: 'Vista previa' }).click()
   await expect(page.getByTestId('quote-preview')).toContainText('BAYP')
   await expect(page.getByTestId('quote-preview')).toContainText('Neto')

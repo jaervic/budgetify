@@ -375,6 +375,16 @@ describe('App · interacciones', () => {
 
     // $7.89 × 876,8 = Bs. 6.917,95
     expect(screen.getByTestId('quote-total').textContent).toBe('Bs. 6.917,95')
-    expect(screen.getByText(/Total en dólares: \$7\.89/)).toBeTruthy()
+
+    // La opción de ambas monedas añade el equivalente en dólares en la tabla y
+    // en los totales, sin cambiar la moneda principal.
+    await userEvent.click(
+      screen.getByRole('checkbox', {
+        name: /Mostrar también los importes en dólares/,
+      }),
+    )
+    expect(screen.getByTestId('quote-total').textContent).toBe('Bs. 6.917,95')
+    expect(screen.getAllByText('$7.89').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('$6.80').length).toBeGreaterThan(0)
   }, 30_000)
 })

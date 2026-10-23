@@ -93,6 +93,7 @@ interface AppState {
         | 'office'
         | 'transport'
         | 'currency'
+        | 'showBothCurrencies'
         | 'dueDate'
         | 'purchaseOrder'
         | 'description'

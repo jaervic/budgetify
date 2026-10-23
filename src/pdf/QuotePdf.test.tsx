@@ -38,6 +38,7 @@ function quote(count: number): Quote {
     office: 'Principal',
     transport: 'Delivery',
     currency: 'USD',
+    showBothCurrencies: false,
     issueDate: todayIso(),
     dueDate: todayIso(),
     purchaseOrder: 'OC-2026-001',
@@ -148,14 +149,24 @@ describe('paginación del PDF de cotización', () => {
     }
   }, 30_000)
 
-  it('emite la cotización en bolívares con el equivalente en dólares', async () => {
+  it('emite la cotización en bolívares', async () => {
     const q = quote(8)
     q.currency = 'VES'
     const pages = await pagesText(await renderQuotePdf(q, 'Letter'))
 
     expect(pages[0]).toContain('Moneda: VES')
     expect(pages[0]).toContain('Precio Bs.')
-    expect(pages[0]).toContain('Total en dólares')
+    expect(pages[0]).toContain('Bs.')
+  }, 30_000)
+
+  it('muestra ambas monedas cuando la opción está activa', async () => {
+    const q = quote(8)
+    q.showBothCurrencies = true
+    const pages = await pagesText(await renderQuotePdf(q, 'Letter'))
+
+    expect(pages[0]).toContain('Moneda: USD / VES')
+    expect(pages[0]).toContain('Total en bolívares')
+    expect(pages[0]).toContain('$')
     expect(pages[0]).toContain('Bs.')
   }, 30_000)
 
@@ -168,6 +179,12 @@ describe('paginación del PDF de cotización', () => {
     expect(pages.length).toBeGreaterThan(1)
     expect(pages[0]).toContain('Unidad Clínica de Prueba')
     expect(pages[1]).toContain('Unidad Clínica de Prueba')
+  }, 30_000)
+
+  it('una cotización de 40 líneas con ambas monedas sigue cabiendo en dos hojas', async () => {
+    const q = quote(40)
+    q.showBothCurrencies = true
+    expect(pageCount(await renderQuotePdf(q, 'Letter'))).toBe(2)
   }, 30_000)
 
   it('los totales aparecen una sola vez, al final', async () => {

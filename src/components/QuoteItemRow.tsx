@@ -7,6 +7,7 @@ import type { ComputedQuoteItem } from '@/lib/quoteCalc'
 import { LIMITS } from '@/lib/limits'
 import {
   formatQuoteMoney,
+  formatQuoteOtherMoney,
   fromQuoteCurrency,
   quoteCurrencyLabel,
   toQuoteCurrency,
@@ -25,6 +26,7 @@ interface QuoteItemRowProps {
   item: ComputedQuoteItem
   currency: QuoteCurrency
   rate: number
+  showBothCurrencies: boolean
   canMoveUp: boolean
   canMoveDown: boolean
   onUpdate: (patch: Partial<Omit<QuoteItem, 'id'>>) => void
@@ -37,6 +39,7 @@ export function QuoteItemRow({
   item,
   currency,
   rate,
+  showBothCurrencies,
   canMoveUp,
   canMoveDown,
   onUpdate,
@@ -122,6 +125,11 @@ export function QuoteItemRow({
             })
           }
         />
+        {showBothCurrencies && (
+          <span className="text-right text-xs tabular-nums text-muted-foreground">
+            {formatQuoteOtherMoney(item.unitPriceUsd, currency, rate)}
+          </span>
+        )}
       </div>
 
       <div role="cell" className="grid gap-1 lg:px-2 lg:py-2">
@@ -141,8 +149,13 @@ export function QuoteItemRow({
         className="flex items-center justify-between gap-3 lg:block lg:px-2 lg:py-2 lg:text-right"
       >
         <span className="text-xs text-muted-foreground lg:hidden">IVA</span>
-        <span className="tabular-nums whitespace-nowrap">
-          {formatQuoteMoney(item.taxUsd, currency, rate)}
+        <span className="flex flex-col tabular-nums whitespace-nowrap lg:items-end">
+          <span>{formatQuoteMoney(item.taxUsd, currency, rate)}</span>
+          {showBothCurrencies && (
+            <span className="text-xs text-muted-foreground">
+              {formatQuoteOtherMoney(item.taxUsd, currency, rate)}
+            </span>
+          )}
         </span>
       </div>
 
@@ -152,8 +165,13 @@ export function QuoteItemRow({
         className="flex items-center justify-between gap-3 font-medium lg:block lg:px-2 lg:py-2 lg:text-right"
       >
         <span className="text-xs font-normal text-muted-foreground lg:hidden">Neto</span>
-        <span className="tabular-nums whitespace-nowrap">
-          {formatQuoteMoney(item.netUsd, currency, rate)}
+        <span className="flex flex-col tabular-nums whitespace-nowrap lg:items-end">
+          <span>{formatQuoteMoney(item.netUsd, currency, rate)}</span>
+          {showBothCurrencies && (
+            <span className="text-xs font-normal text-muted-foreground">
+              {formatQuoteOtherMoney(item.netUsd, currency, rate)}
+            </span>
+          )}
         </span>
       </div>
 

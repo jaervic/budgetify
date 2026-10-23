@@ -77,6 +77,7 @@ export function createEmptyQuote(number = formatQuoteNumber(1)): Quote {
     number,
     client: { name: '' },
     currency: 'USD',
+    showBothCurrencies: false,
     issueDate: todayIso(),
     rate: DEFAULT_RATE,
     items: [],

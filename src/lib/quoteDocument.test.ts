@@ -21,6 +21,7 @@ function quote(patch: Partial<Quote> = {}): Quote {
     number: '000000010',
     client: { name: 'Ana Pérez', rif: 'V-1234567' },
     currency: 'USD',
+    showBothCurrencies: false,
     issueDate: todayIso(),
     rate: DEFAULT_RATE,
     items: ITEMS,
@@ -62,6 +63,21 @@ describe('modelo de la cotización', () => {
     expect(model.total).toContain('Bs.')
     expect(model.totalOtherLabel).toBe('Total en dólares')
     expect(model.totalOther).toBe('$23.20')
+  })
+
+  it('incluye los importes en ambas monedas cuando se pide', () => {
+    const q = quote({ showBothCurrencies: true })
+    const model = buildQuoteDocumentModel(q, computeQuote(q.items), DEFAULT_CLINIC, 'Letter')
+
+    expect(model.showBothCurrencies).toBe(true)
+    expect(model.currencyDisplay).toBe('USD / VES')
+    expect(model.priceColumnLabel).toBe('Precio')
+    expect(model.rows[0].unitPriceOther).toContain('Bs.')
+    expect(model.rows[0].taxOther).toContain('Bs.')
+    expect(model.rows[0].netOther).toContain('Bs.')
+    expect(model.subtotalOther).toContain('Bs.')
+    expect(model.taxTotalOther).toContain('Bs.')
+    expect(model.totalOther).toContain('Bs.')
   })
 
   it('omite los datos opcionales que están vacíos', () => {

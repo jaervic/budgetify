@@ -126,6 +126,16 @@ describe('validación de cotizaciones', () => {
     expect(parseQuote(quote).currency).toBe('VES')
   })
 
+  it('lee la opción de mostrar ambas monedas y la deja desactivada si falta', () => {
+    const quote = createEmptyQuote()
+    // @ts-expect-error simulamos una cotización guardada antes de esta opción
+    delete quote.showBothCurrencies
+    expect(parseQuote(quote).showBothCurrencies).toBe(false)
+
+    quote.showBothCurrencies = true
+    expect(parseQuote(quote).showBothCurrencies).toBe(true)
+  })
+
   it('rechaza una moneda desconocida', () => {
     const quote = createEmptyQuote()
     // @ts-expect-error probamos un JSON corrupto a propósito

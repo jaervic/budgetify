@@ -20,6 +20,7 @@ export function QuoteItemsTable({ calc, emptyFocusRef }: QuoteItemsTableProps) {
   const moveQuoteItem = useBudgetStore((state) => state.moveQuoteItem)
   const currency = useBudgetStore((state) => state.quote.currency)
   const rate = useBudgetStore((state) => state.quote.rate)
+  const showBothCurrencies = useBudgetStore((state) => state.quote.showBothCurrencies)
   const tableRef = useRef<HTMLDivElement>(null)
 
   const removeWithUndo = (id: string, description: string) => {
@@ -54,7 +55,7 @@ export function QuoteItemsTable({ calc, emptyFocusRef }: QuoteItemsTableProps) {
         <span role="columnheader" className="px-2 text-right">Cant.</span>
         <span role="columnheader" className="px-2 text-center">Unidad</span>
         <span role="columnheader" className="px-2 text-right">
-          Precio {quoteCurrencyLabel(currency)}
+          {showBothCurrencies ? 'Precio' : `Precio ${quoteCurrencyLabel(currency)}`}
         </span>
         <span role="columnheader" className="px-2 text-right">% IVA</span>
         <span role="columnheader" className="px-2 text-right">IVA</span>
@@ -68,6 +69,7 @@ export function QuoteItemsTable({ calc, emptyFocusRef }: QuoteItemsTableProps) {
           item={item}
           currency={currency}
           rate={rate}
+          showBothCurrencies={showBothCurrencies}
           canMoveUp={index > 0}
           canMoveDown={index < calc.items.length - 1}
           onUpdate={(patch) => updateQuoteItem(item.id, patch)}

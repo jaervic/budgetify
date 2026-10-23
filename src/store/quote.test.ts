@@ -41,9 +41,12 @@ describe('store de cotizaciones', () => {
     expect(useBudgetStore.getState().quote.items).toHaveLength(3)
   })
 
-  it('cambia la moneda de la cotización', () => {
+  it('cambia la moneda de la cotización y el modo de ambas monedas', () => {
     useBudgetStore.getState().setQuoteMeta({ currency: 'VES' })
     expect(useBudgetStore.getState().quote.currency).toBe('VES')
+
+    useBudgetStore.getState().setQuoteMeta({ showBothCurrencies: true })
+    expect(useBudgetStore.getState().quote.showBothCurrencies).toBe(true)
 
     useBudgetStore.getState().setQuoteMeta({ currency: 'USD' })
     expect(useBudgetStore.getState().quote.currency).toBe('USD')

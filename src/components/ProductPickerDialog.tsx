@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { formatQuoteMoney } from '@/lib/quoteMoney'
+import { formatQuoteMoney, formatQuoteOtherMoney } from '@/lib/quoteMoney'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { Product } from '@/types'
 
@@ -33,6 +33,7 @@ function filterProducts(products: Product[], query: string): Product[] {
 function PickerContent({ onClose }: { onClose: () => void }) {
   const products = useBudgetStore((state) => state.catalog.products)
   const currency = useBudgetStore((state) => state.quote.currency)
+  const showBothCurrencies = useBudgetStore((state) => state.quote.showBothCurrencies)
   const rate = useBudgetStore((state) => state.quote.rate)
   const addQuoteProducts = useBudgetStore((state) => state.addQuoteProducts)
   const [query, setQuery] = useState('')
@@ -127,7 +128,12 @@ function PickerContent({ onClose }: { onClose: () => void }) {
                     </span>
                   </span>
                   <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                    <span>{formatQuoteMoney(product.priceUsd, currency, rate)}</span>
+                    <span>
+                      {formatQuoteMoney(product.priceUsd, currency, rate)}
+                      {showBothCurrencies
+                        ? ` · ${formatQuoteOtherMoney(product.priceUsd, currency, rate)}`
+                        : ''}
+                    </span>
                     <span>{product.taxRate} % IVA</span>
                     <span>{product.unit || 'UND'}</span>
                   </span>

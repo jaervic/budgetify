@@ -128,7 +128,12 @@ export function QuoteWorkspace({
         tabIndex={-1}
         className="grid content-start gap-4 outline-none lg:sticky lg:top-4"
       >
-        <QuoteTotalsPanel calc={calc} rate={quote.rate} currency={quote.currency} />
+        <QuoteTotalsPanel
+          calc={calc}
+          rate={quote.rate}
+          currency={quote.currency}
+          showBothCurrencies={quote.showBothCurrencies}
+        />
         <QuoteActionBar onDocumentReplaced={onDocumentReplaced} onViewPdf={onViewPdf} />
       </aside>
 

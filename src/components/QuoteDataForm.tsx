@@ -134,6 +134,29 @@ export function QuoteDataForm() {
           </p>
         </div>
 
+        <label
+          htmlFor="quote-show-both"
+          className="flex cursor-pointer items-start gap-2 text-sm sm:col-span-2"
+        >
+          <input
+            id="quote-show-both"
+            type="checkbox"
+            className="mt-0.5 size-4 shrink-0 accent-primary"
+            checked={quote.showBothCurrencies}
+            onChange={(event) =>
+              setQuoteMeta({ showBothCurrencies: event.target.checked })
+            }
+          />
+          <span>
+            Mostrar también los importes en{' '}
+            {quote.currency === 'USD' ? 'bolívares (VES)' : 'dólares (USD)'}
+            <span className="block text-xs text-muted-foreground">
+              Añade el equivalente en la otra moneda en cada producto, en los totales y en
+              el PDF.
+            </span>
+          </span>
+        </label>
+
         <RateField />
 
         <div className="sm:col-span-2">
