@@ -45,10 +45,13 @@ y al final un espacio para la **firma y el sello**:
 ## Cotizaciones de productos
 
 En la parte superior puedes cambiar entre **Presupuesto médico** y **Cotización**. La
-cotización tiene su propio catálogo de productos (código, descripción, unidad, precio e IVA)
-y su propio formato de hoja:
+cotización tiene su propio catálogo de productos (código, categoría, descripción, unidad,
+precio e IVA) y su propio formato de hoja:
 
-- Se eligen **varios productos a la vez** desde un buscador con casillas.
+- Trae **78 productos de ejemplo** en 11 categorías: protección, curación, antisépticos,
+  inyección, diagnóstico, quirófano, ortopedia, odontología, laboratorio, higiene y
+  medicamentos. Los precios son referencias editables en USD.
+- Se eligen **varios productos a la vez** desde un buscador con filtros por categoría.
 - La **moneda** puede ser **USD** o **VES (bolívares)**. Puedes activar **“Mostrar también
   los importes en la otra moneda”** para ver ambos valores en cada producto, en los totales
   y en el PDF.

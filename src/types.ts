@@ -179,6 +179,8 @@ export interface PackService {
 export interface Product {
   id: string
   code: string
+  /** Categoría del catálogo: protección, curación, medicamentos… */
+  category: string
   description: string
   unit: string
   priceUsd: number
@@ -195,6 +197,11 @@ export interface Catalog {
   specialties: Specialty[]
   /** Productos para la modalidad de cotización. */
   products: Product[]
+  /**
+   * Versión de la base de productos de fábrica. Permite añadir productos
+   * nuevos una sola vez sin reañadir los que el usuario haya borrado.
+   */
+  productCatalogVersion?: number
 }
 
 /** Cómo aplicar un pack a un presupuesto que ya tiene ítems. */

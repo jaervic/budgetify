@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { migrateCatalogDefaults } from '@/data/catalog'
 import { downloadJson, fileStamp, parseCatalog, readJsonFile } from '@/lib/io'
 import { keepOpenForToast, withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
@@ -46,8 +47,14 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
         Boolean(raw) &&
         typeof raw === 'object' &&
         Array.isArray((raw as Record<string, unknown>).products)
-      if (!hadProducts) next.products = useBudgetStore.getState().catalog.products
-      loadCatalog(next)
+      if (!hadProducts) {
+        const current = useBudgetStore.getState().catalog
+        next.products = current.products
+        next.productCatalogVersion = current.productCatalogVersion ?? 2
+      }
+      // Un catálogo de la versión anterior se amplía con los productos nuevos
+      // al importarlo, igual que al recargar la app.
+      loadCatalog(migrateCatalogDefaults(next, { seedProducts: false }))
       toast.success('Catálogo importado')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'No se pudo importar el catálogo')
@@ -61,7 +68,10 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl" onInteractOutside={keepOpenForToast}>
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto sm:max-w-3xl"
+        onInteractOutside={keepOpenForToast}
+      >
         <DialogHeader>
           <DialogTitle>Catálogo</DialogTitle>
           <DialogDescription>

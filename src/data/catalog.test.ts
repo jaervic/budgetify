@@ -8,6 +8,7 @@ import {
   DEFAULT_SERVICES,
   migrateCatalogDefaults,
 } from './catalog'
+import { DEFAULT_PRODUCTS, PRODUCT_CATEGORIES } from './products'
 
 function itemsFromPack(packId: string): Item[] {
   const pack = DEFAULT_CATALOG.packs.find((entry) => entry.id === packId)
@@ -220,6 +221,7 @@ describe('migrateCatalogDefaults', () => {
         {
           id: 'prod_mio',
           code: 'MIO',
+          category: 'General',
           description: 'Bata personalizada',
           unit: 'UND',
           priceUsd: 99,
@@ -230,7 +232,11 @@ describe('migrateCatalogDefaults', () => {
 
     const result = migrateCatalogDefaults(custom)
 
-    expect(result.products).toEqual(custom.products)
+    expect(result.products.find((product) => product.id === 'prod_mio')).toEqual(
+      custom.products[0],
+    )
+    expect(result.products.length).toBeGreaterThan(custom.products.length)
+    expect(result.productCatalogVersion).toBe(2)
   })
 
   it('siembra los productos de ejemplo en un catálogo antiguo sin productos', () => {
@@ -244,6 +250,57 @@ describe('migrateCatalogDefaults', () => {
 
     const result = migrateCatalogDefaults(legacy)
 
-    expect(result.products.length).toBeGreaterThan(0)
+    expect(result.products).toHaveLength(DEFAULT_PRODUCTS.length)
+    expect(result.productCatalogVersion).toBe(2)
+  })
+
+  it('el catálogo inicial está organizado por categorías y sin duplicados', () => {
+    expect(DEFAULT_PRODUCTS).toHaveLength(78)
+    expect(new Set(DEFAULT_PRODUCTS.map((product) => product.id)).size).toBe(
+      DEFAULT_PRODUCTS.length,
+    )
+    expect(new Set(DEFAULT_PRODUCTS.map((product) => product.code)).size).toBe(
+      DEFAULT_PRODUCTS.length,
+    )
+
+    for (const category of PRODUCT_CATEGORIES) {
+      expect(
+        DEFAULT_PRODUCTS.some((product) => product.category === category),
+        `La categoría ${category} no tiene productos`,
+      ).toBe(true)
+    }
+    expect(DEFAULT_PRODUCTS.every((product) => product.category.length > 0)).toBe(true)
+  })
+
+  it('amplía un catálogo con los 8 productos iniciales sin pisar precios editados', () => {
+    const oldIds = [
+      'prod_bata',
+      'prod_cepillo',
+      'prod_electrodo',
+      'prod_gasa',
+      'prod_guantes',
+      'prod_cateter',
+      'prod_hemostatico',
+      'prod_seda',
+    ]
+    const oldProducts = oldIds.map((id) => {
+      const product = DEFAULT_PRODUCTS.find((entry) => entry.id === id)
+      if (!product) throw new Error(`Falta el producto inicial ${id}`)
+      return { ...product, priceUsd: id === 'prod_bata' ? 99 : product.priceUsd }
+    })
+    const legacy: Catalog = {
+      categories: [],
+      services: [],
+      packs: [],
+      specialties: [],
+      products: oldProducts,
+    }
+
+    const result = migrateCatalogDefaults(legacy)
+    const bata = result.products.find((product) => product.id === 'prod_bata')
+
+    expect(bata?.priceUsd).toBe(99)
+    expect(result.products).toHaveLength(DEFAULT_PRODUCTS.length)
+    expect(result.productCatalogVersion).toBe(2)
   })
 })

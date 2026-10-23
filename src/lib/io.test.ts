@@ -174,5 +174,26 @@ describe('validación de cotizaciones', () => {
     })
 
     expect(parsed.products).toEqual([])
+    expect(parsed.productCatalogVersion).toBe(1)
+  })
+
+  it('asigna categoría General a los productos guardados sin categoría', () => {
+    const parsed = parseCatalog({
+      categories: [],
+      services: [],
+      packs: [],
+      products: [
+        {
+          id: 'prod_antiguo',
+          code: 'P-1',
+          description: 'Producto antiguo',
+          unit: 'UND',
+          priceUsd: 1,
+          taxRate: 16,
+        },
+      ],
+    })
+
+    expect(parsed.products[0].category).toBe('General')
   })
 })

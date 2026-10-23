@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
@@ -361,6 +361,31 @@ describe('App · interacciones', () => {
     expect(preview.getAttribute('aria-label')).toBe('Vista previa de la cotización')
     expect(preview.textContent).toContain('BAYP')
     expect(preview.textContent).toContain('$7.89')
+  }, 30_000)
+
+  it('filtra los productos por categoría en el selector', async () => {
+    render(<App />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cotización' }))
+    await userEvent.click(screen.getAllByRole('button', { name: 'Agregar productos' })[0])
+
+    const dialog = screen.getByRole('dialog')
+    expect(
+      within(dialog).getByRole('group', { name: 'Filtrar productos por categoría' }),
+    ).toBeTruthy()
+    expect(within(dialog).getAllByText(/Bata de pacientes/).length).toBeGreaterThan(0)
+
+    await userEvent.click(
+      within(dialog).getByRole('button', { name: 'Curación y apósitos' }),
+    )
+    expect(
+      within(dialog).getByRole('heading', { name: 'Curación y apósitos' }),
+    ).toBeTruthy()
+    expect(within(dialog).getAllByText(/Gasa estéril/).length).toBeGreaterThan(0)
+    expect(within(dialog).queryAllByText(/Bata de pacientes/)).toHaveLength(0)
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Todas' }))
+    expect(within(dialog).getAllByText(/Bata de pacientes/).length).toBeGreaterThan(0)
   }, 30_000)
 
   it('cotiza en bolívares y convierte los importes con la tasa', async () => {

@@ -1,5 +1,8 @@
 import type { Catalog, CatalogService } from '@/types'
-import { DEFAULT_PRODUCTS } from '@/data/products'
+import {
+  DEFAULT_PRODUCT_CATALOG_VERSION,
+  DEFAULT_PRODUCTS,
+} from '@/data/products'
 import { DEFAULT_SPECIALTIES } from '@/data/specialties'
 
 /**
@@ -1183,6 +1186,7 @@ export const DEFAULT_CATALOG: Catalog = {
   services: DEFAULT_SERVICES,
   specialties: DEFAULT_SPECIALTIES.map((specialty) => ({ ...specialty })),
   products: structuredClone(DEFAULT_PRODUCTS),
+  productCatalogVersion: DEFAULT_PRODUCT_CATALOG_VERSION,
   packs: [
     {
       id: 'pack_cirugia_base',
@@ -1353,13 +1357,41 @@ export function migrateCatalogDefaults(
   ]
 
   // Los catálogos anteriores a las cotizaciones no traían productos. En ese
-  // caso se siembra el catálogo de ejemplo. Si el catálogo ya viene con la
-  // lista (aunque esté vacía porque el usuario borró todo), se respeta tal cual.
-  const products =
-    options.seedProducts !== false &&
-    catalog.products.length === 0
-      ? structuredClone(DEFAULT_PRODUCTS)
-      : catalog.products
+  // caso se siembra la base completa. Si ya tenían productos (la lista de 8
+  // iniciales), se añaden los nuevos sin tocar precios ni códigos editados.
+  // A partir de la versión actual no se vuelven a añadir los que el usuario
+  // haya borrado.
+  const fromProductVersion = catalog.productCatalogVersion ?? 1
+  const shouldSeed = options.seedProducts !== false
+  const shouldMerge =
+    shouldSeed ||
+    (fromProductVersion < DEFAULT_PRODUCT_CATALOG_VERSION && catalog.products.length > 0)
 
-  return { categories, services: relocated, packs, specialties, products }
+  const categoryById = new Map(
+    DEFAULT_PRODUCTS.map((product) => [product.id, product.category]),
+  )
+  const normalized = catalog.products.map((product) => {
+    const category = product.category || categoryById.get(product.id) || 'General'
+    return category === product.category ? product : { ...product, category }
+  })
+
+  let products = normalized
+  if (shouldMerge) {
+    const existingProducts = new Set(products.map((product) => product.id))
+    products = [
+      ...products,
+      ...DEFAULT_PRODUCTS.filter((product) => !existingProducts.has(product.id)).map(
+        (product) => structuredClone(product),
+      ),
+    ]
+  }
+
+  return {
+    categories,
+    services: relocated,
+    packs,
+    specialties,
+    products,
+    productCatalogVersion: DEFAULT_PRODUCT_CATALOG_VERSION,
+  }
 }

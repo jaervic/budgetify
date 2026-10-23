@@ -271,6 +271,33 @@ describe('migratePersisted', () => {
     if (entry.kind === 'quote') expect(entry.quote.client.name).toBe('Cliente Historial')
   })
 
+  it('amplía un catálogo con los productos iniciales sin perder el precio editado', () => {
+    const oldIds = [
+      'prod_bata',
+      'prod_cepillo',
+      'prod_electrodo',
+      'prod_gasa',
+      'prod_guantes',
+      'prod_cateter',
+      'prod_hemostatico',
+      'prod_seda',
+    ]
+    const oldProducts = oldIds.map((id) => {
+      const product = DEFAULT_PRODUCTS.find((entry) => entry.id === id)
+      if (!product) throw new Error(`Falta el producto inicial ${id}`)
+      return { ...product, priceUsd: id === 'prod_gasa' ? 99 : product.priceUsd }
+    })
+
+    const state = migratePersisted({
+      ...V5_STATE,
+      catalog: { ...V5_STATE.catalog, products: oldProducts },
+    })
+
+    expect(state.catalog.products).toHaveLength(DEFAULT_PRODUCTS.length)
+    expect(state.catalog.products.find((p) => p.id === 'prod_gasa')?.priceUsd).toBe(99)
+    expect(state.catalog.productCatalogVersion).toBe(2)
+  })
+
   it('respeta un catálogo de productos vacío ya migrado', () => {
     const state = migratePersisted({
       ...V5_STATE,

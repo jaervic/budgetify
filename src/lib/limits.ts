@@ -27,6 +27,7 @@ export const LIMITS = {
   doctorId: 60,
   /** Catálogo de productos de cotización. */
   productCode: 40,
+  productCategory: 80,
   productDescription: 200,
   productUnit: 20,
   /** Datos de la cotización. */

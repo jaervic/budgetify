@@ -118,8 +118,10 @@ describe('store de cotizaciones', () => {
   })
 
   it('gestiona el catálogo de productos', () => {
+    expect(useBudgetStore.getState().catalog.products).toHaveLength(78)
     useBudgetStore.getState().addCatalogProduct({
       code: 'NEW',
+      category: 'General',
       description: 'Producto nuevo',
       unit: 'UND',
       priceUsd: 12,

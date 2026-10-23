@@ -88,6 +88,8 @@ export const catalogServiceSchema = z.object({
 export const productSchema = z.object({
   id: z.string().min(1).max(100),
   code: z.string().max(LIMITS.productCode),
+  // Los productos guardados antes de las categorías pasan a «General».
+  category: z.string().max(LIMITS.productCategory).default('General'),
   description: z.string().max(LIMITS.productDescription),
   unit: z.string().max(LIMITS.productUnit),
   priceUsd: z.number().finite().min(0).max(MAX_MONEY),
@@ -162,6 +164,8 @@ export const catalogSchema = z.object({
   specialties: z.array(specialtySchema).max(50).default([]),
   // Los catálogos anteriores a las cotizaciones no traían productos.
   products: z.array(productSchema).max(MAX_ITEMS).default([]),
+  // 1 = catálogo anterior a la ampliación; 2 = base de productos actual.
+  productCatalogVersion: z.number().int().min(1).default(1),
 })
 
 export const clinicSchema = z.object({
