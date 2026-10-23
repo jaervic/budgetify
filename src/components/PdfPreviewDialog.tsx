@@ -7,30 +7,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useCalc } from '@/hooks/useCalc'
-import { buildPdfBlob } from '@/pdf/actions'
-import { useBudgetStore } from '@/store/useBudgetStore'
+import { usePdfActions } from '@/hooks/usePdfActions'
 
 /**
  * Contenido del modal: se monta cada vez que se abre el diálogo, así que
  * genera el PDF una sola vez con el estado actual (sin refs ni resets).
  */
 function PdfPreviewContent() {
-  const calc = useCalc()
+  const { buildBlob } = usePdfActions()
   const [url, setUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
     let objectUrl: string | null = null
-    const {
-      budget: currentBudget,
-      clinic: currentClinic,
-      rateMode,
-      pageSize,
-    } = useBudgetStore.getState()
 
-    buildPdfBlob(currentBudget, calc, currentClinic, { rateMode, pageSize })
+    buildBlob()
       .then((blob) => {
         objectUrl = URL.createObjectURL(blob)
         if (cancelled) {

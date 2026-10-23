@@ -1,41 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-  Building2,
-  History,
-  Layers,
-  ListPlus,
-  Plus,
-  Settings2,
-  Stethoscope,
-} from 'lucide-react'
-import { ActionBar } from '@/components/ActionBar'
+import { useEffect, useState } from 'react'
+import { Building2, History, Settings2, Stethoscope } from 'lucide-react'
 import { AppFooter } from '@/components/AppFooter'
+import { BudgetWorkspace } from '@/components/BudgetWorkspace'
 import { CatalogManagerDialog } from '@/components/CatalogManagerDialog'
-import { CatalogPickerDialog } from '@/components/CatalogPickerDialog'
 import { ClinicDialog } from '@/components/ClinicDialog'
-import { DataForm } from '@/components/DataForm'
+import { DocumentModeSwitch } from '@/components/DocumentModeSwitch'
 import { HistoryDialog } from '@/components/HistoryDialog'
-import { DocumentPreview } from '@/components/DocumentPreview'
-import { ItemsTable } from '@/components/ItemsTable'
 import { MobileActionBar } from '@/components/MobileActionBar'
-import { NotesEditor } from '@/components/NotesEditor'
-import { PackPickerDialog } from '@/components/PackPickerDialog'
 import { PdfPreviewDialog } from '@/components/PdfPreviewDialog'
+import { QuoteWorkspace } from '@/components/QuoteWorkspace'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { TotalsPanel } from '@/components/TotalsPanel'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Toaster } from '@/components/ui/sonner'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { specialtyName } from '@/data/specialties'
-import { useCalc } from '@/hooks/useCalc'
 import { usePdfActions } from '@/hooks/usePdfActions'
 import { useStorageWarning } from '@/hooks/useStorageWarning'
 import { useTheme } from '@/hooks/useTheme'
-import { buildDocumentModel } from '@/lib/document'
 import { useBudgetStore } from '@/store/useBudgetStore'
-
-type View = 'edit' | 'preview'
 
 /** En pantallas pequeñas (móvil/tablet) el PDF se abre en pestaña nueva. */
 function isCompactScreen(): boolean {
@@ -45,17 +25,10 @@ function isCompactScreen(): boolean {
 }
 
 export default function App() {
-  const calc = useCalc()
-  const budget = useBudgetStore((state) => state.budget)
-  const clinic = useBudgetStore((state) => state.clinic)
-  const rateMode = useBudgetStore((state) => state.rateMode)
-  const pageSize = useBudgetStore((state) => state.pageSize)
+  const docMode = useBudgetStore((state) => state.docMode)
   const refreshBcvRate = useBudgetStore((state) => state.refreshBcvRate)
-  const catalog = useBudgetStore((state) => state.catalog)
-  const defaultCategory = useBudgetStore((state) => state.catalog.categories[0] ?? 'General')
-  const addManualItem = useBudgetStore((state) => state.addManualItem)
   const { resolved } = useTheme()
-  const { openPdf } = usePdfActions(calc)
+  const { openPdf } = usePdfActions()
   // Avisa si el navegador deja de poder guardar el borrador (cuota llena).
   useStorageWarning()
 
@@ -65,23 +38,9 @@ export default function App() {
     else setPdfOpen(true)
   }
 
-  const hasItems = calc.items.length > 0
-  const model = useMemo(
-    () =>
-      buildDocumentModel(budget, calc, clinic, {
-        rateMode,
-        pageSize,
-        specialtyName: specialtyName(clinic.specialtyId, catalog.specialties),
-      }),
-    [budget, calc, clinic, rateMode, pageSize, catalog.specialties],
-  )
-
-  const [view, setView] = useState<View>('edit')
   // Al importar o limpiar, remontamos el formulario para que tome los nuevos datos.
   const [formKey, setFormKey] = useState(0)
-  const [pickerOpen, setPickerOpen] = useState(false)
   const [managerOpen, setManagerOpen] = useState(false)
-  const [packOpen, setPackOpen] = useState(false)
   const [clinicOpen, setClinicOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [pdfOpen, setPdfOpen] = useState(false)
@@ -108,12 +67,9 @@ export default function App() {
               <Stethoscope className="size-5" />
             </span>
             <div className="min-w-0">
-              <h1 className="text-lg leading-tight font-semibold">
-                <span className="sm:hidden">Presupuestos</span>
-                <span className="hidden sm:inline">Presupuestos Médicos</span>
-              </h1>
+              <h1 className="text-lg leading-tight font-semibold">Budgetify</h1>
               <p className="hidden text-xs text-muted-foreground sm:block">
-                Budgetify · gratis y sin instalar
+                Presupuestos médicos y cotizaciones · gratis y sin instalar
               </p>
             </div>
           </div>
@@ -123,10 +79,13 @@ export default function App() {
               type="button"
               variant="outline"
               size="sm"
+              aria-label="Datos de la empresa"
               onClick={() => setClinicOpen(true)}
             >
               <Building2 />
-              Clínica
+              <span aria-hidden="true" className="hidden sm:inline">
+                Empresa
+              </span>
             </Button>
             <Button
               type="button"
@@ -150,116 +109,37 @@ export default function App() {
             </Button>
           </div>
         </div>
+        <div className="mx-auto max-w-6xl px-4 pb-3">
+          <DocumentModeSwitch />
+        </div>
       </header>
 
       <main className="mx-auto grid max-w-6xl gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <Tabs value={view} onValueChange={(value) => setView(value as View)}>
-          <TabsList>
-            <TabsTrigger value="edit">Edición</TabsTrigger>
-            <TabsTrigger value="preview">Vista previa</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="edit" className="mt-4 grid content-start gap-4">
-            <DataForm key={formKey} />
-
-            <Card>
-              <CardHeader>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <CardTitle>Servicios</CardTitle>
-                    <CardDescription>
-                      Ajusta concepto, detalle, categoría, cantidad o precio de cada línea.
-                    </CardDescription>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPackOpen(true)}
-                    >
-                      <Layers />
-                      Cargar plantilla
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => addManualItem(defaultCategory)}
-                    >
-                      <ListPlus />
-                      Línea manual
-                    </Button>
-                    <Button type="button" size="sm" onClick={() => setPickerOpen(true)}>
-                      <Plus />
-                      Agregar servicio
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {hasItems ? (
-                  <ItemsTable calc={calc} rate={budget.rate} />
-                ) : (
-                  <div className="grid place-items-center gap-3 rounded-lg border border-dashed py-12 text-center">
-                    <p className="max-w-sm text-sm text-muted-foreground">
-                      Aún no hay servicios. Agrega del catálogo, carga una plantilla o crea
-                      líneas manuales para armar el presupuesto.
-                    </p>
-                    <div className="flex flex-wrap items-center justify-center gap-2">
-                      <Button type="button" size="sm" onClick={() => setPickerOpen(true)}>
-                        <Plus />
-                        Agregar servicio
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addManualItem(defaultCategory)}
-                      >
-                        <ListPlus />
-                        Añadir línea manual
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <NotesEditor />
-          </TabsContent>
-
-          <TabsContent value="preview" className="mt-4">
-            <DocumentPreview model={model} />
-          </TabsContent>
-        </Tabs>
-
-        <aside
-          id="acciones"
-          tabIndex={-1}
-          className="grid content-start gap-4 outline-none lg:sticky lg:top-4"
-        >
-          <TotalsPanel calc={calc} rate={budget.rate} />
-          <ActionBar
-            calc={calc}
-            onBudgetReplaced={() => setFormKey((key) => key + 1)}
+        {docMode === 'quote' ? (
+          <QuoteWorkspace
+            formKey={formKey}
+            onDocumentReplaced={() => setFormKey((key) => key + 1)}
             onViewPdf={handleViewPdf}
           />
-        </aside>
+        ) : (
+          <BudgetWorkspace
+            formKey={formKey}
+            onDocumentReplaced={() => setFormKey((key) => key + 1)}
+            onViewPdf={handleViewPdf}
+          />
+        )}
       </main>
 
       <AppFooter />
 
-      <MobileActionBar calc={calc} onViewPdf={handleViewPdf} />
+      <MobileActionBar onViewPdf={handleViewPdf} />
 
-      <CatalogPickerDialog open={pickerOpen} onOpenChange={setPickerOpen} />
-      <PackPickerDialog open={packOpen} onOpenChange={setPackOpen} />
       <CatalogManagerDialog open={managerOpen} onOpenChange={setManagerOpen} />
       <ClinicDialog open={clinicOpen} onOpenChange={setClinicOpen} />
       <HistoryDialog
         open={historyOpen}
         onOpenChange={setHistoryOpen}
-        onBudgetReplaced={() => setFormKey((key) => key + 1)}
+        onDocumentReplaced={() => setFormKey((key) => key + 1)}
       />
       <PdfPreviewDialog open={pdfOpen} onOpenChange={setPdfOpen} />
       <Toaster position="top-center" theme={resolved} />

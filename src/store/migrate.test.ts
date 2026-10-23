@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_CATALOG } from '@/data/catalog'
-import { DEFAULT_CLINIC } from '@/data/defaults'
+import {
+  createEmptyQuote,
+  DEFAULT_CLINIC,
+  formatQuoteNumber,
+} from '@/data/defaults'
+import { DEFAULT_PRODUCTS } from '@/data/products'
 import { HISTORY_LIMIT } from '@/lib/limits'
 import { migratePersisted } from './migrate'
 
@@ -139,7 +144,9 @@ describe('migratePersisted', () => {
     })
 
     expect(state.history).toHaveLength(1)
-    expect(state.history[0].budget.patient.name).toBe('Ana Pérez')
+    const [entry] = state.history
+    expect(entry.kind).toBe('budget')
+    if (entry.kind === 'budget') expect(entry.budget.patient.name).toBe('Ana Pérez')
   })
 
   it('sin historial guardado, arranca con una lista vacía', () => {
@@ -188,5 +195,108 @@ describe('migratePersisted', () => {
     expect(state.pageSize).toBe('A4')
     // El estado "loading" nunca se restaura: quedaría colgado.
     expect(state.bcv.status).toBe('idle')
+  })
+
+  it('crea una cotización vacía y añade el catálogo de productos', () => {
+    const state = migratePersisted(undefined)
+
+    expect(state.docMode).toBe('budget')
+    expect(state.quote.items).toEqual([])
+    expect(state.quote.number).toBe(formatQuoteNumber(1))
+    expect(state.quotePageSize).toBe('Letter')
+    expect(state.quoteCounter).toBe(1)
+    expect(state.catalog.products).toHaveLength(DEFAULT_PRODUCTS.length)
+  })
+
+  it('conserva la cotización guardada y su tamaño de hoja', () => {
+    const quote = createEmptyQuote('000000042')
+    quote.client.name = 'Cliente Guardado'
+    quote.items.push({
+      id: 'qi_1',
+      code: 'A',
+      description: 'Producto',
+      qty: 2,
+      unit: 'UND',
+      unitPriceUsd: 5,
+      taxRate: 16,
+    })
+
+    const state = migratePersisted({
+      ...V5_STATE,
+      docMode: 'quote',
+      quote,
+      quotePageSize: 'A4',
+      quoteCounter: 42,
+    })
+
+    expect(state.docMode).toBe('quote')
+    expect(state.quote.client.name).toBe('Cliente Guardado')
+    expect(state.quote.items).toHaveLength(1)
+    expect(state.quotePageSize).toBe('A4')
+    expect(state.quoteCounter).toBe(42)
+  })
+
+  it('migra las copias antiguas del historial como presupuestos', () => {
+    const state = migratePersisted({
+      ...V5_STATE,
+      history: [
+        {
+          id: 'saved_legacy',
+          savedAt: '2026-10-13T18:30:00.000Z',
+          budget: V5_STATE.budget,
+        },
+      ],
+    })
+
+    expect(state.history[0].kind).toBe('budget')
+  })
+
+  it('conserva una cotización dentro del historial', () => {
+    const quote = createEmptyQuote('000000007')
+    quote.client.name = 'Cliente Historial'
+    const state = migratePersisted({
+      ...V5_STATE,
+      history: [
+        {
+          id: 'saved_quote',
+          savedAt: '2026-10-13T18:30:00.000Z',
+          kind: 'quote',
+          quote,
+        },
+      ],
+    })
+
+    const [entry] = state.history
+    expect(entry.kind).toBe('quote')
+    if (entry.kind === 'quote') expect(entry.quote.client.name).toBe('Cliente Historial')
+  })
+
+  it('respeta un catálogo de productos vacío ya migrado', () => {
+    const state = migratePersisted({
+      ...V5_STATE,
+      catalog: { ...V5_STATE.catalog, products: [] },
+    })
+
+    expect(state.catalog.products).toEqual([])
+  })
+
+  it('siembra los productos si el catálogo guardado no traía la lista', () => {
+    const state = migratePersisted(V5_STATE)
+
+    expect(state.catalog.products.length).toBe(DEFAULT_PRODUCTS.length)
+  })
+
+  it('cae en valores por defecto si la cotización guardada no es válida', () => {
+    const state = migratePersisted({
+      ...V5_STATE,
+      quote: { number: 42, items: 'no' },
+      quoteCounter: -5,
+      quotePageSize: 'A9',
+    })
+
+    expect(state.quote.items).toEqual([])
+    expect(state.quote.number).toBe(formatQuoteNumber(1))
+    expect(state.quoteCounter).toBe(1)
+    expect(state.quotePageSize).toBe('Letter')
   })
 })

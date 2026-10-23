@@ -3,7 +3,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
-import { cloneDefaultClinic } from '@/data/defaults'
+import { cloneDefaultClinic, createEmptyQuote } from '@/data/defaults'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import { useThemeStore } from '@/store/useThemeStore'
 
@@ -52,7 +52,15 @@ beforeEach(() => {
   useBudgetStore.getState().clearBudget()
   useBudgetStore.getState().resetCatalog()
   // Modo manual: evita que la app consulte el BCV al montar durante los tests.
-  useBudgetStore.setState({ clinic: cloneDefaultClinic(), rateMode: 'manual', history: [] })
+  useBudgetStore.setState({
+    clinic: cloneDefaultClinic(),
+    rateMode: 'manual',
+    history: [],
+    docMode: 'budget',
+    quote: createEmptyQuote('000000001'),
+    quoteCounter: 1,
+    quotePageSize: 'Letter',
+  })
   useThemeStore.setState({ theme: 'system' })
   localStorage.clear()
   document.documentElement.classList.remove('dark')
@@ -237,7 +245,7 @@ describe('App · interacciones', () => {
     expect(items).toHaveLength(1)
     expect(items[0].concept).toBe('Limpieza dental')
     expect(screen.getByTestId('total-usd').textContent).toBe('$250.00')
-  }, 20_000)
+  }, 30_000)
 
   it('expone los servicios como tabla y da contexto a cada fila', async () => {
     render(<App />)
@@ -312,5 +320,46 @@ describe('App · interacciones', () => {
     expect(screen.getByText('Cirujano Principal')).toBeTruthy()
     // Este caso renderiza los ~130 servicios del catálogo: en jsdom tarda
     // bastante más que el resto y el límite por defecto (5 s) se queda corto.
-  }, 20_000)
+  }, 30_000)
+
+  it('cambia a cotización, escoge productos y calcula IVA', async () => {
+    render(<App />)
+
+    expect(screen.getByRole('group', { name: 'Tipo de documento' })).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: 'Cotización' }))
+    expect(
+      screen.getByRole('button', { name: 'Cotización' }).getAttribute('aria-pressed'),
+    ).toBe('true')
+    expect(screen.getByText('Datos de la cotización')).toBeTruthy()
+    expect(screen.getByText('Productos')).toBeTruthy()
+
+    // Los datos opcionales se anuncian como un grupo plegable y no se muestran
+    // hasta que el usuario los abre.
+    const optional = screen.getByRole('button', { name: /Datos opcionales/ })
+    expect(optional.getAttribute('aria-expanded')).toBe('false')
+    expect(document.getElementById('quote-extra')?.hasAttribute('hidden')).toBe(true)
+    await userEvent.click(optional)
+    expect(optional.getAttribute('aria-expanded')).toBe('true')
+    expect(document.getElementById('quote-extra')?.hasAttribute('hidden')).toBe(false)
+
+    await userEvent.click(screen.getAllByRole('button', { name: 'Agregar productos' })[0])
+    expect(screen.getByRole('checkbox', { name: /Bata de pacientes/ })).toBeTruthy()
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: /Bata de pacientes/ }),
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Agregar (1)' }))
+
+    const items = useBudgetStore.getState().quote.items
+    expect(items).toHaveLength(1)
+    expect(items[0].code).toBe('BAYP')
+    expect(screen.getByRole('table', { name: 'Productos de la cotización' })).toBeTruthy()
+    // $6.80 + 16 % IVA = $7.89
+    expect(screen.getByTestId('quote-total-usd').textContent).toBe('$7.89')
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Vista previa' }))
+    const preview = screen.getByTestId('quote-preview')
+    expect(preview.getAttribute('aria-label')).toBe('Vista previa de la cotización')
+    expect(preview.textContent).toContain('BAYP')
+    expect(preview.textContent).toContain('$7.89')
+  }, 30_000)
 })

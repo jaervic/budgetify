@@ -1,9 +1,11 @@
-# 🩺 Presupuestos Médicos
+# 🩺 Presupuestos Médicos y Cotizaciones
 
-**Una página web para hacer los presupuestos de tu clínica o consultorio en minutos.**
+**Una página web para hacer los presupuestos de tu clínica o consultorio y cotizaciones
+de productos en minutos.**
 
-Escribes los datos del paciente, agregas los servicios (cirugía, consulta, exámenes…),
-y descargas un **PDF listo para imprimir, guardar o enviar por WhatsApp**.
+Escribes los datos del paciente, agregas los servicios (cirugía, consulta, exámenes…), o
+cambias a la modalidad de **cotización** para escoger productos del catálogo, y descargas un
+**PDF listo para imprimir, guardar o enviar por WhatsApp**.
 
 > ✅ No hay que instalar nada · ✅ no hay que crear cuenta · ✅ funciona sin internet ·
 > ✅ **tus datos no salen de tu computadora**
@@ -29,6 +31,8 @@ escribas datos reales de pacientes en ella.)*
 - **Descarga el PDF**, lo imprimes o lo compartes por WhatsApp.
 - **Historial**: guarda copias dentro del navegador (hasta 100) y vuelve a abrir
   cualquier presupuesto anterior cuando el paciente regrese.
+- **Cotizaciones de productos**: cambia la modalidad, escoge varios productos del catálogo,
+  ajusta cantidades, unidades, precios e **IVA por producto**, y obtén Sub-Total, IVA y Neto.
 - **Respaldo en archivo**: Exportar / Importar JSON para llevarte todo a otro equipo.
 
 ## El documento que genera
@@ -37,6 +41,25 @@ Se ve como un presupuesto formal, con el **logo**, el **RIF** y los datos de tu 
 y al final un espacio para la **firma y el sello**:
 
 ![Vista previa del documento](docs/capturas/documento.png)
+
+## Cotizaciones de productos
+
+En la parte superior puedes cambiar entre **Presupuesto médico** y **Cotización**. La
+cotización tiene su propio catálogo de productos (código, descripción, unidad, precio e IVA)
+y su propio formato de hoja:
+
+- Se eligen **varios productos a la vez** desde un buscador con casillas.
+- El **precio es la base sin IVA**; cada producto tiene su porcentaje (16 % por defecto, 0 %
+  para exentos).
+- El documento muestra **Código, Descripción, Cantidad, Unidad, Precio, % IVA, IVA y Neto**.
+- Al final: **Sub-Total, IVA, Neto** y el total en bolívares con la tasa aplicada.
+- El tamaño por defecto es **Carta**. Si el contenido pasa de una hoja, la cabecera, los
+  datos del cliente y la cabecera de la tabla se repiten en las hojas siguientes.
+- Los datos opcionales (código y RIF del cliente, teléfonos, dirección, vendedor, oficina,
+  transporte, vencimiento, orden de compra y descripción) solo se imprimen si tienen valor.
+- Los productos se gestionan en **Gestionar catálogo → Productos** y se incluyen en el
+  respaldo JSON del catálogo.
+- El **historial** guarda presupuestos y cotizaciones juntos, con un distintivo de tipo.
 
 ## Funciona en el teléfono
 
@@ -73,7 +96,7 @@ con tu nombre y tu título (“Od. Ana Rojas”) y debajo tu área de práctica.
 5. Pulsa **“Descargar PDF”**. También puedes **imprimirlo** o **mandarlo por WhatsApp**.
    Si quieres conservarlo a mano, **“Guardar copia en el historial”** (arriba, en
    **Historial**, lo vuelves a abrir después).
-6. La primera vez, entra en **“Clínica”**: elige si el presupuesto es de una **clínica** o
+6. La primera vez, entra en **“Empresa”**: elige si los documentos son de una **clínica** o
    de un **profesional independiente**, escribe tu **título** (Dr., Dra., Od., Lcda.…) y tu
    **área de práctica**, y carga el RIF, el logo, la firma y el sello.
 
@@ -114,7 +137,7 @@ Sí, toma solo la **tasa oficial del BCV**. Si prefieres, puedes desmarcar *“A
 y escribir la tasa a mano.
 
 **¿Puedo poner el logo, el RIF, la firma y el sello de mi clínica?**
-Sí, en **“Clínica”**. Salen en el encabezado y al pie del documento. Si trabajas por tu
+Sí, en **“Empresa”**. Salen en el encabezado y al pie del documento. Si trabajas por tu
 cuenta, activa **“Profesional independiente”** y la hoja se encabeza con tu nombre, tu
 título y tu área.
 

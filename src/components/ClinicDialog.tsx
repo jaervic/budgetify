@@ -130,15 +130,16 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Datos de la clínica</DialogTitle>
+          <DialogTitle>Datos de la empresa</DialogTitle>
           <DialogDescription>
-            Encabezan el presupuesto y el PDF. Se guardan solo en este navegador.
+            Encabezan el presupuesto, la cotización y el PDF. Se guardan solo en este
+            navegador.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <Label>El presupuesto es de</Label>
+            <Label>El documento es de</Label>
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
@@ -164,18 +165,18 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
             <p className="text-xs text-muted-foreground">
               {clinic.headerMode === 'professional'
                 ? 'La hoja se encabeza con tu nombre, tu título y tu área de práctica.'
-                : 'La hoja se encabeza con el nombre de la clínica.'}
+                : 'La hoja se encabeza con el nombre de la clínica o empresa.'}
             </p>
           </div>
 
           {clinic.headerMode !== 'professional' && (
             <div className="grid gap-2">
-              <Label htmlFor="clinic-name">Nombre de la clínica</Label>
+              <Label htmlFor="clinic-name">Nombre de la clínica o empresa</Label>
               <Input
                 id="clinic-name"
                 maxLength={LIMITS.clinicName}
                 value={clinic.name}
-                placeholder="Clínica / Centro médico"
+                placeholder="Clínica, centro médico o empresa"
                 onChange={(event) => setClinic({ name: event.target.value })}
               />
             </div>

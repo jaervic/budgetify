@@ -22,12 +22,19 @@ function formatUpdate(iso: string | null): string {
  * mano; si hay red se consulta el BCV, y si no, se usa el último valor cacheado.
  */
 export function RateField() {
-  const rate = useBudgetStore((state) => state.budget.rate)
+  const docMode = useBudgetStore((state) => state.docMode)
+  const budgetRate = useBudgetStore((state) => state.budget.rate)
+  const quoteRate = useBudgetStore((state) => state.quote.rate)
   const rateMode = useBudgetStore((state) => state.rateMode)
   const bcv = useBudgetStore((state) => state.bcv)
-  const setRate = useBudgetStore((state) => state.setRate)
+  const setBudgetRate = useBudgetStore((state) => state.setRate)
+  const setQuoteRate = useBudgetStore((state) => state.setQuoteRate)
   const setRateMode = useBudgetStore((state) => state.setRateMode)
   const refreshBcvRate = useBudgetStore((state) => state.refreshBcvRate)
+
+  const isQuote = docMode === 'quote'
+  const rate = isQuote ? quoteRate : budgetRate
+  const setRate = isQuote ? setQuoteRate : setBudgetRate
 
   const isAuto = rateMode === 'auto'
 
@@ -79,7 +86,7 @@ export function RateField() {
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-muted-foreground" aria-live="polite">
         {bcv.status === 'loading' && 'Consultando la tasa BCV…'}
         {bcv.status === 'ok' &&
           bcv.value !== null &&

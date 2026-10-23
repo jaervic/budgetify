@@ -100,6 +100,7 @@ describe('migrateCatalogDefaults', () => {
       services: [],
       packs: [],
       specialties: [],
+      products: [],
     }
 
     const result = migrateCatalogDefaults(legacy)
@@ -115,6 +116,7 @@ describe('migrateCatalogDefaults', () => {
       services: [],
       packs: [],
       specialties: [{ id: 'cirugia', name: 'Cirugía', titles: ['Dr.'] }],
+      products: [],
     }
 
     const result = migrateCatalogDefaults(legacy)
@@ -137,6 +139,7 @@ describe('migrateCatalogDefaults', () => {
       ],
       packs: [],
       specialties: [],
+      products: [],
     }
 
     const result = migrateCatalogDefaults(legacy)
@@ -160,6 +163,7 @@ describe('migrateCatalogDefaults', () => {
       ],
       packs: [],
       specialties: [],
+      products: [],
     }
 
     const result = migrateCatalogDefaults(legacy)
@@ -183,6 +187,7 @@ describe('migrateCatalogDefaults', () => {
       ],
       packs: [],
       specialties: [],
+      products: [],
     }
 
     const result = migrateCatalogDefaults(custom)
@@ -202,5 +207,43 @@ describe('migrateCatalogDefaults', () => {
     expect(new Set(result.specialties.map((s) => s.id)).size).toBe(
       result.specialties.length,
     )
+    expect(new Set(result.products.map((p) => p.id)).size).toBe(result.products.length)
+  })
+
+  it('respeta el catálogo de productos editado por el usuario', () => {
+    const custom: Catalog = {
+      categories: [],
+      services: [],
+      packs: [],
+      specialties: [],
+      products: [
+        {
+          id: 'prod_mio',
+          code: 'MIO',
+          description: 'Bata personalizada',
+          unit: 'UND',
+          priceUsd: 99,
+          taxRate: 8,
+        },
+      ],
+    }
+
+    const result = migrateCatalogDefaults(custom)
+
+    expect(result.products).toEqual(custom.products)
+  })
+
+  it('siembra los productos de ejemplo en un catálogo antiguo sin productos', () => {
+    const legacy: Catalog = {
+      categories: [],
+      services: [],
+      packs: [],
+      specialties: [],
+      products: [],
+    }
+
+    const result = migrateCatalogDefaults(legacy)
+
+    expect(result.products.length).toBeGreaterThan(0)
   })
 })

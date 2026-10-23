@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef, type RefObject } from 'react'
 import { ITEM_GRID, ItemRow } from '@/components/ItemRow'
 import type { CalcResult, ComputedItem } from '@/lib/calc'
 import { Decimal, formatUsd, formatVes, usdToVes } from '@/lib/money'
@@ -9,15 +9,18 @@ import { cn } from '@/lib/utils'
 interface ItemsTableProps {
   calc: CalcResult
   rate: number
+  /** Botón al que devolver el foco si se elimina la última fila. */
+  emptyFocusRef?: RefObject<HTMLButtonElement | null>
 }
 
-export function ItemsTable({ calc, rate }: ItemsTableProps) {
+export function ItemsTable({ calc, rate, emptyFocusRef }: ItemsTableProps) {
   const updateItem = useBudgetStore((state) => state.updateItem)
   const updateFormula = useBudgetStore((state) => state.updateFormula)
   const removeItem = useBudgetStore((state) => state.removeItem)
   const duplicateItem = useBudgetStore((state) => state.duplicateItem)
   const moveItem = useBudgetStore((state) => state.moveItem)
   const catalogCategories = useBudgetStore((state) => state.catalog.categories)
+  const tableRef = useRef<HTMLDivElement>(null)
 
   const concepts = useMemo(
     () => [...new Set(calc.items.map((item) => item.concept))],
@@ -33,9 +36,14 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
   )
 
   const removeWithUndo = (item: ComputedItem) => {
-    withUndo({ budget: useBudgetStore.getState().budget }, 'Servicio eliminado', () =>
-      removeItem(item.id),
-    )
+    withUndo({ budget: useBudgetStore.getState().budget }, 'Servicio eliminado', () => {
+      removeItem(item.id)
+      // El botón que tenía el foco desaparece con la fila. Se devuelve el foco
+      // a la tabla, o al botón de agregar si la tabla se queda vacía.
+      const target =
+        calc.items.length <= 1 && emptyFocusRef ? emptyFocusRef.current : tableRef.current
+      requestAnimationFrame(() => target?.focus())
+    })
   }
 
   // Agrupa por categoría respetando el orden de aparición.
@@ -52,7 +60,13 @@ export function ItemsTable({ calc, rate }: ItemsTableProps) {
   return (
     // Semántica de tabla: sin ella, un lector de pantalla lee una lista plana
     // de ~150 controles sin decir a qué columna ni a qué servicio pertenecen.
-    <div role="table" aria-label="Servicios del presupuesto" className="rounded-lg border">
+    <div
+      ref={tableRef}
+      tabIndex={-1}
+      role="table"
+      aria-label="Servicios del presupuesto"
+      className="rounded-lg border outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
       {/* Cabecera: sólo en escritorio */}
       <div
         role="row"

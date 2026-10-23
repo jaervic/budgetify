@@ -1,10 +1,16 @@
-import type { BcvCache, Budget, Clinic, PageSize } from '@/types'
+import type { BcvCache, Budget, Clinic, PageSize, Quote } from '@/types'
 
 /** Tasa VES/USD por defecto (la de los ejemplos del proyecto). */
 export const DEFAULT_RATE = 876.8
 
-/** Tamaño de hoja por defecto (el del documento de referencia). */
+/** Tamaño de hoja por defecto del presupuesto médico (el del documento de referencia). */
 export const DEFAULT_PAGE_SIZE: PageSize = 'A4'
+
+/** La cotización se pensó para Carta: es el tamaño del formato de referencia. */
+export const DEFAULT_QUOTE_PAGE_SIZE: PageSize = 'Letter'
+
+/** IVA general de referencia en Venezuela. Cada producto puede cambiarlo. */
+export const DEFAULT_TAX_RATE = 16
 
 /**
  * Datos de la clínica. Son marcadores de ejemplo: edítalos en
@@ -51,6 +57,29 @@ export function createEmptyBudget(): Budget {
     rate: DEFAULT_RATE,
     items: [],
     notes: [...DEFAULT_NOTES],
+  }
+}
+
+/** Correlativo de cotización con nueve dígitos, como en la hoja de referencia. */
+export function formatQuoteNumber(counter: number): string {
+  return String(Math.max(1, Math.trunc(counter))).padStart(9, '0')
+}
+
+/** Lee el número de una cotización editada a mano ("COT-000042" → 42). */
+export function quoteNumberValue(number: string): number {
+  const digits = Number.parseInt(number.replace(/\D/g, ''), 10)
+  return Number.isFinite(digits) && digits > 0 ? digits : 0
+}
+
+/** Cotización vacía lista para empezar a cargar productos. */
+export function createEmptyQuote(number = formatQuoteNumber(1)): Quote {
+  return {
+    number,
+    client: { name: '' },
+    currency: 'USD',
+    issueDate: todayIso(),
+    rate: DEFAULT_RATE,
+    items: [],
   }
 }
 

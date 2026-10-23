@@ -1,12 +1,15 @@
 import { toast } from 'sonner'
 import { useBudgetStore } from '@/store/useBudgetStore'
-import type { Budget, Catalog, SavedBudget } from '@/types'
+import type { Budget, Catalog, DocMode, Quote, SavedDocument } from '@/types'
 
 /** Estado anterior que se puede restaurar (solo lo que cambia cada acción). */
 export interface UndoSnapshot {
   budget?: Budget
+  quote?: Quote
+  quoteCounter?: number
+  docMode?: DocMode
   catalog?: Catalog
-  history?: SavedBudget[]
+  history?: SavedDocument[]
 }
 
 /**

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { createEmptyBudget, DEFAULT_NOTES, DEFAULT_RATE, todayIso } from '@/data/defaults'
-import { parseBudget, parseCatalog, clinicSchema } from './io'
+import {
+  createEmptyBudget,
+  createEmptyQuote,
+  DEFAULT_NOTES,
+  DEFAULT_RATE,
+  todayIso,
+} from '@/data/defaults'
+import { parseBudget, parseCatalog, parseDocument, parseQuote, clinicSchema } from './io'
 
 describe('validación de importación', () => {
   it('acepta un presupuesto generado por la propia app', () => {
@@ -93,5 +99,57 @@ describe('validación endurecida (seguridad)', () => {
   it('acepta el presupuesto por defecto intacto', () => {
     expect(() => parseBudget(createEmptyBudget())).not.toThrow()
     expect(parseBudget(createEmptyBudget()).items).toEqual([])
+  })
+})
+
+describe('validación de cotizaciones', () => {
+  it('acepta una cotización generada por la app', () => {
+    const quote = createEmptyQuote()
+    quote.client.name = 'Cliente'
+    quote.items.push({
+      id: 'qi_1',
+      code: 'A',
+      description: 'Producto',
+      qty: 2,
+      unit: 'UND',
+      unitPriceUsd: 10,
+      taxRate: 16,
+    })
+
+    expect(() => parseQuote(quote)).not.toThrow()
+    expect(parseQuote(quote).items).toHaveLength(1)
+  })
+
+  it('rechaza un IVA fuera de 0–100', () => {
+    const quote = createEmptyQuote()
+    quote.items.push({
+      id: 'qi_1',
+      code: 'A',
+      description: 'Producto',
+      qty: 2,
+      unit: 'UND',
+      unitPriceUsd: 10,
+      taxRate: 120,
+    })
+
+    expect(() => parseQuote(quote)).toThrow()
+  })
+
+  it('detecta cotizaciones y presupuestos al importar', () => {
+    const quote = createEmptyQuote()
+    expect(parseDocument(quote).kind).toBe('quote')
+    expect(parseDocument(createEmptyBudget()).kind).toBe('budget')
+  })
+
+  it('un catálogo sin productos sigue siendo válido (catálogos antiguos)', () => {
+    const parsed = parseCatalog({
+      categories: ['A'],
+      services: [
+        { id: 's', category: 'A', concept: 'Servicio', formula: { type: 'fixed', amountUsd: 1 } },
+      ],
+      packs: [],
+    })
+
+    expect(parsed.products).toEqual([])
   })
 })

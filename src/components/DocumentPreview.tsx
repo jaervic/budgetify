@@ -21,6 +21,7 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
     <div className="overflow-x-auto">
       <article
         data-testid="document-preview"
+        aria-label="Vista previa del presupuesto"
         style={{ '--doc-ratio': `${page.width} / ${page.height}` } as CSSProperties}
         className="mx-auto w-full max-w-[800px] rounded-md border border-slate-200 bg-white px-4 py-6 text-[11px] text-slate-600 shadow-sm sm:px-9 sm:py-8 sm:[aspect-ratio:var(--doc-ratio)]"
       >
@@ -30,7 +31,7 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
             {clinic.logoDataUrl && (
               <img
                 src={clinic.logoDataUrl}
-                alt="Logo"
+                alt={`Logo de ${clinic.name || 'la clínica'}`}
                 className="h-14 w-14 shrink-0 object-contain sm:h-16 sm:w-16"
               />
             )}

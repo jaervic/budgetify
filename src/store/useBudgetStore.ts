@@ -5,7 +5,12 @@ import {
   cloneDefaultClinic,
   createEmptyBcvCache,
   createEmptyBudget,
+  createEmptyQuote,
   DEFAULT_PAGE_SIZE,
+  DEFAULT_QUOTE_PAGE_SIZE,
+  formatQuoteNumber,
+  quoteNumberValue,
+  DEFAULT_TAX_RATE,
 } from '@/data/defaults'
 import { fetchBcvRate } from '@/lib/bcv'
 import { newId } from '@/lib/ids'
@@ -16,19 +21,24 @@ import type {
   Catalog,
   CatalogService,
   Clinic,
+  DocMode,
   Formula,
   Item,
   Pack,
   PackApplyMode,
   PageSize,
+  Product,
+  Quote,
+  QuoteItem,
   RateMode,
-  SavedBudget,
+  SavedDocument,
 } from '@/types'
 import { migratePersisted } from './migrate'
 import { createDebouncedStorage } from './storage'
 
 export type NewService = Omit<CatalogService, 'id'>
 export type NewPack = Omit<Pack, 'id'>
+export type NewProduct = Omit<Product, 'id'>
 
 interface AppState {
   /** Presupuesto en edición (una sola instancia). */
@@ -41,10 +51,18 @@ interface AppState {
   rateMode: RateMode
   /** Último valor conocido de la tasa BCV (cacheado para uso offline). */
   bcv: BcvCache
-  /** Tamaño de hoja del documento (A4, Carta u Oficio). */
+  /** Tamaño de hoja del presupuesto médico (A4, Carta u Oficio). */
   pageSize: PageSize
-  /** Presupuestos archivados a mano, del más reciente al más antiguo. */
-  history: SavedBudget[]
+  /** Modalidad activa: presupuesto médico o cotización de productos. */
+  docMode: DocMode
+  /** Cotización en edición. */
+  quote: Quote
+  /** Tamaño de hoja de la cotización (Carta por defecto). */
+  quotePageSize: PageSize
+  /** Último correlativo usado para el número de cotización. */
+  quoteCounter: number
+  /** Documentos archivados a mano, del más reciente al más antiguo. */
+  history: SavedDocument[]
 
   // ── Presupuesto ──────────────────────────────────────────────────────
   setPatient: (patch: Partial<Budget['patient']>) => void
@@ -62,14 +80,41 @@ interface AppState {
   moveItem: (id: string, direction: -1 | 1) => void
   loadBudget: (budget: Budget) => void
   clearBudget: () => void
+  setDocMode: (mode: DocMode) => void
+
+  // ── Cotización ───────────────────────────────────────────────────────
+  setQuoteNumber: (number: string) => void
+  setQuoteClient: (patch: Partial<Quote['client']>) => void
+  setQuoteMeta: (
+    patch: Partial<
+      Pick<
+        Quote,
+        'seller' | 'office' | 'transport' | 'dueDate' | 'purchaseOrder' | 'description'
+      >
+    >,
+  ) => void
+  setQuoteIssueDate: (issueDate: string) => void
+  setQuoteRate: (rate: number) => void
+  setQuotePageSize: (pageSize: PageSize) => void
+  addQuoteProduct: (product: Product) => void
+  addQuoteProducts: (products: Product[]) => void
+  addManualQuoteItem: () => void
+  updateQuoteItem: (id: string, patch: Partial<Omit<QuoteItem, 'id'>>) => void
+  removeQuoteItem: (id: string) => void
+  duplicateQuoteItem: (id: string) => void
+  moveQuoteItem: (id: string, direction: -1 | 1) => void
+  loadQuote: (quote: Quote) => void
+  clearQuote: () => void
 
   // ── Historial ────────────────────────────────────────────────────────
   /**
-   * Archiva el presupuesto en curso. Devuelve la entrada creada y cuántas
-   * copias antiguas hubo que descartar por el tope (0 si no se descartó nada).
+   * Archiva el documento en curso (presupuesto o cotización). Devuelve la
+   * entrada creada y cuántas copias antiguas hubo que descartar por el tope.
    */
-  saveToHistory: () => { saved: SavedBudget; dropped: number }
-  /** Carga una copia del historial. `false` si ya no existe. */
+  saveToHistory: () => { saved: SavedDocument; dropped: number }
+  /** Carga una copia del historial. `null` si ya no existe. */
+  loadSavedDocument: (id: string) => DocMode | null
+  /** Compatibilidad: carga solo una copia de presupuesto. */
   loadSavedBudget: (id: string) => boolean
   removeSavedBudget: (id: string) => void
 
@@ -84,6 +129,9 @@ interface AppState {
   addPack: (pack: NewPack) => void
   updatePack: (id: string, patch: Partial<NewPack>) => void
   removePack: (id: string) => void
+  addCatalogProduct: (product: NewProduct) => void
+  updateCatalogProduct: (id: string, patch: Partial<NewProduct>) => void
+  removeCatalogProduct: (id: string) => void
   loadCatalog: (catalog: Catalog) => void
   resetCatalog: () => void
   /** Copia las tarifas del presupuesto al catálogo. Devuelve cuántos servicios cambió. */
@@ -119,6 +167,20 @@ function itemFromPack(service: CatalogService, qty?: number): Item {
   return item
 }
 
+/** Copia un producto del catálogo a una línea de cotización. */
+function itemFromProduct(product: Product): QuoteItem {
+  return {
+    id: newId('quote_item'),
+    sourceProductId: product.id,
+    code: product.code,
+    description: product.description,
+    qty: 1,
+    unit: product.unit,
+    unitPriceUsd: product.priceUsd,
+    taxRate: product.taxRate,
+  }
+}
+
 export const useBudgetStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -128,6 +190,10 @@ export const useBudgetStore = create<AppState>()(
       rateMode: 'auto',
       bcv: createEmptyBcvCache(),
       pageSize: DEFAULT_PAGE_SIZE,
+      docMode: 'budget',
+      quote: createEmptyQuote(formatQuoteNumber(1)),
+      quotePageSize: DEFAULT_QUOTE_PAGE_SIZE,
+      quoteCounter: 1,
       history: [],
 
       // ── Presupuesto ────────────────────────────────────────────────────
@@ -240,19 +306,160 @@ export const useBudgetStore = create<AppState>()(
           return { budget: { ...state.budget, items } }
         }),
 
-      loadBudget: (budget) => set({ budget }),
+      loadBudget: (budget) => set({ budget, docMode: 'budget' }),
 
       clearBudget: () => set({ budget: createEmptyBudget() }),
 
+      setDocMode: (docMode) =>
+        set((state) => ({
+          docMode,
+          // Al entrar en cotización con la tasa anclada, usa el último BCV
+          // conocido para no mostrar una tasa vieja.
+          quote:
+            docMode === 'quote' && state.rateMode === 'auto' && state.bcv.value !== null
+              ? { ...state.quote, rate: state.bcv.value }
+              : state.quote,
+        })),
+
+      // ── Cotización ─────────────────────────────────────────────────────
+      setQuoteNumber: (number) =>
+        set((state) => ({ quote: { ...state.quote, number } })),
+
+      setQuoteClient: (patch) =>
+        set((state) => ({
+          quote: { ...state.quote, client: { ...state.quote.client, ...patch } },
+        })),
+
+      setQuoteMeta: (patch) =>
+        set((state) => ({ quote: { ...state.quote, ...patch } })),
+
+      setQuoteIssueDate: (issueDate) =>
+        set((state) => ({ quote: { ...state.quote, issueDate } })),
+
+      // Editar la tasa de la cotización también desancla el cálculo del BCV.
+      setQuoteRate: (rate) =>
+        set((state) => ({ rateMode: 'manual', quote: { ...state.quote, rate } })),
+
+      setQuotePageSize: (quotePageSize) => set({ quotePageSize }),
+
+      addQuoteProduct: (product) =>
+        set((state) => ({
+          quote: {
+            ...state.quote,
+            items: [...state.quote.items, itemFromProduct(product)],
+          },
+        })),
+
+      addQuoteProducts: (products) =>
+        set((state) => ({
+          quote: {
+            ...state.quote,
+            items: [
+              ...state.quote.items,
+              ...products.map((product) => itemFromProduct(product)),
+            ],
+          },
+        })),
+
+      addManualQuoteItem: () =>
+        set((state) => ({
+          quote: {
+            ...state.quote,
+            items: [
+              ...state.quote.items,
+              {
+                id: newId('quote_item'),
+                code: '',
+                description: 'Nuevo producto',
+                qty: 1,
+                unit: 'UND',
+                unitPriceUsd: 0,
+                taxRate: DEFAULT_TAX_RATE,
+              },
+            ],
+          },
+        })),
+
+      updateQuoteItem: (id, patch) =>
+        set((state) => ({
+          quote: {
+            ...state.quote,
+            items: state.quote.items.map((item) =>
+              item.id === id ? { ...item, ...patch, id: item.id } : item,
+            ),
+          },
+        })),
+
+      removeQuoteItem: (id) =>
+        set((state) => ({
+          quote: {
+            ...state.quote,
+            items: state.quote.items.filter((item) => item.id !== id),
+          },
+        })),
+
+      duplicateQuoteItem: (id) =>
+        set((state) => {
+          const index = state.quote.items.findIndex((item) => item.id === id)
+          if (index === -1) return state
+          const clone: QuoteItem = { ...state.quote.items[index], id: newId('quote_item') }
+          const items = [...state.quote.items]
+          items.splice(index + 1, 0, clone)
+          return { quote: { ...state.quote, items } }
+        }),
+
+      moveQuoteItem: (id, direction) =>
+        set((state) => {
+          const items = [...state.quote.items]
+          const index = items.findIndex((item) => item.id === id)
+          const target = index + direction
+          if (index === -1 || target < 0 || target >= items.length) return state
+          ;[items[index], items[target]] = [items[target], items[index]]
+          return { quote: { ...state.quote, items } }
+        }),
+
+      loadQuote: (quote) =>
+        set((state) => ({
+          quote,
+          docMode: 'quote',
+          // Si la copia trae un número mayor (p. ej. otra serie), el correlativo
+          // local no debe volver a emitir uno ya usado.
+          quoteCounter: Math.max(state.quoteCounter, quoteNumberValue(quote.number)),
+        })),
+
+      clearQuote: () =>
+        set((state) => {
+          const current = quoteNumberValue(state.quote.number)
+          const nextCounter = Math.max(state.quoteCounter, current) + 1
+          const rate =
+            state.rateMode === 'auto' && state.bcv.value !== null
+              ? state.bcv.value
+              : state.quote.rate
+          return {
+            quoteCounter: nextCounter,
+            quote: { ...createEmptyQuote(formatQuoteNumber(nextCounter)), rate },
+          }
+        }),
+
       // ── Historial ──────────────────────────────────────────────────────
       saveToHistory: () => {
-        const { budget, history } = get()
-        const saved: SavedBudget = {
-          id: newId('saved'),
-          savedAt: new Date().toISOString(),
-          // Copia profunda: el historial no debe seguir los cambios del borrador.
-          budget: structuredClone(budget),
-        }
+        const { budget, quote, docMode, history } = get()
+        const savedAt = new Date().toISOString()
+        // Copia profunda: el historial no debe seguir los cambios del borrador.
+        const saved: SavedDocument =
+          docMode === 'quote'
+            ? {
+                id: newId('saved'),
+                savedAt,
+                kind: 'quote',
+                quote: structuredClone(quote),
+              }
+            : {
+                id: newId('saved'),
+                savedAt,
+                kind: 'budget',
+                budget: structuredClone(budget),
+              }
         const next = [saved, ...history]
         const dropped = Math.max(0, next.length - HISTORY_LIMIT)
         // `slice` corta por delante, así que se van las más antiguas.
@@ -260,10 +467,26 @@ export const useBudgetStore = create<AppState>()(
         return { saved, dropped }
       },
 
+      loadSavedDocument: (id) => {
+        const entry = get().history.find((item) => item.id === id)
+        if (!entry) return null
+        if (entry.kind === 'quote') {
+          const quote = structuredClone(entry.quote)
+          set((state) => ({
+            quote,
+            docMode: 'quote',
+            quoteCounter: Math.max(state.quoteCounter, quoteNumberValue(quote.number)),
+          }))
+          return 'quote'
+        }
+        set({ budget: structuredClone(entry.budget), docMode: 'budget' })
+        return 'budget'
+      },
+
       loadSavedBudget: (id) => {
         const entry = get().history.find((item) => item.id === id)
-        if (!entry) return false
-        set({ budget: structuredClone(entry.budget) })
+        if (!entry || entry.kind !== 'budget') return false
+        set({ budget: structuredClone(entry.budget), docMode: 'budget' })
         return true
       },
 
@@ -382,6 +605,32 @@ export const useBudgetStore = create<AppState>()(
           },
         })),
 
+      addCatalogProduct: (product) =>
+        set((state) => ({
+          catalog: {
+            ...state.catalog,
+            products: [...state.catalog.products, { ...product, id: newId('prod') }],
+          },
+        })),
+
+      updateCatalogProduct: (id, patch) =>
+        set((state) => ({
+          catalog: {
+            ...state.catalog,
+            products: state.catalog.products.map((product) =>
+              product.id === id ? { ...product, ...patch, id: product.id } : product,
+            ),
+          },
+        })),
+
+      removeCatalogProduct: (id) =>
+        set((state) => ({
+          catalog: {
+            ...state.catalog,
+            products: state.catalog.products.filter((product) => product.id !== id),
+          },
+        })),
+
       loadCatalog: (catalog) => set({ catalog }),
 
       resetCatalog: () => set({ catalog: cloneDefaultCatalog() }),
@@ -424,6 +673,8 @@ export const useBudgetStore = create<AppState>()(
           rateMode: 'auto',
           budget:
             bcv.value !== null ? { ...state.budget, rate: bcv.value } : state.budget,
+          quote:
+            bcv.value !== null ? { ...state.quote, rate: bcv.value } : state.quote,
         }))
         if (bcv.value === null) void get().refreshBcvRate()
       },
@@ -447,6 +698,10 @@ export const useBudgetStore = create<AppState>()(
               state.rateMode === 'auto'
                 ? { ...state.budget, rate: rate.value }
                 : state.budget,
+            quote:
+              state.rateMode === 'auto'
+                ? { ...state.quote, rate: rate.value }
+                : state.quote,
           }))
         } catch (error) {
           set((state) => ({
@@ -466,8 +721,8 @@ export const useBudgetStore = create<AppState>()(
     }),
     {
       name: 'budgetify:v1',
-      // v7: historial de presupuestos guardados.
-      version: 7,
+      // v8: cotizaciones de productos y catálogo de productos.
+      version: 8,
       storage: createJSONStorage(() => createDebouncedStorage(500)),
       partialize: (state) => ({
         budget: state.budget,
@@ -476,6 +731,10 @@ export const useBudgetStore = create<AppState>()(
         rateMode: state.rateMode,
         bcv: state.bcv,
         pageSize: state.pageSize,
+        docMode: state.docMode,
+        quote: state.quote,
+        quotePageSize: state.quotePageSize,
+        quoteCounter: state.quoteCounter,
         history: state.history,
       }),
       // Migra y valida lo guardado: si el borrador no encaja con el modelo

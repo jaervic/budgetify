@@ -1,4 +1,5 @@
 import type { Catalog, CatalogService } from '@/types'
+import { DEFAULT_PRODUCTS } from '@/data/products'
 import { DEFAULT_SPECIALTIES } from '@/data/specialties'
 
 /**
@@ -1181,6 +1182,7 @@ export const DEFAULT_CATALOG: Catalog = {
   categories: [...DEFAULT_CATEGORIES],
   services: DEFAULT_SERVICES,
   specialties: DEFAULT_SPECIALTIES.map((specialty) => ({ ...specialty })),
+  products: structuredClone(DEFAULT_PRODUCTS),
   packs: [
     {
       id: 'pack_cirugia_base',
@@ -1302,7 +1304,10 @@ export function cloneDefaultCatalog(): Catalog {
  *  4. Reordena las categorías añadiendo las nuevas y limpia la antigua si vacía.
  *  5. Añade las áreas y plantillas nuevas que falten.
  */
-export function migrateCatalogDefaults(catalog: Catalog): Catalog {
+export function migrateCatalogDefaults(
+  catalog: Catalog,
+  options: { seedProducts?: boolean } = {},
+): Catalog {
   const existing = new Set(catalog.services.map((service) => service.id))
 
   const services = [...catalog.services]
@@ -1347,5 +1352,14 @@ export function migrateCatalogDefaults(catalog: Catalog): Catalog {
     ),
   ]
 
-  return { categories, services: relocated, packs, specialties }
+  // Los catálogos anteriores a las cotizaciones no traían productos. En ese
+  // caso se siembra el catálogo de ejemplo. Si el catálogo ya viene con la
+  // lista (aunque esté vacía porque el usuario borró todo), se respeta tal cual.
+  const products =
+    options.seedProducts !== false &&
+    catalog.products.length === 0
+      ? structuredClone(DEFAULT_PRODUCTS)
+      : catalog.products
+
+  return { categories, services: relocated, packs, specialties, products }
 }

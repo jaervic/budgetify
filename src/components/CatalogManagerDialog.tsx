@@ -3,6 +3,7 @@ import { Download, RotateCcw, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { CategoriesPanel } from '@/components/catalog/CategoriesPanel'
 import { PacksPanel } from '@/components/catalog/PacksPanel'
+import { ProductsPanel } from '@/components/catalog/ProductsPanel'
 import { ServicesPanel } from '@/components/catalog/ServicesPanel'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
@@ -37,7 +38,15 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
 
   const handleImport = async (file: File) => {
     try {
-      const next = parseCatalog(await readJsonFile(file))
+      const raw = await readJsonFile(file)
+      const next = parseCatalog(raw)
+      // Los respaldos anteriores a las cotizaciones no traen productos: en ese
+      // caso se conserva el catálogo de productos actual en lugar de vaciarlo.
+      const hadProducts =
+        Boolean(raw) &&
+        typeof raw === 'object' &&
+        Array.isArray((raw as Record<string, unknown>).products)
+      if (!hadProducts) next.products = useBudgetStore.getState().catalog.products
       loadCatalog(next)
       toast.success('Catálogo importado')
     } catch (error) {
@@ -54,9 +63,10 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl" onInteractOutside={keepOpenForToast}>
         <DialogHeader>
-          <DialogTitle>Catálogo de la clínica</DialogTitle>
+          <DialogTitle>Catálogo</DialogTitle>
           <DialogDescription>
-            Edita la biblioteca de tarifas. Los cambios no afectan al presupuesto actual.
+            Edita la biblioteca de servicios y el catálogo de productos. Los cambios no
+            afectan al documento que estás editando.
           </DialogDescription>
         </DialogHeader>
 
@@ -108,11 +118,15 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
         <Tabs defaultValue="services">
           <TabsList className="w-full overflow-x-auto">
             <TabsTrigger value="services">Servicios</TabsTrigger>
+            <TabsTrigger value="products">Productos</TabsTrigger>
             <TabsTrigger value="categories">Categorías</TabsTrigger>
             <TabsTrigger value="packs">Plantillas</TabsTrigger>
           </TabsList>
           <TabsContent value="services" className="mt-3">
             <ServicesPanel />
+          </TabsContent>
+          <TabsContent value="products" className="mt-3">
+            <ProductsPanel />
           </TabsContent>
           <TabsContent value="categories" className="mt-3">
             <CategoriesPanel />

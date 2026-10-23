@@ -24,6 +24,13 @@ export function formatLongDate(iso: string): string {
   return `${day} de ${name.charAt(0).toUpperCase()}${name.slice(1)} de ${year}`
 }
 
+/** Formatea una fecha ISO corta como `13/10/2026` (estilo de la cotización). */
+export function formatShortDate(iso: string): string {
+  const [year, month, day] = iso.split('-').map(Number)
+  if (!year || !month || !day || month < 1 || month > 12) return iso
+  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`
+}
+
 /**
  * Formatea un instante ISO completo (`toISOString`) como `13/10/2026, 14:05`.
  * Aquí sí interesa la zona horaria del usuario: es el momento en que guardó.

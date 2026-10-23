@@ -33,10 +33,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'theme-init.js'],
       manifest: {
-        name: 'Presupuestos Médicos · Budgetify',
-        short_name: 'Presupuestos',
+        name: 'Presupuestos Médicos y Cotizaciones · Budgetify',
+        short_name: 'Budgetify',
         description:
-          'Crea, calcula y descarga presupuestos médicos en PDF, en dólares y bolívares con la tasa BCV.',
+          'Crea, calcula y descarga presupuestos médicos y cotizaciones de productos en PDF, en dólares y bolívares con la tasa BCV.',
         lang: 'es',
         theme_color: '#0284c7',
         background_color: '#f8fafc',

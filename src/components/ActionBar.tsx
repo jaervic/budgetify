@@ -22,32 +22,31 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { usePdfActions } from '@/hooks/usePdfActions'
-import type { CalcResult } from '@/lib/calc'
-import { downloadJson, fileStamp, parseBudget, readJsonFile } from '@/lib/io'
+import { downloadJson, fileStamp, parseDocument, readJsonFile } from '@/lib/io'
 import { HISTORY_LIMIT } from '@/lib/limits'
 import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { PageSize } from '@/types'
 
 interface ActionBarProps {
-  calc: CalcResult
   /** Se llama tras importar o limpiar, para remontar el formulario de datos. */
-  onBudgetReplaced: () => void
+  onDocumentReplaced: () => void
   /** Abre el PDF (modal en escritorio, pestaña nueva en móvil). */
   onViewPdf: () => void
 }
 
-export function ActionBar({ calc, onBudgetReplaced, onViewPdf }: ActionBarProps) {
+export function ActionBar({ onDocumentReplaced, onViewPdf }: ActionBarProps) {
   const budget = useBudgetStore((state) => state.budget)
   const pageSize = useBudgetStore((state) => state.pageSize)
   const setPageSize = useBudgetStore((state) => state.setPageSize)
   const loadBudget = useBudgetStore((state) => state.loadBudget)
+  const loadQuote = useBudgetStore((state) => state.loadQuote)
   const clearBudget = useBudgetStore((state) => state.clearBudget)
   const syncPricesToCatalog = useBudgetStore((state) => state.syncPricesToCatalog)
   const saveToHistory = useBudgetStore((state) => state.saveToHistory)
   const fileInput = useRef<HTMLInputElement>(null)
   const [confirmClearOpen, setConfirmClearOpen] = useState(false)
-  const { busy, downloadPdf, printPdf, sharePdf } = usePdfActions(calc)
+  const { busy, downloadPdf, printPdf, sharePdf } = usePdfActions()
 
   const handleSaveCopy = () => {
     const { dropped } = saveToHistory()
@@ -73,12 +72,18 @@ export function ActionBar({ calc, onBudgetReplaced, onViewPdf }: ActionBarProps)
 
   const handleImport = async (file: File) => {
     try {
-      const next = parseBudget(await readJsonFile(file))
-      loadBudget(next)
-      onBudgetReplaced()
+      const parsed = parseDocument(await readJsonFile(file))
+      if (parsed.kind === 'quote') {
+        loadQuote(parsed.document)
+        onDocumentReplaced()
+        toast.success('Cotización importada')
+        return
+      }
+      loadBudget(parsed.document)
+      onDocumentReplaced()
       toast.success('Presupuesto importado')
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'No se pudo importar el presupuesto')
+      toast.error(error instanceof Error ? error.message : 'No se pudo importar el documento')
     }
   }
 
@@ -86,7 +91,7 @@ export function ActionBar({ calc, onBudgetReplaced, onViewPdf }: ActionBarProps)
     const before = useBudgetStore.getState().budget
     withUndo({ budget: before }, 'Presupuesto limpiado', () => {
       clearBudget()
-      onBudgetReplaced()
+      onDocumentReplaced()
     })
   }
 

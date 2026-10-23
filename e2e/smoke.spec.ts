@@ -14,7 +14,10 @@ function textosClave(page: Page): Array<[string, Locator]> {
       'el botón primario',
       page.getByRole('button', { name: 'Descargar PDF' }).filter({ visible: true }),
     ],
-    ['el texto secundario', page.getByText('Budgetify · gratis y sin instalar')],
+    [
+      'el texto secundario',
+      page.getByText('Presupuestos médicos y cotizaciones · gratis y sin instalar'),
+    ],
     [
       'el total del documento',
       page

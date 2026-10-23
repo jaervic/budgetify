@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "SPA para la creación de presupuestos médicos de clínica",
+  "description": "SPA para presupuestos médicos y cotizaciones de productos",
   "engines": {
     "node": "22.x"
   },

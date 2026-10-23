@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { LIMITS, HISTORY_LIMIT } from './limits'
-import type { Budget, Catalog } from '@/types'
+import type { Budget, Catalog, Quote } from '@/types'
 
 /**
  * Esquemas Zod: validan los JSON importados antes de tocar el estado.
@@ -85,6 +85,51 @@ export const catalogServiceSchema = z.object({
   specialtyId: z.string().max(60).optional(),
 })
 
+export const productSchema = z.object({
+  id: z.string().min(1).max(100),
+  code: z.string().max(LIMITS.productCode),
+  description: z.string().max(LIMITS.productDescription),
+  unit: z.string().max(LIMITS.productUnit),
+  priceUsd: z.number().finite().min(0).max(MAX_MONEY),
+  taxRate: z.number().finite().min(0).max(100),
+})
+
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida.')
+
+export const quoteClientSchema = z.object({
+  name: z.string().max(LIMITS.quoteClientName),
+  code: z.string().max(LIMITS.quoteClientCode).optional(),
+  rif: z.string().max(LIMITS.quoteClientRif).optional(),
+  phones: z.string().max(LIMITS.quoteClientPhones).optional(),
+  address: z.string().max(LIMITS.quoteClientAddress).optional(),
+})
+
+export const quoteItemSchema = z.object({
+  id: z.string().min(1).max(100),
+  sourceProductId: z.string().min(1).max(100).optional(),
+  code: z.string().max(LIMITS.productCode),
+  description: z.string().max(LIMITS.productDescription),
+  qty: z.number().finite().min(0).max(10_000),
+  unit: z.string().max(LIMITS.productUnit),
+  unitPriceUsd: z.number().finite().min(0).max(MAX_MONEY),
+  taxRate: z.number().finite().min(0).max(100),
+})
+
+export const quoteSchema = z.object({
+  number: z.string().max(LIMITS.quoteNumber),
+  client: quoteClientSchema,
+  seller: z.string().max(LIMITS.quoteSeller).optional(),
+  office: z.string().max(LIMITS.quoteOffice).optional(),
+  transport: z.string().max(LIMITS.quoteTransport).optional(),
+  currency: z.literal('USD'),
+  issueDate: isoDate,
+  dueDate: isoDate.optional(),
+  purchaseOrder: z.string().max(LIMITS.quotePurchaseOrder).optional(),
+  description: z.string().max(LIMITS.quoteDescription).optional(),
+  rate: z.number().finite().min(0.0001).max(1_000_000),
+  items: z.array(quoteItemSchema).max(MAX_ITEMS),
+})
+
 export const packSchema = z.object({
   id: z.string().min(1).max(100),
   name: z.string().min(1).max(LIMITS.packName),
@@ -112,6 +157,8 @@ export const catalogSchema = z.object({
   // Por defecto vacío: los catálogos guardados antes de existir las áreas se
   // completan luego con `migrateCatalogDefaults`.
   specialties: z.array(specialtySchema).max(50).default([]),
+  // Los catálogos anteriores a las cotizaciones no traían productos.
+  products: z.array(productSchema).max(MAX_ITEMS).default([]),
 })
 
 export const clinicSchema = z.object({
@@ -140,18 +187,32 @@ export const bcvCacheSchema = z.object({
   error: z.string().nullable(),
 })
 
-/** Entrada del historial: el presupuesto archivado, con su fecha. */
+/**
+ * Entrada del historial: el presupuesto o la cotización archivados, con su
+ * fecha. `kind` tiene valor por defecto para poder leer las copias antiguas,
+ * que se guardaron antes de existir las cotizaciones.
+ */
 export const savedBudgetSchema = z.object({
   id: z.string().min(1).max(100),
   savedAt: z.string().max(40),
+  kind: z.literal('budget').default('budget'),
   budget: budgetSchema,
 })
+
+export const savedQuoteSchema = z.object({
+  id: z.string().min(1).max(100),
+  savedAt: z.string().max(40),
+  kind: z.literal('quote'),
+  quote: quoteSchema,
+})
+
+export const savedDocumentSchema = z.union([savedBudgetSchema, savedQuoteSchema])
 
 /**
  * El historial entero. El tope también se aplica al leer: si alguien edita el
  * `localStorage` a mano y mete 10.000 entradas, no se cargan en memoria.
  */
-export const historySchema = z.array(savedBudgetSchema).max(HISTORY_LIMIT)
+export const historySchema = z.array(savedDocumentSchema).max(HISTORY_LIMIT)
 
 /** Primer mensaje de error legible para el usuario. */
 function firstIssue(error: z.ZodError): string {
@@ -165,6 +226,27 @@ export function parseBudget(input: unknown): Budget {
   const result = budgetSchema.safeParse(input)
   if (!result.success) throw new Error(firstIssue(result.error))
   return result.data
+}
+
+export function parseQuote(input: unknown): Quote {
+  const result = quoteSchema.safeParse(input)
+  if (!result.success) throw new Error(firstIssue(result.error))
+  return result.data
+}
+
+/**
+ * Detecta si un JSON importado es un presupuesto o una cotización.
+ *
+ * Los presupuestos tienen `patient`; las cotizaciones tienen `client`. Así los
+ * respaldos antiguos (sin ningún campo `kind`) siguen funcionando.
+ */
+export function parseDocument(
+  input: unknown,
+): { kind: 'budget'; document: Budget } | { kind: 'quote'; document: Quote } {
+  if (input && typeof input === 'object' && 'client' in input) {
+    return { kind: 'quote', document: parseQuote(input) }
+  }
+  return { kind: 'budget', document: parseBudget(input) }
 }
 
 export function parseCatalog(input: unknown): Catalog {

@@ -25,6 +25,22 @@ export const LIMITS = {
   doctorTitle: 40,
   doctorName: 120,
   doctorId: 60,
+  /** Catálogo de productos de cotización. */
+  productCode: 40,
+  productDescription: 200,
+  productUnit: 20,
+  /** Datos de la cotización. */
+  quoteNumber: 40,
+  quoteClientCode: 40,
+  quoteClientName: 160,
+  quoteClientRif: 40,
+  quoteClientPhones: 80,
+  quoteClientAddress: 200,
+  quoteSeller: 120,
+  quoteOffice: 120,
+  quoteTransport: 120,
+  quotePurchaseOrder: 60,
+  quoteDescription: 300,
 } as const
 
 /**

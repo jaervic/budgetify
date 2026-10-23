@@ -15,7 +15,7 @@ export function useStorageWarning() {
       toast.error('No se pudieron guardar los cambios', {
         id: TOAST_ID,
         description:
-          'El almacenamiento del navegador está lleno, así que lo que escribas no se guardará. Exporta el presupuesto (JSON), quita imágenes grandes de la clínica y sigue trabajando.',
+          'El almacenamiento del navegador está lleno, así que lo que escribas no se guardará. Exporta el documento (JSON), quita imágenes grandes de la empresa y sigue trabajando.',
         duration: Number.POSITIVE_INFINITY,
         action: { label: 'Entendido', onClick: () => toast.dismiss(TOAST_ID) },
       })

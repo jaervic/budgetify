@@ -1,10 +1,10 @@
 /**
- * Modelo de datos de Presupuestos Médicos (Budgetify).
+ * Modelo de datos de Budgetify (presupuestos médicos y cotizaciones).
  *
  * Se distinguen dos capas:
- *  - El catálogo (`Catalog`): la biblioteca de tarifas de la clínica. Persistente y editable.
- *  - El presupuesto (`Budget`): una instancia puntual. Editar precios aquí NO altera el
- *    catálogo salvo que el usuario lo pida explícitamente.
+ *  - El catálogo (`Catalog`): biblioteca de servicios y de productos. Persistente y editable.
+ *  - El documento (`Budget` o `Quote`): una instancia puntual. Editar precios aquí NO
+ *    altera el catálogo salvo que el usuario lo pida explícitamente.
  */
 
 /** Fórmulas soportadas para calcular el monto en USD de un ítem. */
@@ -45,18 +45,79 @@ export interface Budget {
   notes: string[]
 }
 
+/** Tipo de documento que se está editando o que se guardó en el historial. */
+export type DocMode = 'budget' | 'quote'
+
+export interface QuoteClient {
+  name: string
+  /** Código interno del cliente. Opcional en el documento. */
+  code?: string
+  rif?: string
+  phones?: string
+  address?: string
+}
+
+/** Línea de una cotización de productos. */
+export interface QuoteItem {
+  id: string
+  /** Producto del catálogo del que provino (si aplica). */
+  sourceProductId?: string
+  code: string
+  description: string
+  qty: number
+  unit: string
+  /** Precio unitario en USD, sin IVA. */
+  unitPriceUsd: number
+  /** Porcentaje de IVA aplicado a la línea. */
+  taxRate: number
+}
+
 /**
- * Presupuesto archivado a mano en el historial del navegador.
+ * Cotización de productos.
  *
- * Se guarda el presupuesto completo y nada más: el nombre del paciente o el
- * total se derivan al mostrarlo, así no hay copias que se queden desfasadas.
+ * El número y los datos del cliente son la identificación mínima del
+ * documento. Los datos de vendedor, oficina, transporte, vencimiento, orden de
+ * compra y descripción son opcionales: solo se imprimen si tienen valor.
+ */
+export interface Quote {
+  number: string
+  client: QuoteClient
+  seller?: string
+  office?: string
+  transport?: string
+  /** Moneda del documento. Por ahora siempre USD, como en la referencia. */
+  currency: 'USD'
+  issueDate: string
+  dueDate?: string
+  purchaseOrder?: string
+  description?: string
+  /** Tasa de cálculo: bolívares por cada dólar. */
+  rate: number
+  items: QuoteItem[]
+}
+
+/**
+ * Documento archivado a mano en el historial del navegador.
+ *
+ * Se guarda el documento completo y nada más: el nombre del paciente o del
+ * cliente y el total se derivan al mostrarlo, así no hay copias desfasadas.
  */
 export interface SavedBudget {
   id: string
   /** Cuándo se archivó (ISO completo; también da el orden). */
   savedAt: string
+  kind: 'budget'
   budget: Budget
 }
+
+export interface SavedQuote {
+  id: string
+  savedAt: string
+  kind: 'quote'
+  quote: Quote
+}
+
+export type SavedDocument = SavedBudget | SavedQuote
 
 /** Tamaño de hoja del documento. */
 export type PageSize = 'A4' | 'Letter' | 'Legal'
@@ -101,6 +162,23 @@ export interface PackService {
   qty?: number
 }
 
+/**
+ * Producto del catálogo de cotizaciones.
+ *
+ * Es independiente de los servicios médicos: se usa para cotizar insumos o
+ * artículos con código, unidad de venta e IVA propio. El precio es la base sin
+ * IVA, igual que en la hoja de cotización de referencia.
+ */
+export interface Product {
+  id: string
+  code: string
+  description: string
+  unit: string
+  priceUsd: number
+  /** Porcentaje de IVA (16 por defecto; 0 para exentos). */
+  taxRate: number
+}
+
 export interface Catalog {
   /** Orden en que se muestran las categorías. */
   categories: string[]
@@ -108,6 +186,8 @@ export interface Catalog {
   packs: Pack[]
   /** Áreas de práctica disponibles, en el orden en que se muestran. */
   specialties: Specialty[]
+  /** Productos para la modalidad de cotización. */
+  products: Product[]
 }
 
 /** Cómo aplicar un pack a un presupuesto que ya tiene ítems. */

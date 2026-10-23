@@ -5,6 +5,13 @@ import { computeBudget } from '@/lib/calc'
 import { HISTORY_LIMIT } from '@/lib/limits'
 import { formatUsd } from '@/lib/money'
 import { useBudgetStore } from './useBudgetStore'
+import type { SavedDocument } from '@/types'
+
+/** Extrae el presupuesto de una entrada del historial (falla si es cotización). */
+function budgetOf(entry: SavedDocument | undefined) {
+  if (!entry || entry.kind !== 'budget') throw new Error('Se esperaba un presupuesto')
+  return entry.budget
+}
 
 function jsonResponse(body: unknown, ok = true, status = 200): Response {
   return { ok, status, json: async () => body } as unknown as Response
@@ -161,7 +168,7 @@ describe('tasa BCV y datos de la clínica', () => {
     const { saved, dropped } = useBudgetStore.getState().saveToHistory()
 
     expect(dropped).toBe(0)
-    expect(saved.budget.patient.name).toBe('Ana Pérez')
+    expect(budgetOf(saved).patient.name).toBe('Ana Pérez')
     expect(useBudgetStore.getState().history).toHaveLength(1)
   })
 
@@ -171,7 +178,7 @@ describe('tasa BCV y datos de la clínica', () => {
 
     useBudgetStore.getState().setPatient({ name: 'Otro paciente' })
 
-    expect(useBudgetStore.getState().history[0].budget.patient.name).toBe('Ana Pérez')
+    expect(budgetOf(useBudgetStore.getState().history[0]).patient.name).toBe('Ana Pérez')
     expect(useBudgetStore.getState().budget.patient.name).toBe('Otro paciente')
   })
 
@@ -214,7 +221,7 @@ describe('tasa BCV y datos de la clínica', () => {
     const history = useBudgetStore.getState().history
     expect(history).toHaveLength(HISTORY_LIMIT)
     // La última guardada va primera; las tres más antiguas se fueron.
-    expect(history[0].budget.patient.name).toBe(`Paciente ${HISTORY_LIMIT + 2}`)
-    expect(history.at(-1)?.budget.patient.name).toBe('Paciente 3')
+    expect(budgetOf(history[0]).patient.name).toBe(`Paciente ${HISTORY_LIMIT + 2}`)
+    expect(budgetOf(history.at(-1)).patient.name).toBe('Paciente 3')
   })
 })

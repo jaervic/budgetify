@@ -3,7 +3,8 @@ import type { DocumentProps } from '@react-pdf/renderer'
 import type { CalcResult } from '@/lib/calc'
 import { downloadBlob } from '@/lib/io'
 import { formatUsd, formatVes, usdToVes } from '@/lib/money'
-import type { Budget, Clinic, PageSize, RateMode } from '@/types'
+import type { QuoteCalcResult } from '@/lib/quoteCalc'
+import type { Budget, Clinic, PageSize, Quote, RateMode } from '@/types'
 
 /** Opciones del documento que afectan a su render. */
 export interface PdfOptions {
@@ -35,6 +36,32 @@ export async function buildPdfBlob(
   return pdf(element).toBlob()
 }
 
+export interface QuotePdfOptions {
+  pageSize: PageSize
+  /** La tasa ya vive en la cotización; se acepta por simetría con el presupuesto. */
+  rateMode?: RateMode
+}
+
+/** Construye el PDF de una cotización, cargando react-pdf solo al usarlo. */
+export async function buildQuotePdfBlob(
+  quote: Quote,
+  calc: QuoteCalcResult,
+  clinic: Clinic,
+  options: QuotePdfOptions,
+): Promise<Blob> {
+  const [{ pdf }, { QuotePdf }] = await Promise.all([
+    import('@react-pdf/renderer'),
+    import('./QuotePdf'),
+  ])
+  const element = createElement(QuotePdf, {
+    quote,
+    calc,
+    clinic,
+    pageSize: options.pageSize,
+  }) as React.ReactElement<DocumentProps>
+  return pdf(element).toBlob()
+}
+
 function slug(value: string): string {
   return (
     value
@@ -48,6 +75,10 @@ function slug(value: string): string {
 
 export function pdfFileName(budget: Budget): string {
   return `presupuesto-${slug(budget.patient.name)}-${budget.issueDate || 'borrador'}.pdf`
+}
+
+export function quotePdfFileName(quote: Quote): string {
+  return `cotizacion-${slug(quote.client.name)}-${quote.issueDate || 'borrador'}.pdf`
 }
 
 export async function downloadBudgetPdf(
@@ -145,6 +176,84 @@ export async function printBudgetPdf(
   document.body.append(frame)
 }
 
+export async function downloadQuotePdf(
+  quote: Quote,
+  calc: QuoteCalcResult,
+  clinic: Clinic,
+  options: QuotePdfOptions,
+): Promise<void> {
+  const blob = await buildQuotePdfBlob(quote, calc, clinic, options)
+  downloadBlob(blob, quotePdfFileName(quote))
+}
+
+export async function openQuotePdfInNewTab(
+  quote: Quote,
+  calc: QuoteCalcResult,
+  clinic: Clinic,
+  options: QuotePdfOptions,
+): Promise<void> {
+  // La pestaña se abre antes del `await` para que el bloqueador de popups no
+  // la corte (mismo motivo que en el presupuesto).
+  const preview = window.open('', '_blank')
+  try {
+    const blob = await buildQuotePdfBlob(quote, calc, clinic, options)
+    const url = URL.createObjectURL(blob)
+    if (preview && !preview.closed) {
+      preview.location.href = url
+      preview.focus()
+    } else {
+      downloadBlob(blob, quotePdfFileName(quote))
+    }
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  } catch (error) {
+    preview?.close()
+    throw error
+  }
+}
+
+export async function printQuotePdf(
+  quote: Quote,
+  calc: QuoteCalcResult,
+  clinic: Clinic,
+  options: QuotePdfOptions,
+): Promise<void> {
+  if (isAppleMobile()) {
+    await openQuotePdfInNewTab(quote, calc, clinic, options)
+    return
+  }
+
+  const blob = await buildQuotePdfBlob(quote, calc, clinic, options)
+  const url = URL.createObjectURL(blob)
+
+  const cleanup = () => {
+    frame.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  const frame = document.createElement('iframe')
+  frame.setAttribute('aria-hidden', 'true')
+  frame.style.position = 'fixed'
+  frame.style.right = '0'
+  frame.style.bottom = '0'
+  frame.style.width = '0'
+  frame.style.height = '0'
+  frame.style.border = '0'
+  frame.src = url
+  frame.addEventListener('load', () => {
+    const view = frame.contentWindow
+    if (!view) {
+      cleanup()
+      void openQuotePdfInNewTab(quote, calc, clinic, options)
+      return
+    }
+    view.focus()
+    view.print()
+    window.setTimeout(cleanup, 60_000)
+  })
+
+  document.body.append(frame)
+}
+
 /** iPhone/iPad (incluido iPadOS, que se identifica como Mac con táctil). */
 function isAppleMobile(): boolean {
   if (typeof navigator === 'undefined') return false
@@ -191,6 +300,57 @@ export async function shareByWhatsApp(
       const file = new File([blob], pdfFileName(budget), { type: 'application/pdf' })
       if (navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Presupuesto médico', text })
+        return 'shared'
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return 'cancelled'
+      // Si falla el share con archivo, continuamos con el enlace de WhatsApp.
+    }
+  }
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+  return 'whatsapp'
+}
+
+/** Resumen de texto corto para compartir una cotización por WhatsApp. */
+export function buildQuoteWhatsAppText(quote: Quote, calc: QuoteCalcResult): string {
+  const lines = [
+    'Cotización',
+    `N.º: ${quote.number || '—'}`,
+    `Cliente: ${quote.client.name || '—'}`,
+    `Fecha: ${quote.issueDate}`,
+    '',
+  ]
+  for (const item of calc.items) {
+    lines.push(
+      `${item.code ? `${item.code} · ` : ''}${item.description}: ${item.qty} × ${formatUsd(
+        item.unitPriceUsd,
+      )} = ${formatUsd(item.netUsd)}`,
+    )
+  }
+  lines.push('')
+  lines.push(`Sub-Total: ${formatUsd(calc.subtotalUsd)}`)
+  lines.push(`IVA: ${formatUsd(calc.taxUsd)}`)
+  lines.push(`Neto: ${formatUsd(calc.totalUsd)}`)
+  lines.push(formatVes(usdToVes(calc.totalUsd, quote.rate)))
+  lines.push(`(Tasa Bs. ${quote.rate} por $1)`)
+  return lines.join('\n')
+}
+
+export async function shareQuoteByWhatsApp(
+  quote: Quote,
+  calc: QuoteCalcResult,
+  clinic: Clinic,
+  options: QuotePdfOptions,
+): Promise<'shared' | 'whatsapp' | 'cancelled'> {
+  const text = buildQuoteWhatsAppText(quote, calc)
+
+  if (typeof navigator !== 'undefined' && 'canShare' in navigator) {
+    try {
+      const blob = await buildQuotePdfBlob(quote, calc, clinic, options)
+      const file = new File([blob], quotePdfFileName(quote), { type: 'application/pdf' })
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Cotización', text })
         return 'shared'
       }
     } catch (error) {
