@@ -75,8 +75,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
         <DialogHeader>
           <DialogTitle>Catálogo y precios</DialogTitle>
           <DialogDescription>
-            Aquí guardas los servicios y productos que usas a diario. Los cambios no
-            afectan al documento que estás editando.
+            Los cambios no afectan al documento que estás editando.
           </DialogDescription>
         </DialogHeader>
 

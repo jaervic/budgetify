@@ -110,8 +110,7 @@ function PickerContent({ onClose }: { onClose: () => void }) {
         </div>
         {activeAreaName && (
           <p className="text-sm text-muted-foreground">
-            Se muestran los servicios de <b>{activeAreaName}</b> y los generales (enfermería,
-            estudios, gastos de clínica). Elige «Todo el catálogo» para verlos todos.
+            Se muestran los de <b>{activeAreaName}</b> y los generales.
           </p>
         )}
       </div>
@@ -191,7 +190,7 @@ export function CatalogPickerDialog({ open, onOpenChange }: CatalogPickerDialogP
         <DialogHeader>
           <DialogTitle>Agregar servicios</DialogTitle>
           <DialogDescription>
-            Elige los servicios del catálogo. Puedes cambiar precios y cantidades en la tabla.
+            Elige los servicios que necesitas.
           </DialogDescription>
         </DialogHeader>
         <PickerContent onClose={() => onOpenChange(false)} />

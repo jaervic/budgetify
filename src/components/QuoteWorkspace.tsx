@@ -63,7 +63,7 @@ export function QuoteWorkspace({
                 <div>
                   <CardTitle>Productos</CardTitle>
                   <CardDescription>
-                    Elige los productos del catálogo y ajusta cantidad, unidad, precio o IVA.
+                    Puedes editar cada línea directamente.
                   </CardDescription>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

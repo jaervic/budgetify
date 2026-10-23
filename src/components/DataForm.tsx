@@ -98,7 +98,7 @@ export function DataForm() {
           />
           {patient.name.trim() === '' && (
             <p className="text-sm text-muted-foreground">
-              Sin nombre, la hoja muestra «—». Puedes completarlo más tarde.
+              Puedes completarlo después.
             </p>
           )}
         </div>
@@ -163,8 +163,7 @@ export function DataForm() {
             Opciones avanzadas: precio del dólar
           </summary>
           <p className="mt-2 text-sm text-muted-foreground">
-            Se actualiza solo con el BCV. Ábrelo únicamente si necesitas fijar el precio a
-            mano.
+            Ábrelo solo si necesitas fijar el precio a mano.
           </p>
           <RateField />
         </details>

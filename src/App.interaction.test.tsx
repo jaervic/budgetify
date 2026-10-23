@@ -100,7 +100,7 @@ describe('App · interacciones', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     expect(localStorage.getItem(WELCOME_SEEN_KEY)).toBe('1')
 
-    await userEvent.click(screen.getByRole('button', { name: 'Cómo se usa' }))
+    await userEvent.click(screen.getByRole('button', { name: '¿Cómo se usa?' }))
     expect(await screen.findByRole('dialog')).toBeTruthy()
   })
 

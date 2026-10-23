@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import { HelpNote } from '@/components/HelpNote'
 import { RateField } from '@/components/RateField'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -110,7 +111,7 @@ export function QuoteDataForm() {
           />
           {quote.client.name.trim() === '' && (
             <p className="text-sm text-muted-foreground">
-              Sin nombre, el documento muestra «—». Puedes completarlo más tarde.
+              Puedes completarlo después.
             </p>
           )}
         </div>
@@ -131,9 +132,6 @@ export function QuoteDataForm() {
               <SelectItem value="VES">VES · bolívares</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-sm text-muted-foreground">
-            La tabla y el PDF muestran los precios en esta moneda.
-          </p>
         </div>
 
         <label
@@ -153,7 +151,7 @@ export function QuoteDataForm() {
             Mostrar también en{' '}
             {quote.currency === 'USD' ? 'bolívares (VES)' : 'dólares (USD)'}
             <span className="block text-sm text-muted-foreground">
-              Añade el equivalente en cada producto, en los totales y en el PDF.
+              Se muestra también en la tabla, los totales y el PDF.
             </span>
           </span>
         </label>
@@ -166,16 +164,18 @@ export function QuoteDataForm() {
               Opciones avanzadas: precio del dólar
             </summary>
             <p className="mt-2 text-sm text-muted-foreground">
-              Se actualiza solo con el BCV. Ábrelo únicamente si necesitas fijar el precio
-              a mano.
+              Ábrelo solo si necesitas fijar el precio a mano.
             </p>
             <RateField />
           </details>
         )}
-        <p className="text-sm text-muted-foreground sm:col-span-2">
-          Los precios se guardan en dólares. Si cotizas en bolívares, el precio del dólar
-          los convierte a Bs.; al cambiarlo, los importes se recalculan.
-        </p>
+        <HelpNote title="¿Cómo se calculan los precios?" className="sm:col-span-2">
+          <p>Los precios se guardan en dólares.</p>
+          <p>
+            Si cotizas en bolívares, el precio del dólar los convierte a Bs. Al cambiarlo, los
+            importes se recalculan.
+          </p>
+        </HelpNote>
 
         <div className="min-w-0 sm:col-span-2">
           <Button
@@ -192,9 +192,7 @@ export function QuoteDataForm() {
             Datos opcionales del cliente y del documento
           </Button>
           <p className="mt-2 text-sm text-muted-foreground">
-            Solo se imprimen los campos que tengan valor. Sirven para completar la
-            referencia: código y RIF del cliente, vendedor, oficina, transporte, vencimiento,
-            orden de compra y descripción.
+            Opcional. Solo se imprime lo que completes.
           </p>
         </div>
 

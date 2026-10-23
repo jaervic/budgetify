@@ -1,3 +1,4 @@
+import { HelpNote } from '@/components/HelpNote'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import type { CalcResult } from '@/lib/calc'
@@ -54,9 +55,11 @@ export function TotalsPanel({ calc, rate }: TotalsPanelProps) {
         </div>
 
         <p className="text-sm text-muted-foreground">
-          Precio del dólar: Bs. {formatRate(rate)} por $1. El monto en Bs. se recalcula con
-          el precio oficial del día de pago.
+          Precio del dólar: Bs. {formatRate(rate)} por $1.
         </p>
+        <HelpNote title="¿Por qué cambia el monto en Bs.?">
+          <p>Se recalcula con el precio oficial del día de pago.</p>
+        </HelpNote>
       </CardContent>
     </Card>
   )

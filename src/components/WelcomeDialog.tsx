@@ -52,7 +52,7 @@ const MODE_OPTIONS: Array<{
  * Guía de tres pasos para quien usa la app por primera vez.
  *
  * No rellena datos por el usuario: explica el recorrido y permite elegir el
- * tipo de documento en el primer paso. Se puede cerrar y reabrir con «Ayuda».
+ * tipo de documento en el primer paso. Se puede cerrar y reabrir con «¿Cómo se usa?».
  */
 export function WelcomeDialog({ open, onOpenChange }: WelcomeDialogProps) {
   const docMode = useBudgetStore((state) => state.docMode)
@@ -76,7 +76,7 @@ export function WelcomeDialog({ open, onOpenChange }: WelcomeDialogProps) {
         <DialogHeader className="pr-8">
           <DialogTitle>Cómo hacer un documento en 3 pasos</DialogTitle>
           <DialogDescription>
-            Puedes cerrar esta guía y volver a abrirla con el botón «Ayuda».
+            Puedes cerrarla y volver a abrirla con el botón «¿Cómo se usa?».
           </DialogDescription>
         </DialogHeader>
 

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { HelpNote } from '@/components/HelpNote'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -117,7 +118,7 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
           </SelectContent>
         </Select>
         <p className="text-sm text-muted-foreground">
-          Carta por defecto. La cabecera y los datos del cliente se repiten en cada hoja.
+          Carta por defecto.
         </p>
       </div>
 
@@ -178,7 +179,7 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
             }
           >
             <FileDown />
-            Descargar archivo
+            Descargar
           </Button>
           <Button
             type="button"
@@ -187,13 +188,12 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
             onClick={() => fileInput.current?.click()}
           >
             <FileUp />
-            Abrir archivo
+            Abrir
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground">
-          La copia es un archivo .json. Sirve para guardar el documento o abrirlo en otro
-          equipo.
-        </p>
+        <HelpNote title="¿Qué es el archivo?">
+          <p>Es una copia del documento para guardarla o abrirla en otro equipo.</p>
+        </HelpNote>
         <Button
           type="button"
           variant="ghost"

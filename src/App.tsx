@@ -87,16 +87,6 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              aria-label="Cómo se usa"
-              onClick={() => setHelpOpen(true)}
-            >
-              <HelpCircle />
-              <span className="hidden sm:inline">Ayuda</span>
-            </Button>
             <ThemeToggle />
             <Button
               type="button"
@@ -132,8 +122,12 @@ export default function App() {
             </Button>
           </div>
         </div>
-        <div className="mx-auto max-w-7xl px-4 pb-3">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 pb-3">
           <DocumentModeSwitch />
+          <Button type="button" variant="outline" size="sm" onClick={() => setHelpOpen(true)}>
+            <HelpCircle />
+            ¿Cómo se usa?
+          </Button>
         </div>
       </header>
 

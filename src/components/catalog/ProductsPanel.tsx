@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { PackagePlus, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { HelpNote } from '@/components/HelpNote'
 import { NumberInput } from '@/components/NumberInput'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -182,9 +183,11 @@ export function ProductsPanel() {
         ))}
       </div>
 
+      <HelpNote title="Sobre los precios">
+        <p>Son precios de referencia en dólares y puedes editarlos. Cada producto tiene su IVA.</p>
+      </HelpNote>
       <p className="text-sm text-muted-foreground">
-        Precios de referencia en dólares, editables. IVA por producto. La categoría
-        «Medicamentos» requiere validar registro sanitario, lote y vencimiento.
+        Medicamentos: valida registro sanitario, lote y vencimiento.
       </p>
 
       <ScrollArea className="h-[50vh] min-h-64 pr-3" aria-label="Productos del catálogo">

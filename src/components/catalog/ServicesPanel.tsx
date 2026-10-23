@@ -141,7 +141,7 @@ export function ServicesPanel() {
                   ariaLabel="Área del servicio"
                 />
                 <p className="text-sm text-muted-foreground">
-                  Un servicio transversal se ofrece en todas las áreas.
+                  Transversal: se ofrece en todas las áreas.
                 </p>
               </div>
             </div>

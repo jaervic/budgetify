@@ -287,8 +287,7 @@ export function ProductPickerDialog({ open, onOpenChange }: ProductPickerDialogP
         <DialogHeader>
           <DialogTitle>Agregar productos</DialogTitle>
           <DialogDescription>
-            Filtra por categoría y marca cada producto que quieras cotizar. Luego ajusta
-            cantidades, precios o IVA en la tabla.
+            Marca los productos que quieras cotizar.
           </DialogDescription>
         </DialogHeader>
         {open && <PickerContent onClose={() => onOpenChange(false)} />}

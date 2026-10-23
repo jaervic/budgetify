@@ -75,7 +75,7 @@ export function BudgetWorkspace({
                 <div>
                   <CardTitle>Servicios</CardTitle>
                   <CardDescription>
-                    Ajusta concepto, detalle, categoría, cantidad o precio de cada línea.
+                    Puedes editar cada línea directamente.
                   </CardDescription>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

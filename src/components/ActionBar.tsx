@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { HelpNote } from '@/components/HelpNote'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -167,7 +168,7 @@ export function ActionBar({ onDocumentReplaced, onViewPdf }: ActionBarProps) {
             onClick={() => downloadJson(`presupuesto-${fileStamp()}.json`, budget)}
           >
             <FileDown />
-            Descargar archivo
+            Descargar
           </Button>
           <Button
             type="button"
@@ -176,13 +177,12 @@ export function ActionBar({ onDocumentReplaced, onViewPdf }: ActionBarProps) {
             onClick={() => fileInput.current?.click()}
           >
             <FileUp />
-            Abrir archivo
+            Abrir
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground">
-          La copia es un archivo .json. Sirve para guardar el documento o abrirlo en otro
-          equipo.
-        </p>
+        <HelpNote title="¿Qué es el archivo?">
+          <p>Es una copia del documento para guardarla o abrirla en otro equipo.</p>
+        </HelpNote>
         <Button
           type="button"
           variant="ghost"

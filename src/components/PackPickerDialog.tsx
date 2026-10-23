@@ -50,7 +50,7 @@ export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) 
         <DialogHeader>
           <DialogTitle>Paquetes de servicios</DialogTitle>
           <DialogDescription>
-            Carga un conjunto de servicios ya armado y luego ajusta precios o cantidades.
+            Carga un conjunto de servicios ya armado.
           </DialogDescription>
         </DialogHeader>
 

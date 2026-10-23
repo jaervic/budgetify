@@ -84,7 +84,7 @@ paciente:
 
 - Textos y botones más grandes, con áreas de toque cómodas en el teléfono.
 - La guía de 3 pasos explica el recorrido la primera vez y se puede reabrir con
-  **“Ayuda”**.
+  **“¿Cómo se usa?”**.
 - Las opciones técnicas (precio del dólar, datos opcionales, copias de seguridad)
   quedan plegadas para no distraer.
 - Todo se puede usar solo con el teclado y los avisos se anuncian al lector de pantalla.
@@ -105,7 +105,7 @@ con tu nombre y tu título (“Od. Ana Rojas”) y debajo tu área de práctica.
 ## Cómo usarlo (paso a paso)
 
 1. **Abre la página** en tu navegador (Chrome, Edge, Safari…). La primera vez
-   aparece una guía de 3 pasos; puedes volver a abrirla con **“Ayuda”**.
+   aparece una guía de 3 pasos; puedes volver a abrirla con **“¿Cómo se usa?”**.
 2. Escribe el **nombre del paciente**, su cédula y su edad, y el **procedimiento**.
 3. Pulsa **“Agregar servicio”** y elige los que necesites del catálogo, o **“Cargar
    paquete”** para traer un conjunto ya armado (por ejemplo, una cirugía completa).
@@ -133,7 +133,7 @@ navegador. No hay cuentas, no hay registro y no hay base de datos.
 En el navegador del equipo donde trabajas. Además del que estás editando, puedes archivar
 copias en **“Historial”** (se conservan las 100 últimas; al pasar de ahí se descartan las
 más viejas y la app te avisa). Si cambias de computadora o quieres un respaldo, usa
-**“Descargar archivo”** y luego **“Abrir archivo”** en el otro equipo.
+**“Descargar”** y luego **“Abrir”** (en “Guardar copia”) en el otro equipo.
 
 **Me equivoque, ¿puedo volver atrás?**
 Sí. Al borrar una línea, una nota, una categoría o una copia del historial, o al reemplazar
