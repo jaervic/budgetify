@@ -298,6 +298,57 @@ describe('migratePersisted', () => {
     expect(state.catalog.productCatalogVersion).toBe(2)
   })
 
+  it('completa un catálogo v8 aunque ya tenga la versión de productos actual', () => {
+    const oldIds = [
+      'prod_bata',
+      'prod_cepillo',
+      'prod_electrodo',
+      'prod_gasa',
+      'prod_guantes',
+      'prod_cateter',
+      'prod_hemostatico',
+      'prod_seda',
+    ]
+    const oldProducts = oldIds.map((id) => {
+      const product = DEFAULT_PRODUCTS.find((entry) => entry.id === id)
+      if (!product) throw new Error(`Falta el producto inicial ${id}`)
+      return { ...product, priceUsd: id === 'prod_gasa' ? 99 : product.priceUsd }
+    })
+
+    const state = migratePersisted(
+      {
+        ...V5_STATE,
+        catalog: {
+          ...V5_STATE.catalog,
+          products: oldProducts,
+          productCatalogVersion: 2,
+        },
+      },
+      8,
+    )
+
+    expect(state.catalog.products).toHaveLength(DEFAULT_PRODUCTS.length)
+    expect(state.catalog.products.find((p) => p.id === 'prod_gasa')?.priceUsd).toBe(99)
+  })
+
+  it('no vuelve a añadir productos borrados al migrar una versión actual', () => {
+    const kept = DEFAULT_PRODUCTS.slice(0, 3)
+
+    const state = migratePersisted(
+      {
+        ...V5_STATE,
+        catalog: {
+          ...V5_STATE.catalog,
+          products: kept,
+          productCatalogVersion: 2,
+        },
+      },
+      9,
+    )
+
+    expect(state.catalog.products).toHaveLength(3)
+  })
+
   it('respeta un catálogo de productos vacío ya migrado', () => {
     const state = migratePersisted({
       ...V5_STATE,

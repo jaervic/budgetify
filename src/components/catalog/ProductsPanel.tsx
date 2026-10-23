@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
+import { PackagePlus, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberInput } from '@/components/NumberInput'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { DEFAULT_TAX_RATE } from '@/data/defaults'
-import { PRODUCT_CATEGORIES } from '@/data/products'
+import { DEFAULT_PRODUCTS, PRODUCT_CATEGORIES } from '@/data/products'
 import { LIMITS } from '@/lib/limits'
 import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
@@ -21,7 +21,7 @@ const UNITS = ['UND', 'CAJA', 'PAQ', 'PAR', 'FRASCO', 'TUBO', 'ROLLO', 'KIT', 'A
 
 const chipClass = (active: boolean) =>
   cn(
-    'rounded-full border px-3 py-1 text-xs font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+    'shrink-0 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
     active
       ? 'border-primary bg-primary text-primary-foreground'
       : 'border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground',
@@ -38,6 +38,7 @@ export function ProductsPanel() {
   const addCatalogProduct = useBudgetStore((state) => state.addCatalogProduct)
   const updateCatalogProduct = useBudgetStore((state) => state.updateCatalogProduct)
   const removeCatalogProduct = useBudgetStore((state) => state.removeCatalogProduct)
+  const mergeDefaultProductList = useBudgetStore((state) => state.mergeDefaultProducts)
   const [query, setQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState(ALL)
   const [focusId, setFocusId] = useState<string | null>(null)
@@ -75,6 +76,11 @@ export function ProductsPanel() {
     activeCategory !== ALL && !categories.includes(activeCategory)
       ? [...categories, activeCategory]
       : categories
+
+  const missingDefaults = useMemo(() => {
+    const existing = new Set(products.map((product) => product.id))
+    return DEFAULT_PRODUCTS.filter((product) => !existing.has(product.id)).length
+  }, [products])
 
   const term = query.trim().toLowerCase()
   const visible = products.filter((product) => {
@@ -114,6 +120,15 @@ export function ProductsPanel() {
     toast.success('Producto agregado')
   }
 
+  const handleMergeDefaults = () => {
+    const added = mergeDefaultProductList()
+    toast.success(
+      added === 1
+        ? 'Se agregó 1 producto de fábrica'
+        : `Se agregaron ${added} productos de fábrica`,
+    )
+  }
+
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -121,22 +136,28 @@ export function ProductsPanel() {
           <Plus />
           Nuevo producto
         </Button>
+        {missingDefaults > 0 && (
+          <Button type="button" size="sm" variant="outline" onClick={handleMergeDefaults}>
+            <PackagePlus />
+            Completar catálogo ({missingDefaults})
+          </Button>
+        )}
         <div className="w-full sm:w-64">
           <Input
-            className="h-8 text-xs"
+            className="h-10 text-sm"
             placeholder="Buscar código, descripción o categoría…"
             aria-label="Buscar productos"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-sm text-muted-foreground" aria-live="polite">
           {visible.length} de {products.length} productos
         </span>
       </div>
 
       <div
-        className="flex flex-wrap gap-1.5"
+        className="flex gap-1.5 overflow-x-auto pb-1"
         role="group"
         aria-label="Filtrar productos por categoría"
       >
@@ -161,12 +182,12 @@ export function ProductsPanel() {
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Precios de referencia en USD, editables. IVA por producto. La categoría
+      <p className="text-sm text-muted-foreground">
+        Precios de referencia en dólares, editables. IVA por producto. La categoría
         «Medicamentos» requiere validar registro sanitario, lote y vencimiento.
       </p>
 
-      <ScrollArea className="h-[42vh] pr-3" aria-label="Productos del catálogo">
+      <ScrollArea className="h-[50vh] min-h-64 pr-3" aria-label="Productos del catálogo">
         <datalist id="product-categories">
           {categories.map((category) => (
             <option key={category} value={category} />
@@ -188,7 +209,7 @@ export function ProductsPanel() {
           <>
             <div
               className={cn(
-                'hidden px-3 py-1 text-xs font-medium text-muted-foreground lg:grid',
+                'hidden px-3 py-1 text-sm font-medium text-muted-foreground lg:grid',
                 PRODUCT_GRID,
               )}
             >
@@ -217,9 +238,9 @@ export function ProductsPanel() {
                   )}
                 >
                 <div className="grid gap-1 lg:px-3 lg:py-2">
-                  <span className="text-xs text-muted-foreground lg:hidden">Código</span>
+                  <span className="text-sm text-muted-foreground lg:hidden">Código</span>
                   <Input
-                    className="h-8"
+                    className="h-10"
                     aria-label={`Código de ${product.description || 'producto'}`}
                     placeholder="Código"
                     maxLength={LIMITS.productCode}
@@ -231,11 +252,11 @@ export function ProductsPanel() {
                 </div>
 
                 <div className="grid gap-1 lg:px-3 lg:py-2">
-                  <span className="text-xs text-muted-foreground lg:hidden">
+                  <span className="text-sm text-muted-foreground lg:hidden">
                     Descripción
                   </span>
                   <Input
-                    className="h-8 font-medium"
+                    className="h-10 font-medium"
                     data-field="description"
                     aria-label={`Descripción de ${product.description || 'producto'}`}
                     placeholder="Descripción"
@@ -250,11 +271,11 @@ export function ProductsPanel() {
                 </div>
 
                 <div className="grid gap-1 lg:px-3 lg:py-2">
-                  <span className="text-xs text-muted-foreground lg:hidden">
+                  <span className="text-sm text-muted-foreground lg:hidden">
                     Categoría
                   </span>
                   <Input
-                    className="h-8"
+                    className="h-10"
                     aria-label={`Categoría de ${product.description || 'producto'}`}
                     placeholder="Categoría"
                     list="product-categories"
@@ -269,9 +290,9 @@ export function ProductsPanel() {
                 </div>
 
                 <div className="grid gap-1 lg:px-3 lg:py-2">
-                  <span className="text-xs text-muted-foreground lg:hidden">Unidad</span>
+                  <span className="text-sm text-muted-foreground lg:hidden">Unidad</span>
                   <Input
-                    className="h-8 text-center"
+                    className="h-10 text-center"
                     aria-label={`Unidad de ${product.description || 'producto'}`}
                     placeholder="UND"
                     list="product-units"
@@ -284,11 +305,11 @@ export function ProductsPanel() {
                 </div>
 
                 <div className="grid gap-1 lg:px-3 lg:py-2">
-                  <span className="text-xs text-muted-foreground lg:hidden">
+                  <span className="text-sm text-muted-foreground lg:hidden">
                     Precio USD
                   </span>
                   <NumberInput
-                    className="h-8"
+                    className="h-10"
                     aria-label={`Precio en USD de ${product.description || 'producto'}`}
                     decimals={2}
                     value={product.priceUsd}
@@ -299,9 +320,9 @@ export function ProductsPanel() {
                 </div>
 
                 <div className="grid gap-1 lg:px-3 lg:py-2">
-                  <span className="text-xs text-muted-foreground lg:hidden">% IVA</span>
+                  <span className="text-sm text-muted-foreground lg:hidden">% IVA</span>
                   <NumberInput
-                    className="h-8"
+                    className="h-10"
                     aria-label={`Porcentaje de IVA de ${product.description || 'producto'}`}
                     decimals={2}
                     value={product.taxRate}

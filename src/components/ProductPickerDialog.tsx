@@ -28,7 +28,7 @@ const ALL = 'all'
 
 const chipClass = (active: boolean) =>
   cn(
-    'rounded-full border px-3 py-1 text-xs font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+    'shrink-0 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
     active
       ? 'border-primary bg-primary text-primary-foreground'
       : 'border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground',
@@ -143,7 +143,7 @@ function PickerContent({ onClose }: { onClose: () => void }) {
       </div>
 
       <div
-        className="flex flex-wrap gap-1.5"
+        className="flex gap-1.5 overflow-x-auto pb-1"
         role="group"
         aria-label="Filtrar productos por categoría"
       >
@@ -193,24 +193,30 @@ function PickerContent({ onClose }: { onClose: () => void }) {
             </Button>
           )}
         </div>
-        <Badge variant="secondary" aria-live="polite" aria-atomic="true">
-          {selected.length} seleccionados
-        </Badge>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground" aria-live="polite">
+            {visible.length} de {products.length} productos
+          </span>
+          <Badge variant="secondary" aria-live="polite" aria-atomic="true">
+            {selected.length} seleccionados
+          </Badge>
+        </div>
       </div>
 
-      <ScrollArea className="h-[46vh] pr-3" aria-label="Productos disponibles">
+      <ScrollArea className="h-[52vh] min-h-64 pr-3" aria-label="Productos disponibles">
         {visible.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             {query || activeCategory !== ALL
               ? 'No hay productos que coincidan con el filtro.'
-              : 'No hay productos. Créalos en «Gestionar catálogo → Productos».'}
+              : 'No hay productos. Créalos en «Catálogo y precios → Productos».'}
           </p>
         ) : (
           <div className="grid gap-4">
             {groups.map(([category, items]) => (
               <section key={category} className="grid gap-1.5">
-                <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                  {category || 'Sin categoría'}
+                <h3 className="text-sm font-semibold text-muted-foreground">
+                  {category || 'Sin categoría'}{' '}
+                  <span className="font-normal">({items.length})</span>
                 </h3>
                 {items.map((product) => {
                   const checked = selectedSet.has(product.id)
@@ -221,26 +227,26 @@ function PickerContent({ onClose }: { onClose: () => void }) {
                     >
                       <input
                         type="checkbox"
-                        className="mt-1 size-4 shrink-0 accent-primary"
+                        className="mt-0.5 size-5 shrink-0 accent-primary"
                         aria-label={`Seleccionar ${product.code ? `${product.code} ` : ''}${product.description}`}
                         checked={checked}
                         onChange={() => toggle(product.id)}
                       />
                       <span className="min-w-0 flex-1">
                         <span className="flex flex-wrap items-center gap-2">
-                          <span className="text-xs font-semibold text-muted-foreground">
+                          <span className="text-sm font-semibold text-muted-foreground">
                             {product.code || '—'}
                           </span>
                           <span className="text-sm font-medium break-words">
                             {product.description}
                           </span>
                           {!defaultIds.has(product.id) && (
-                            <Badge variant="outline" className="text-[10px]">
+                            <Badge variant="outline" className="text-xs">
                               Personalizado
                             </Badge>
                           )}
                         </span>
-                        <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                        <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
                           <span>
                             {formatQuoteMoney(product.priceUsd, currency, rate)}
                             {showBothCurrencies

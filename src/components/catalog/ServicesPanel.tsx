@@ -55,11 +55,11 @@ export function ServicesPanel() {
             value={areaFilter}
             onChange={setAreaFilter}
             noneLabel="Todas las áreas"
-            className="h-8 text-xs"
+            className="h-10 text-sm"
             ariaLabel="Filtrar servicios por área"
           />
         </div>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-sm text-muted-foreground" aria-live="polite">
           {visible.length} de {catalog.services.length} servicios
         </span>
       </div>
@@ -102,7 +102,6 @@ export function ServicesPanel() {
               </div>
 
               <Input
-                className="text-xs"
                 aria-label="Detalle"
                 placeholder="Detalle (opcional)"
                 maxLength={LIMITS.detail}
@@ -120,7 +119,7 @@ export function ServicesPanel() {
                   options={categoryOptions}
                   onChange={(category) => updateCatalogService(service.id, { category })}
                   ariaLabel="Categoría"
-                  className="h-8 w-full text-xs"
+                  className="h-10 w-full text-sm"
                 />
                 <FormulaFields
                   formula={service.formula}
@@ -138,10 +137,10 @@ export function ServicesPanel() {
                     updateCatalogService(service.id, { specialtyId })
                   }
                   noneLabel="Transversal (todas)"
-                  className="h-8 text-xs"
+                  className="h-10 text-sm"
                   ariaLabel="Área del servicio"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Un servicio transversal se ofrece en todas las áreas.
                 </p>
               </div>

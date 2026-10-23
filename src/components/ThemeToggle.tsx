@@ -11,8 +11,7 @@ export function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon-sm"
-      aria-label="Cambiar tema"
-      title="Cambiar tema"
+      aria-label="Cambiar entre modo claro y oscuro"
       onClick={toggle}
     >
       {resolved === 'dark' ? <Moon /> : <Sun />}

@@ -102,7 +102,7 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
   return (
     <div className="grid gap-3">
       <div className="grid gap-2">
-        <span className="text-xs font-medium text-muted-foreground">Tamaño de hoja</span>
+        <span className="text-sm font-medium text-muted-foreground">Tamaño de hoja</span>
         <Select
           value={quotePageSize}
           onValueChange={(value) => setQuotePageSize(value as PageSize)}
@@ -116,7 +116,7 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
             <SelectItem value="Legal">Oficio (Legal)</SelectItem>
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Carta por defecto. La cabecera y los datos del cliente se repiten en cada hoja.
         </p>
       </div>
@@ -178,7 +178,7 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
             }
           >
             <FileDown />
-            Exportar JSON
+            Descargar archivo
           </Button>
           <Button
             type="button"
@@ -187,9 +187,13 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
             onClick={() => fileInput.current?.click()}
           >
             <FileUp />
-            Importar JSON
+            Abrir archivo
           </Button>
         </div>
+        <p className="text-sm text-muted-foreground">
+          La copia es un archivo .json. Sirve para guardar el documento o abrirlo en otro
+          equipo.
+        </p>
         <Button
           type="button"
           variant="ghost"
@@ -208,7 +212,7 @@ export function QuoteActionBar({ onDocumentReplaced, onViewPdf }: QuoteActionBar
         title="¿Empezar una nueva cotización?"
         description={
           <p>
-            Se crea una cotización vacía con el siguiente número correlativo. La actual se
+            Se crea una cotización vacía con el siguiente número disponible. La actual se
             puede recuperar desde el aviso de deshacer.
           </p>
         }

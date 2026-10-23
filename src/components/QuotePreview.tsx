@@ -162,7 +162,7 @@ export function QuotePreview({ model }: QuotePreviewProps) {
         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="w-fit rounded-md border-l-4 border-sky-600 bg-slate-50 px-3 py-1.5 text-[10px]">
             <p>
-              <span className="font-semibold text-slate-800">Tasa: </span>
+              <span className="font-semibold text-slate-800">Precio del dólar: </span>
               {model.rateLabel}
             </p>
             {model.showBothCurrencies && (
@@ -177,7 +177,7 @@ export function QuotePreview({ model }: QuotePreviewProps) {
 
           <div className="grid w-full gap-0 text-[11px] sm:w-52">
             <div className="flex justify-between border-b border-slate-200 bg-slate-50 px-2 py-1">
-              <span className="text-slate-600">Sub-Total</span>
+              <span className="text-slate-600">Subtotal</span>
               <span className="flex flex-col items-end font-semibold text-slate-800">
                 <span>{model.subtotal}</span>
                 {model.showBothCurrencies && (

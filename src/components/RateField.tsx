@@ -18,8 +18,8 @@ function formatUpdate(iso: string | null): string {
 }
 
 /**
- * Tasa de cálculo VES/USD. Se puede anclar a la tasa oficial del BCV o fijar a
- * mano; si hay red se consulta el BCV, y si no, se usa el último valor cacheado.
+ * Precio del dólar en bolívares. Se actualiza solo con el BCV o se fija a mano;
+ * si hay red se consulta el BCV y, si no, se usa el último valor guardado.
  */
 export function RateField() {
   const docMode = useBudgetStore((state) => state.docMode)
@@ -43,9 +43,9 @@ export function RateField() {
     // Desanclar es fácil de hacer sin querer y deja el presupuesto colgado de
     // una tasa que ya no se actualiza: conviene decirlo en el momento.
     if (!checked) {
-      toast.info('Tasa fijada a mano', {
+      toast.info('Precio del dólar fijado a mano', {
         description:
-          'Ya no seguirá al BCV. Vuelve a marcar «Anclar al BCV» para que se actualice sola.',
+          'Ya no se actualizará solo. Vuelve a marcar «Actualizar solo con el BCV» para que cambie automáticamente.',
       })
     }
   }
@@ -53,23 +53,23 @@ export function RateField() {
   return (
     <div className="grid gap-2 sm:col-span-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Label htmlFor="rate">Tasa de cálculo (Bs. por $)</Label>
-        <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+        <Label htmlFor="rate">Precio del dólar (Bs. por $1)</Label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
           <input
             type="checkbox"
-            className="size-4 accent-primary"
+            className="size-5 accent-primary"
             checked={isAuto}
             onChange={(event) => handleAnchor(event.target.checked)}
           />
-          Anclar al BCV
+          Actualizar solo con el BCV
         </label>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <NumberInput
           id="rate"
           className="max-w-40"
-          aria-label="Tasa de cálculo"
+          aria-label="Precio del dólar en bolívares"
           decimals={4}
           value={rate}
           onValueChange={setRate}
@@ -86,23 +86,23 @@ export function RateField() {
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground" aria-live="polite">
-        {bcv.status === 'loading' && 'Consultando la tasa BCV…'}
+      <p className="text-sm text-muted-foreground" aria-live="polite">
+        {bcv.status === 'loading' && 'Consultando el precio del dólar en el BCV…'}
         {bcv.status === 'ok' &&
           bcv.value !== null &&
           `BCV: Bs. ${formatRate(bcv.value)}${
-            bcv.updatedAt ? ` · actualizada ${formatUpdate(bcv.updatedAt)}` : ''
-          }${isAuto ? ' · anclada' : ' · no aplicada'}`}
+            bcv.updatedAt ? ` · actualizado ${formatUpdate(bcv.updatedAt)}` : ''
+          }${isAuto ? ' · se actualiza solo' : ' · fijado a mano'}`}
         {bcv.status === 'error' && (
           <span className="text-destructive">
-            No se pudo obtener la tasa BCV; se usa la tasa mostrada arriba.
+            No se pudo consultar el BCV; se usa el precio que aparece arriba.
           </span>
         )}
-        {bcv.status === 'idle' && 'Aún no se ha consultado la tasa del BCV.'}
+        {bcv.status === 'idle' && 'Aún no se ha consultado el precio del BCV.'}
       </p>
 
       {rate <= 0 && (
-        <p className="text-xs text-destructive">La tasa debe ser mayor que 0.</p>
+        <p className="text-sm text-destructive">El precio debe ser mayor que 0.</p>
       )}
     </div>
   )

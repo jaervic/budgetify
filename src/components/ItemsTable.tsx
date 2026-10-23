@@ -71,7 +71,7 @@ export function ItemsTable({ calc, rate, emptyFocusRef }: ItemsTableProps) {
       <div
         role="row"
         className={cn(
-          'hidden border-b bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground sm:grid',
+          'hidden border-b bg-muted/50 px-3 py-2 text-sm font-medium text-muted-foreground sm:grid',
           ITEM_GRID,
         )}
       >

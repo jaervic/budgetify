@@ -249,7 +249,7 @@ export function BudgetPdf({ budget, calc, clinic, rateMode, pageSize }: BudgetPd
           </View>
           <View style={styles.rateBox}>
             <Text style={styles.rateText}>
-              <Text style={styles.muted}>Tasa de Cálculo: </Text>
+              <Text style={styles.muted}>Precio del dólar: </Text>
               <Text style={styles.rateBold}>{model.rateLabel}</Text>
             </Text>
           </View>

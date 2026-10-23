@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DEFAULT_CATALOG } from '@/data/catalog'
+import { DEFAULT_PRODUCTS } from '@/data/products'
 import { cloneDefaultClinic, createEmptyBcvCache, DEFAULT_RATE } from '@/data/defaults'
 import { computeBudget } from '@/lib/calc'
 import { HISTORY_LIMIT } from '@/lib/limits'
 import { formatUsd } from '@/lib/money'
 import { useBudgetStore } from './useBudgetStore'
+import { PERSIST_VERSION } from './versions'
 import type { SavedDocument } from '@/types'
 
 /** Extrae el presupuesto de una entrada del historial (falla si es cotización). */
@@ -29,6 +31,27 @@ describe('store del presupuesto', () => {
       history: [],
     })
     vi.unstubAllGlobals()
+  })
+
+  it('usa la versión de persistencia que completa el catálogo', () => {
+    expect(useBudgetStore.persist.getOptions().version).toBe(PERSIST_VERSION)
+  })
+
+  it('completa el catálogo de productos sin duplicar los existentes', () => {
+    const state = useBudgetStore.getState()
+    const catalog = state.catalog
+    state.loadCatalog({
+      ...catalog,
+      products: catalog.products.slice(0, 3),
+      productCatalogVersion: 2,
+    })
+
+    expect(useBudgetStore.getState().mergeDefaultProducts()).toBe(
+      DEFAULT_PRODUCTS.length - 3,
+    )
+    expect(useBudgetStore.getState().catalog.products).toHaveLength(
+      DEFAULT_PRODUCTS.length,
+    )
   })
 
   it('carga el pack de cirugía y produce el total esperado', () => {

@@ -348,7 +348,7 @@ export function buildQuoteWhatsAppText(quote: Quote, calc: QuoteCalcResult): str
   }
   lines.push('')
   lines.push(
-    `Sub-Total: ${formatQuoteMoney(calc.subtotalUsd, quote.currency, quote.rate)}${other(
+    `Subtotal: ${formatQuoteMoney(calc.subtotalUsd, quote.currency, quote.rate)}${other(
       calc.subtotalUsd.toNumber(),
     )}`,
   )

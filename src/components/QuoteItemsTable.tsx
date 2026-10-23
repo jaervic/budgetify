@@ -46,7 +46,7 @@ export function QuoteItemsTable({ calc, emptyFocusRef }: QuoteItemsTableProps) {
       <div
         role="row"
         className={cn(
-          'hidden border-b bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground xl:grid',
+          'hidden border-b bg-muted/50 px-3 py-2 text-sm font-medium text-muted-foreground xl:grid',
           QUOTE_ITEM_GRID,
         )}
       >

@@ -28,6 +28,7 @@ import type {
   RateMode,
   SavedDocument,
 } from '@/types'
+import { PERSIST_VERSION } from './versions'
 
 /** Parte del estado que se guarda en el navegador. */
 export interface PersistedState {
@@ -52,7 +53,10 @@ export interface PersistedState {
  * al arrancar. El catálogo siempre pasa por `migrateCatalogDefaults`, que añade
  * las áreas, categorías, servicios y plantillas nuevas sin pisar lo editado.
  */
-export function migratePersisted(persisted: unknown): PersistedState {
+export function migratePersisted(
+  persisted: unknown,
+  fromStoreVersion?: number,
+): PersistedState {
   const state = (persisted ?? {}) as Record<string, unknown>
   const budget = budgetSchema.safeParse(state.budget)
   const catalog = catalogSchema.safeParse(state.catalog)
@@ -82,11 +86,17 @@ export function migratePersisted(persisted: unknown): PersistedState {
   const readPageSize = (value: unknown, fallback: PageSize): PageSize =>
     value === 'Letter' || value === 'Legal' || value === 'A4' ? value : fallback
 
+  // Las instalaciones de la v8 se quedaron con los 8 productos iniciales
+  // porque el catálogo se amplió sin subir la versión del estado. Al migrar a
+  // la v9 se fuerza la mezcla aunque el catálogo ya diga versión 2.
+  const forceProductMerge =
+    fromStoreVersion !== undefined && fromStoreVersion < PERSIST_VERSION
+
   return {
     budget: budget.success ? budget.data : createEmptyBudget(),
     catalog: migrateCatalogDefaults(
       catalog.success ? catalog.data : cloneDefaultCatalog(),
-      { seedProducts: !hadProducts },
+      { seedProducts: !hadProducts, forceProductMerge },
     ),
     clinic: clinic.success ? clinic.data : cloneDefaultClinic(),
     rateMode: state.rateMode === 'manual' ? 'manual' : 'auto',

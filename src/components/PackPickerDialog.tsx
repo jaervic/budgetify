@@ -20,7 +20,7 @@ interface PackPickerDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-/** Carga plantillas de servicios (packs) para tipos de caso frecuentes. */
+/** Carga paquetes de servicios para tipos de caso frecuentes. */
 export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) {
   const packs = useBudgetStore((state) => state.catalog.packs)
   const hasItems = useBudgetStore((state) => state.budget.items.length > 0)
@@ -48,7 +48,7 @@ export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Plantillas de caso (packs)</DialogTitle>
+          <DialogTitle>Paquetes de servicios</DialogTitle>
           <DialogDescription>
             Carga un conjunto de servicios ya armado y luego ajusta precios o cantidades.
           </DialogDescription>
@@ -58,7 +58,7 @@ export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) 
           <div className="grid gap-2">
             {packs.length === 0 && (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No hay plantillas. Créalas en “Gestionar catálogo”.
+                No hay paquetes. Créalos en “Catálogo y precios”.
               </p>
             )}
 
@@ -74,7 +74,7 @@ export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) 
                     <Badge variant="secondary">{pack.services.length}</Badge>
                   </div>
                   {pack.description && (
-                    <p className="mt-1 text-xs text-muted-foreground">{pack.description}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{pack.description}</p>
                   )}
                 </div>
 
@@ -92,7 +92,6 @@ export function PackPickerDialog({ open, onOpenChange }: PackPickerDialogProps) 
                     type="button"
                     size="sm"
                     disabled={!hasItems}
-                    title={hasItems ? undefined : 'El presupuesto está vacío'}
                     onClick={() => setPendingReplace(pack)}
                   >
                     <RotateCcw />

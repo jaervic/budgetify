@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from '@/App'
+import { WELCOME_SEEN_KEY } from '@/components/WelcomeDialog'
 import { cloneDefaultClinic, createEmptyQuote } from '@/data/defaults'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import { useThemeStore } from '@/store/useThemeStore'
@@ -63,6 +64,8 @@ beforeEach(() => {
   })
   useThemeStore.setState({ theme: 'system' })
   localStorage.clear()
+  // La guía de bienvenida se prueba aparte; en el resto no debe tapar la app.
+  localStorage.setItem(WELCOME_SEEN_KEY, '1')
   document.documentElement.classList.remove('dark')
   // Red simulada, por si algo intenta consultar la tasa.
   vi.stubGlobal(
@@ -81,6 +84,26 @@ afterEach(() => {
 })
 
 describe('App · interacciones', () => {
+  it('muestra la guía de 3 pasos la primera vez y se puede reabrir', async () => {
+    localStorage.removeItem(WELCOME_SEEN_KEY)
+    render(<App />)
+
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('Paso 1 de 3')).toBeTruthy()
+    await userEvent.click(within(dialog).getByRole('button', { name: /Cotización/ }))
+    expect(within(dialog).getByText('Paso 2 de 3')).toBeTruthy()
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Siguiente' }))
+    expect(within(dialog).getByText('Paso 3 de 3')).toBeTruthy()
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Empezar' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(localStorage.getItem(WELCOME_SEEN_KEY)).toBe('1')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cómo se usa' }))
+    expect(await screen.findByRole('dialog')).toBeTruthy()
+  })
+
   it('añade una línea manual al presupuesto', async () => {
     render(<App />)
     expect(screen.queryByLabelText('Concepto')).toBeNull()
@@ -148,11 +171,15 @@ describe('App · interacciones', () => {
     render(<App />)
     await addManualLine()
 
-    await userEvent.click(screen.getByRole('button', { name: 'Limpiar' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Nuevo presupuesto' }))
     // Abrir el diálogo todavía no borra nada.
     expect(useBudgetStore.getState().budget.items).toHaveLength(1)
 
-    await userEvent.click(screen.getByRole('button', { name: 'Limpiar presupuesto' }))
+    await userEvent.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', {
+        name: 'Nuevo presupuesto',
+      }),
+    )
     expect(useBudgetStore.getState().budget.items).toHaveLength(0)
 
     await userEvent.click(screen.getByRole('button', { name: 'Deshacer' }))
@@ -233,8 +260,12 @@ describe('App · interacciones', () => {
     expect(useBudgetStore.getState().history).toHaveLength(1)
 
     // Se tira el presupuesto y se recupera la copia desde el historial.
-    await userEvent.click(screen.getByRole('button', { name: 'Limpiar' }))
-    await userEvent.click(screen.getByRole('button', { name: 'Limpiar presupuesto' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Nuevo presupuesto' }))
+    await userEvent.click(
+      within(screen.getByRole('alertdialog')).getByRole('button', {
+        name: 'Nuevo presupuesto',
+      }),
+    )
     expect(useBudgetStore.getState().budget.items).toHaveLength(0)
 
     await userEvent.click(screen.getByRole('button', { name: 'Historial' }))
@@ -269,7 +300,9 @@ describe('App · interacciones', () => {
     const root = document.documentElement
     expect(root.classList.contains('dark')).toBe(false)
 
-    await userEvent.click(screen.getByRole('button', { name: 'Cambiar tema' }))
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Cambiar entre modo claro y oscuro' }),
+    )
 
     expect(root.classList.contains('dark')).toBe(true)
   })
@@ -379,7 +412,7 @@ describe('App · interacciones', () => {
       within(dialog).getByRole('button', { name: 'Curación y apósitos' }),
     )
     expect(
-      within(dialog).getByRole('heading', { name: 'Curación y apósitos' }),
+      within(dialog).getByRole('heading', { name: /Curación y apósitos/ }),
     ).toBeTruthy()
     expect(within(dialog).getAllByText(/Gasa estéril/).length).toBeGreaterThan(0)
     expect(within(dialog).queryAllByText(/Bata de pacientes/)).toHaveLength(0)

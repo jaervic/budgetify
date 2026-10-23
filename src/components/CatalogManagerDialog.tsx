@@ -25,7 +25,7 @@ interface CatalogManagerDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-/** Gestor de la biblioteca de tarifas: servicios, categorías y plantillas. */
+/** Gestor de la biblioteca de tarifas: servicios, productos, categorías y paquetes. */
 export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialogProps) {
   const catalog = useBudgetStore((state) => state.catalog)
   const loadCatalog = useBudgetStore((state) => state.loadCatalog)
@@ -73,9 +73,9 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
         onInteractOutside={keepOpenForToast}
       >
         <DialogHeader>
-          <DialogTitle>Catálogo</DialogTitle>
+          <DialogTitle>Catálogo y precios</DialogTitle>
           <DialogDescription>
-            Edita la biblioteca de servicios y el catálogo de productos. Los cambios no
+            Aquí guardas los servicios y productos que usas a diario. Los cambios no
             afectan al documento que estás editando.
           </DialogDescription>
         </DialogHeader>
@@ -83,7 +83,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" onClick={handleExport}>
             <Download />
-            Exportar
+            Guardar copia
           </Button>
           <Button
             type="button"
@@ -92,23 +92,23 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
             onClick={() => fileInput.current?.click()}
           >
             <Upload />
-            Importar
+            Restaurar copia
           </Button>
           <Button type="button" variant="outline" size="sm" onClick={() => setConfirmResetOpen(true)}>
             <RotateCcw />
-            Restablecer
+            Volver a fábrica
           </Button>
           <ConfirmDialog
             open={confirmResetOpen}
             onOpenChange={setConfirmResetOpen}
-            title="¿Restablecer el catálogo?"
+            title="¿Volver al catálogo de fábrica?"
             description={
               <p>
-                Se descartan tus tarifas, categorías, áreas y plantillas editadas y
+                Se descartan tus tarifas, categorías, áreas y paquetes editados y
                 vuelven las de fábrica. Se puede deshacer desde el aviso.
               </p>
             }
-            confirmLabel="Restablecer catálogo"
+            confirmLabel="Volver a fábrica"
             destructive
             onConfirm={handleReset}
           />
@@ -130,7 +130,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
             <TabsTrigger value="services">Servicios</TabsTrigger>
             <TabsTrigger value="products">Productos</TabsTrigger>
             <TabsTrigger value="categories">Categorías</TabsTrigger>
-            <TabsTrigger value="packs">Plantillas</TabsTrigger>
+            <TabsTrigger value="packs">Paquetes</TabsTrigger>
           </TabsList>
           <TabsContent value="services" className="mt-3">
             <ServicesPanel />

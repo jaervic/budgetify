@@ -85,7 +85,7 @@ export function DocumentPreview({ model }: DocumentPreviewProps) {
             </p>
           </div>
           <div className="w-fit rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] sm:shrink-0 sm:whitespace-nowrap">
-            <span className="text-amber-800">Tasa de Cálculo: </span>
+            <span className="text-amber-800">Precio del dólar: </span>
             <span className="font-bold text-amber-800">{model.rateLabel}</span>
           </div>
         </div>

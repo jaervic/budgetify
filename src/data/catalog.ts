@@ -1300,6 +1300,24 @@ export function cloneDefaultCatalog(): Catalog {
 }
 
 /**
+ * Añade al catálogo los productos de fábrica que falten. No toca los que ya
+ * existen: se conservan precios, códigos y productos personalizados.
+ */
+export function mergeDefaultProducts(catalog: Catalog): Catalog {
+  const existing = new Set(catalog.products.map((product) => product.id))
+  return {
+    ...catalog,
+    products: [
+      ...catalog.products,
+      ...DEFAULT_PRODUCTS.filter((product) => !existing.has(product.id)).map(
+        (product) => structuredClone(product),
+      ),
+    ],
+    productCatalogVersion: DEFAULT_PRODUCT_CATALOG_VERSION,
+  }
+}
+
+/**
  * Ajusta un catálogo guardado al modelo actual **sin sobrescribir** lo que el
  * usuario haya editado:
  *  1. Añade los servicios nuevos que falten.
@@ -1310,7 +1328,7 @@ export function cloneDefaultCatalog(): Catalog {
  */
 export function migrateCatalogDefaults(
   catalog: Catalog,
-  options: { seedProducts?: boolean } = {},
+  options: { seedProducts?: boolean; forceProductMerge?: boolean } = {},
 ): Catalog {
   const existing = new Set(catalog.services.map((service) => service.id))
 
@@ -1365,7 +1383,9 @@ export function migrateCatalogDefaults(
   const shouldSeed = options.seedProducts !== false
   const shouldMerge =
     shouldSeed ||
-    (fromProductVersion < DEFAULT_PRODUCT_CATALOG_VERSION && catalog.products.length > 0)
+    (catalog.products.length > 0 &&
+      (fromProductVersion < DEFAULT_PRODUCT_CATALOG_VERSION ||
+        options.forceProductMerge === true))
 
   const categoryById = new Map(
     DEFAULT_PRODUCTS.map((product) => [product.id, product.category]),
@@ -1375,16 +1395,9 @@ export function migrateCatalogDefaults(
     return category === product.category ? product : { ...product, category }
   })
 
-  let products = normalized
-  if (shouldMerge) {
-    const existingProducts = new Set(products.map((product) => product.id))
-    products = [
-      ...products,
-      ...DEFAULT_PRODUCTS.filter((product) => !existingProducts.has(product.id)).map(
-        (product) => structuredClone(product),
-      ),
-    ]
-  }
+  const products = shouldMerge
+    ? mergeDefaultProducts({ ...catalog, products: normalized }).products
+    : normalized
 
   return {
     categories,

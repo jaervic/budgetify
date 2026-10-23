@@ -35,11 +35,11 @@ export function QuoteTotalsPanel({
         ) : (
           <div className="grid gap-2 text-sm">
             <div className="flex items-baseline justify-between gap-3">
-              <span className="text-muted-foreground">Sub-Total</span>
+              <span className="text-muted-foreground">Subtotal</span>
               <span className="flex flex-col items-end font-medium tabular-nums">
                 <span>{formatQuoteMoney(calc.subtotalUsd, currency, rate)}</span>
                 {showBothCurrencies && (
-                  <span className="text-xs font-normal text-muted-foreground">
+                  <span className="text-sm font-normal text-muted-foreground">
                     {formatQuoteOtherMoney(calc.subtotalUsd, currency, rate)}
                   </span>
                 )}
@@ -50,7 +50,7 @@ export function QuoteTotalsPanel({
               <span className="flex flex-col items-end font-medium tabular-nums">
                 <span>{formatQuoteMoney(calc.taxUsd, currency, rate)}</span>
                 {showBothCurrencies && (
-                  <span className="text-xs font-normal text-muted-foreground">
+                  <span className="text-sm font-normal text-muted-foreground">
                     {formatQuoteOtherMoney(calc.taxUsd, currency, rate)}
                   </span>
                 )}
@@ -78,9 +78,9 @@ export function QuoteTotalsPanel({
 
         </div>
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {calc.items.length} {calc.items.length === 1 ? 'producto' : 'productos'} · Moneda:{' '}
-          {quoteCurrencyLabel(currency)} · Tasa aplicada: Bs. {formatRate(rate)} por $1.
+          {quoteCurrencyLabel(currency)} · Precio del dólar: Bs. {formatRate(rate)} por $1.
         </p>
       </CardContent>
     </Card>

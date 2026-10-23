@@ -6,7 +6,7 @@ const REPO_URL = 'https://github.com/jaervic/budgetify'
 export function AppFooter() {
   return (
     <footer className="mt-4 border-t bg-background">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-1.5 px-4 pt-6 pb-24 text-center text-xs text-muted-foreground lg:py-6">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-1.5 px-4 pt-6 pb-24 text-center text-sm text-muted-foreground lg:py-6">
         <a
           href={REPO_URL}
           target="_blank"

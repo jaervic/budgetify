@@ -89,10 +89,9 @@ export function FormulaFields({
     <div className="flex flex-wrap items-center gap-1.5">
       <Select value={formula.type} onValueChange={(value) => changeType(value as FormulaType)}>
         <SelectTrigger
-          className="h-8 w-full min-w-0"
+          className="h-10 w-full min-w-0"
           aria-label="Tipo de precio"
           aria-describedby={describedBy}
-          title={TYPE_LABELS[formula.type]}
         >
           <SelectValue />
         </SelectTrigger>
@@ -109,7 +108,7 @@ export function FormulaFields({
         <>
           <Operator>$</Operator>
           <NumberInput
-            className="h-8 w-24 min-w-0"
+            className="h-10 w-24 min-w-0"
             aria-label="Monto en USD"
             aria-describedby={describedBy}
             decimals={2}
@@ -122,7 +121,7 @@ export function FormulaFields({
       {formula.type === 'qty_unit' && (
         <>
           <NumberInput
-            className="h-8 w-16 min-w-0"
+            className="h-10 w-16 min-w-0"
             aria-label="Cantidad"
             aria-describedby={describedBy}
             value={formula.qty}
@@ -131,7 +130,7 @@ export function FormulaFields({
           <Operator>×</Operator>
           <Operator>$</Operator>
           <NumberInput
-            className="h-8 w-24 min-w-0"
+            className="h-10 w-24 min-w-0"
             aria-label="Precio unitario en USD"
             aria-describedby={describedBy}
             decimals={2}
@@ -148,7 +147,7 @@ export function FormulaFields({
             onValueChange={(refConcept) => onChange({ ...formula, refConcept })}
           >
             <SelectTrigger
-              className="h-8 w-full min-w-0"
+              className="h-10 w-full min-w-0"
               aria-label="Servicio de referencia"
               aria-describedby={describedBy}
             >
@@ -163,7 +162,7 @@ export function FormulaFields({
             </SelectContent>
           </Select>
           <NumberInput
-            className="h-8 w-16 min-w-0"
+            className="h-10 w-16 min-w-0"
             aria-label="Porcentaje"
             aria-describedby={describedBy}
             value={formula.percent}
@@ -180,7 +179,7 @@ export function FormulaFields({
             onValueChange={(category) => onChange({ ...formula, category })}
           >
             <SelectTrigger
-              className="h-8 w-full min-w-0"
+              className="h-10 w-full min-w-0"
               aria-label="Categoría de referencia"
               aria-describedby={describedBy}
             >
@@ -195,7 +194,7 @@ export function FormulaFields({
             </SelectContent>
           </Select>
           <NumberInput
-            className="h-8 w-16 min-w-0"
+            className="h-10 w-16 min-w-0"
             aria-label="Porcentaje"
             aria-describedby={describedBy}
             value={formula.percent}

@@ -199,7 +199,7 @@ describe('paginación del PDF de cotización', () => {
   it('los totales aparecen una sola vez, al final', async () => {
     const pages = await pagesText(await renderPdf(40, 'Letter'))
     const count = pages.reduce(
-      (total, page) => total + (page.match(/Sub-Total/g) ?? []).length,
+      (total, page) => total + (page.match(/Subtotal/g) ?? []).length,
       0,
     )
     expect(count).toBe(1)

@@ -6,6 +6,7 @@ import {
   cloneDefaultCatalog,
   DEFAULT_CATALOG,
   DEFAULT_SERVICES,
+  mergeDefaultProducts,
   migrateCatalogDefaults,
 } from './catalog'
 import { DEFAULT_PRODUCTS, PRODUCT_CATEGORIES } from './products'
@@ -252,6 +253,20 @@ describe('migrateCatalogDefaults', () => {
 
     expect(result.products).toHaveLength(DEFAULT_PRODUCTS.length)
     expect(result.productCatalogVersion).toBe(2)
+  })
+
+  it('completa los productos de fábrica sin duplicar ni pisar precios', () => {
+    const base = cloneDefaultCatalog()
+    base.products = base.products.slice(0, 3).map((product, index) =>
+      index === 0 ? { ...product, priceUsd: 123 } : product,
+    )
+
+    const result = mergeDefaultProducts(base)
+    expect(result.products).toHaveLength(DEFAULT_PRODUCTS.length)
+    expect(result.products[0].priceUsd).toBe(123)
+
+    const again = mergeDefaultProducts(result)
+    expect(again.products).toHaveLength(DEFAULT_PRODUCTS.length)
   })
 
   it('el catálogo inicial está organizado por categorías y sin duplicados', () => {

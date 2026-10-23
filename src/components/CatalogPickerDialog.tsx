@@ -28,7 +28,7 @@ const ALL = 'all'
 
 const chipClass = (active: boolean) =>
   cn(
-    'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+    'shrink-0 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
     active
       ? 'border-primary bg-primary text-primary-foreground'
       : 'border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground',
@@ -84,7 +84,7 @@ function PickerContent({ onClose }: { onClose: () => void }) {
     <>
       <div className="grid gap-2">
         <div
-          className="flex flex-wrap gap-1.5"
+          className="flex gap-1.5 overflow-x-auto pb-1"
           role="group"
           aria-label="Filtrar por área de práctica"
         >
@@ -109,7 +109,7 @@ function PickerContent({ onClose }: { onClose: () => void }) {
           ))}
         </div>
         {activeAreaName && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Se muestran los servicios de <b>{activeAreaName}</b> y los generales (enfermería,
             estudios, gastos de clínica). Elige «Todo el catálogo» para verlos todos.
           </p>
@@ -121,6 +121,7 @@ function PickerContent({ onClose }: { onClose: () => void }) {
         <Input
           className="pl-8"
           placeholder="Buscar servicio, categoría o detalle…"
+          aria-label="Buscar servicios"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
@@ -137,8 +138,8 @@ function PickerContent({ onClose }: { onClose: () => void }) {
           )}
           {groups.map(([category, services]) => (
             <section key={category} className="grid gap-1.5">
-              <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                {category}
+              <h3 className="text-sm font-semibold text-muted-foreground">
+                {category} <span className="font-normal">({services.length})</span>
               </h3>
               {services.map((service) => (
                 <button
@@ -155,7 +156,7 @@ function PickerContent({ onClose }: { onClose: () => void }) {
                       {service.concept}
                     </span>
                     {service.detail && (
-                      <span className="block text-xs break-words text-muted-foreground">
+                      <span className="block text-sm break-words text-muted-foreground">
                         {service.detail}
                       </span>
                     )}

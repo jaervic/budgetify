@@ -156,7 +156,7 @@ export function HistoryDialog({
                       </Badge>
                       <p className="truncate font-medium">{entry.title || 'Sin nombre'}</p>
                     </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                    <p className="mt-0.5 text-sm text-muted-foreground">
                       {entry.subtitle ? `${entry.subtitle} · ` : ''}
                       {formatTimestamp(entry.savedAt)} · {entry.count}{' '}
                       {unitLabel(entry.kind, entry.count)} ·{' '}

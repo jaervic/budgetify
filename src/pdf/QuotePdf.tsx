@@ -254,7 +254,7 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
           </Text>
         ) : null}
         <Text style={styles.continuationText}>
-          <Text style={styles.continuationStrong}>Tasa: </Text>
+          <Text style={styles.continuationStrong}>Precio del dólar: </Text>
           {model.rateLabel}
           {model.dueDate ? ` · Vence: ${model.dueDate}` : ''}
         </Text>
@@ -441,7 +441,7 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
         <View style={styles.closing} wrap={false}>
           <View style={styles.rateBox}>
             <Text style={styles.rateLine}>
-              <Text style={styles.rateStrong}>Tasa de cálculo: </Text>
+              <Text style={styles.rateStrong}>Precio del dólar: </Text>
               {model.rateLabel}
             </Text>
             {model.showBothCurrencies && (
@@ -458,7 +458,7 @@ export function QuotePdf({ quote, calc, clinic, pageSize }: QuotePdfProps) {
 
           <View style={styles.totalsBox}>
             <View style={styles.totalsRow}>
-              <Text style={styles.totalsLabel}>Sub-Total</Text>
+              <Text style={styles.totalsLabel}>Subtotal</Text>
               <View style={styles.totalsValues}>
                 <Text style={styles.totalsValue}>{model.subtotal}</Text>
                 {model.showBothCurrencies && (

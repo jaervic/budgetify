@@ -22,7 +22,7 @@ export interface QuoteCalcResult {
  *
  * A diferencia del presupuesto médico, aquí se redondea **por línea** a dos
  * decimales antes de sumar. Es lo que hace una factura impresa: el IVA que se
- * ve en cada renglón es el que se suma, de modo que Sub-Total + IVA = Neto
+ * ve en cada renglón es el que se suma, de modo que Subtotal + IVA = Neto
  * exactamente, sin diferencias de un céntimo.
  */
 export function computeQuote(items: QuoteItem[]): QuoteCalcResult {

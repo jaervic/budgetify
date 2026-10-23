@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Building2, History, Settings2, Stethoscope } from 'lucide-react'
+import { Building2, HelpCircle, History, Settings2, Stethoscope } from 'lucide-react'
 import { AppFooter } from '@/components/AppFooter'
 import { BudgetWorkspace } from '@/components/BudgetWorkspace'
 import { CatalogManagerDialog } from '@/components/CatalogManagerDialog'
@@ -10,6 +10,7 @@ import { MobileActionBar } from '@/components/MobileActionBar'
 import { PdfPreviewDialog } from '@/components/PdfPreviewDialog'
 import { QuoteWorkspace } from '@/components/QuoteWorkspace'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { WELCOME_SEEN_KEY, WelcomeDialog } from '@/components/WelcomeDialog'
 import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { usePdfActions } from '@/hooks/usePdfActions'
@@ -44,6 +45,18 @@ export default function App() {
   const [clinicOpen, setClinicOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [pdfOpen, setPdfOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(
+    () =>
+      typeof localStorage !== 'undefined' &&
+      localStorage.getItem(WELCOME_SEEN_KEY) !== '1',
+  )
+
+  const handleHelpOpenChange = (open: boolean) => {
+    setHelpOpen(open)
+    if (!open && typeof localStorage !== 'undefined') {
+      localStorage.setItem(WELCOME_SEEN_KEY, '1')
+    }
+  }
 
   // Ancla la tasa al BCV al arrancar (una sola vez; los demás refrescos son manuales).
   useEffect(() => {
@@ -68,12 +81,22 @@ export default function App() {
             </span>
             <div className="min-w-0">
               <h1 className="text-lg leading-tight font-semibold">Budgetify</h1>
-              <p className="hidden text-xs text-muted-foreground sm:block">
+              <p className="hidden text-sm text-muted-foreground sm:block">
                 Presupuestos médicos y cotizaciones · gratis y sin instalar
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-label="Cómo se usa"
+              onClick={() => setHelpOpen(true)}
+            >
+              <HelpCircle />
+              <span className="hidden sm:inline">Ayuda</span>
+            </Button>
             <ThemeToggle />
             <Button
               type="button"
@@ -104,7 +127,7 @@ export default function App() {
               onClick={() => setManagerOpen(true)}
             >
               <Settings2 />
-              <span className="hidden sm:inline">Gestionar catálogo</span>
+              <span className="hidden sm:inline">Catálogo y precios</span>
               <span className="sm:hidden">Catálogo</span>
             </Button>
           </div>
@@ -142,6 +165,7 @@ export default function App() {
         onDocumentReplaced={() => setFormKey((key) => key + 1)}
       />
       <PdfPreviewDialog open={pdfOpen} onOpenChange={setPdfOpen} />
+      <WelcomeDialog open={helpOpen} onOpenChange={handleHelpOpenChange} />
       <Toaster position="top-center" theme={resolved} />
     </div>
   )

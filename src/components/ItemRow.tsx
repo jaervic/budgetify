@@ -77,27 +77,25 @@ export function ItemRow({
           ariaLabel="Categoría"
           describedBy={rowLabelId}
           allowEmpty
-          className="h-8 w-full text-xs text-muted-foreground"
+          className="h-10 w-full text-sm text-muted-foreground"
         />
         <Input
-          className="h-8 font-medium"
+          className="h-10 font-medium"
           aria-label="Concepto"
-          title={item.concept}
           maxLength={LIMITS.concept}
           value={item.concept}
           onChange={(event) => onUpdate({ concept: event.target.value })}
         />
         <Input
-          className="h-8 text-xs text-muted-foreground"
+          className="h-10 text-sm text-muted-foreground"
           aria-label="Detalle"
-          title={item.detail ?? undefined}
           placeholder="Detalle (opcional)"
           maxLength={LIMITS.detail}
           value={item.detail ?? ''}
           onChange={(event) => onUpdate({ detail: event.target.value || undefined })}
         />
         {item.error && (
-          <p className="flex items-center gap-1 text-xs text-destructive">
+          <p className="flex items-center gap-1 text-sm text-destructive">
             <TriangleAlert className="size-3.5 shrink-0" />
             {item.error}
           </p>
@@ -122,7 +120,7 @@ export function ItemRow({
         aria-label={`Importe en dólares de ${label}`}
         className="flex items-center justify-between gap-3 sm:block sm:px-2 sm:py-2 sm:text-right"
       >
-        <span className="text-xs text-muted-foreground sm:hidden">USD</span>
+        <span className="text-sm text-muted-foreground sm:hidden">USD</span>
         <span className="font-medium tabular-nums whitespace-nowrap">
           {formatUsd(item.amountUsd)}
         </span>
@@ -132,7 +130,7 @@ export function ItemRow({
         aria-label={`Importe en bolívares de ${label}`}
         className="flex items-center justify-between gap-3 sm:block sm:px-2 sm:py-2 sm:text-right"
       >
-        <span className="text-xs text-muted-foreground sm:hidden">VES</span>
+        <span className="text-sm text-muted-foreground sm:hidden">VES</span>
         <span className="tabular-nums whitespace-nowrap text-muted-foreground">
           {formatVes(usdToVes(item.amountUsd, rate))}
         </span>

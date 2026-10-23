@@ -64,9 +64,9 @@ export function QuoteItemRow({
         <span id={rowLabelId} className="sr-only">
           {label}
         </span>
-        <span className="text-xs text-muted-foreground xl:hidden">Código</span>
+        <span className="text-sm text-muted-foreground xl:hidden">Código</span>
         <Input
-          className="h-8"
+          className="h-10"
           aria-label="Código"
           placeholder="Código"
           maxLength={LIMITS.productCode}
@@ -76,9 +76,9 @@ export function QuoteItemRow({
       </div>
 
       <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
-        <span className="text-xs text-muted-foreground xl:hidden">Descripción</span>
+        <span className="text-sm text-muted-foreground xl:hidden">Descripción</span>
         <Input
-          className="h-8 font-medium"
+          className="h-10 font-medium"
           aria-label="Descripción"
           placeholder="Descripción del producto"
           maxLength={LIMITS.productDescription}
@@ -88,9 +88,9 @@ export function QuoteItemRow({
       </div>
 
       <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
-        <span className="text-xs text-muted-foreground xl:hidden">Cantidad</span>
+        <span className="text-sm text-muted-foreground xl:hidden">Cantidad</span>
         <NumberInput
-          className="h-8"
+          className="h-10"
           aria-label="Cantidad"
           decimals={3}
           value={item.qty}
@@ -99,9 +99,9 @@ export function QuoteItemRow({
       </div>
 
       <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
-        <span className="text-xs text-muted-foreground xl:hidden">Unidad</span>
+        <span className="text-sm text-muted-foreground xl:hidden">Unidad</span>
         <Input
-          className="h-8 text-center"
+          className="h-10 text-center"
           aria-label="Unidad"
           placeholder="UND"
           maxLength={LIMITS.productUnit}
@@ -111,11 +111,11 @@ export function QuoteItemRow({
       </div>
 
       <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
-        <span className="text-xs text-muted-foreground xl:hidden">
+        <span className="text-sm text-muted-foreground xl:hidden">
           Precio {quoteCurrencyLabel(currency)}
         </span>
         <NumberInput
-          className="h-8"
+          className="h-10"
           aria-label={`Precio unitario en ${quoteCurrencyLabel(currency)}`}
           decimals={2}
           value={toQuoteCurrency(item.unitPriceUsd, currency, rate).toNumber()}
@@ -126,16 +126,16 @@ export function QuoteItemRow({
           }
         />
         {showBothCurrencies && (
-          <span className="text-right text-xs tabular-nums text-muted-foreground">
+          <span className="text-right text-sm tabular-nums text-muted-foreground">
             {formatQuoteOtherMoney(item.unitPriceUsd, currency, rate)}
           </span>
         )}
       </div>
 
       <div role="cell" className="grid gap-1 xl:px-2 xl:py-2">
-        <span className="text-xs text-muted-foreground xl:hidden">% IVA</span>
+        <span className="text-sm text-muted-foreground xl:hidden">% IVA</span>
         <NumberInput
-          className="h-8"
+          className="h-10"
           aria-label="Porcentaje de IVA"
           decimals={2}
           value={item.taxRate}
@@ -148,11 +148,11 @@ export function QuoteItemRow({
         aria-label={`IVA de ${label}`}
         className="flex items-center justify-between gap-3 xl:block xl:px-2 xl:py-2 xl:text-right"
       >
-        <span className="text-xs text-muted-foreground xl:hidden">IVA</span>
+        <span className="text-sm text-muted-foreground xl:hidden">IVA</span>
         <span className="flex flex-col tabular-nums whitespace-nowrap xl:items-end">
           <span>{formatQuoteMoney(item.taxUsd, currency, rate)}</span>
           {showBothCurrencies && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
               {formatQuoteOtherMoney(item.taxUsd, currency, rate)}
             </span>
           )}
@@ -164,11 +164,11 @@ export function QuoteItemRow({
         aria-label={`Neto de ${label}`}
         className="flex items-center justify-between gap-3 font-medium xl:block xl:px-2 xl:py-2 xl:text-right"
       >
-        <span className="text-xs font-normal text-muted-foreground xl:hidden">Neto</span>
+        <span className="text-sm font-normal text-muted-foreground xl:hidden">Neto</span>
         <span className="flex flex-col tabular-nums whitespace-nowrap xl:items-end">
           <span>{formatQuoteMoney(item.netUsd, currency, rate)}</span>
           {showBothCurrencies && (
-            <span className="text-xs font-normal text-muted-foreground">
+            <span className="text-sm font-normal text-muted-foreground">
               {formatQuoteOtherMoney(item.netUsd, currency, rate)}
             </span>
           )}

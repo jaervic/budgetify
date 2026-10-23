@@ -16,7 +16,7 @@ function ageError(value: string): string | null {
 
 function FieldError({ message }: { message?: string | null }) {
   if (!message) return null
-  return <p className="text-xs text-destructive">{message}</p>
+  return <p className="text-sm text-destructive">{message}</p>
 }
 
 /**
@@ -35,6 +35,9 @@ export function DataForm() {
   const patient = useBudgetStore((state) => state.budget.patient)
   const procedure = useBudgetStore((state) => state.budget.procedure ?? '')
   const issueDate = useBudgetStore((state) => state.budget.issueDate)
+  const rate = useBudgetStore((state) => state.budget.rate)
+  const rateMode = useBudgetStore((state) => state.rateMode)
+  const bcvStatus = useBudgetStore((state) => state.bcv.status)
   const setPatient = useBudgetStore((state) => state.setPatient)
   const setProcedure = useBudgetStore((state) => state.setProcedure)
   const setIssueDate = useBudgetStore((state) => state.setIssueDate)
@@ -43,6 +46,11 @@ export function DataForm() {
   const [dateText, setDateText] = useState(issueDate)
   const [lastAge, setLastAge] = useState(patient.age)
   const [lastDate, setLastDate] = useState(issueDate)
+  const [advancedOpen, setAdvancedOpen] = useState(false)
+  // Si el usuario fija el precio a mano, la opción avanzada debe quedar a la
+  // vista para que no parezca que desapareció.
+  const showAdvanced =
+    advancedOpen || rateMode === 'manual' || rate <= 0 || bcvStatus === 'error'
 
   // Si el valor cambia desde fuera (importar, limpiar, deshacer), reflejarlo.
   if (issueDate !== lastDate) {
@@ -89,7 +97,7 @@ export function DataForm() {
             onChange={(event) => setPatient({ name: event.target.value })}
           />
           {patient.name.trim() === '' && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Sin nombre, la hoja muestra «—». Puedes completarlo más tarde.
             </p>
           )}
@@ -146,7 +154,20 @@ export function DataForm() {
           />
         </div>
 
-        <RateField />
+        <details
+          className="grid gap-3 rounded-lg border p-3 sm:col-span-2"
+          open={showAdvanced}
+          onToggle={(event) => setAdvancedOpen(event.currentTarget.open)}
+        >
+          <summary className="cursor-pointer text-sm font-medium">
+            Opciones avanzadas: precio del dólar
+          </summary>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Se actualiza solo con el BCV. Ábrelo únicamente si necesitas fijar el precio a
+            mano.
+          </p>
+          <RateField />
+        </details>
       </CardContent>
     </Card>
   )

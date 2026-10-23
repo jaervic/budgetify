@@ -3,6 +3,7 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { ProductsPanel } from '@/components/catalog/ProductsPanel'
+import { DEFAULT_PRODUCTS } from '@/data/products'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
 class ResizeObserverStub {
@@ -64,6 +65,24 @@ describe('ProductsPanel', () => {
       useBudgetStore.getState().catalog.products.find((p) => p.id === created?.id)
         ?.priceUsd,
     ).toBe(12.5)
+  }, 30_000)
+
+  it('completa el catálogo con los productos de fábrica que falten', async () => {
+    const state = useBudgetStore.getState()
+    state.loadCatalog({
+      ...state.catalog,
+      products: state.catalog.products
+        .slice(0, 3)
+        .map((product, index) => (index === 0 ? { ...product, priceUsd: 55 } : product)),
+      productCatalogVersion: 2,
+    })
+
+    render(<ProductsPanel />)
+    await userEvent.click(screen.getByRole('button', { name: /Completar catálogo/ }))
+
+    const products = useBudgetStore.getState().catalog.products
+    expect(products).toHaveLength(DEFAULT_PRODUCTS.length)
+    expect(products[0].priceUsd).toBe(55)
   }, 30_000)
 
   it('muestra y enfoca el producto nuevo aunque haya una búsqueda activa', async () => {

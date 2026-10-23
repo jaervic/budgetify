@@ -32,8 +32,8 @@ escribas datos reales de pacientes en ella.)*
 - **Historial**: guarda copias dentro del navegador (hasta 100) y vuelve a abrir
   cualquier presupuesto anterior cuando el paciente regrese.
 - **Cotizaciones de productos**: cambia la modalidad, escoge varios productos del catálogo,
-  ajusta cantidades, unidades, precios e **IVA por producto**, y obtén Sub-Total, IVA y Neto.
-- **Respaldo en archivo**: Exportar / Importar JSON para llevarte todo a otro equipo.
+  ajusta cantidades, unidades, precios e **IVA por producto**, y obtén Subtotal, IVA y Neto.
+- **Respaldo en archivo**: Descargar / Abrir archivo para llevarte todo a otro equipo.
 
 ## El documento que genera
 
@@ -58,16 +58,16 @@ precio e IVA) y su propio formato de hoja:
 - El **precio es la base sin IVA**; cada producto tiene su porcentaje (16 % por defecto, 0 %
   para exentos).
 - El documento muestra **Código, Descripción, Cantidad, Unidad, Precio, % IVA, IVA y Neto**.
-- Al final: **Sub-Total, IVA, Neto** y el total en bolívares con la tasa aplicada.
+- Al final: **Subtotal, IVA, Neto** y el total en bolívares con la tasa aplicada.
 - El tamaño por defecto es **Carta**. Si el contenido pasa de una hoja, la cabecera, los
   datos del cliente y la cabecera de la tabla se repiten en las hojas siguientes.
 - Los datos opcionales (código y RIF del cliente, teléfonos, dirección, vendedor, oficina,
   transporte, vencimiento, orden de compra, descripción y notas/condiciones) solo se imprimen
   si tienen valor.
-- El botón **Nueva cotización** crea un documento vacío con el siguiente número correlativo,
+- El botón **Nueva cotización** crea un documento vacío con el siguiente número disponible,
   sin perder la copia anterior (se puede deshacer).
-- Los productos se gestionan en **Gestionar catálogo → Productos** y se incluyen en el
-  respaldo JSON del catálogo.
+- Los productos se gestionan en **Catálogo y precios → Productos** y se incluyen en el
+  respaldo del catálogo.
 - El **historial** guarda presupuestos y cotizaciones juntos, con un distintivo de tipo.
 
 ## Funciona en el teléfono
@@ -80,6 +80,15 @@ paciente:
   <img src="docs/capturas/movil-documento.png" alt="Documento en el teléfono" width="280">
 </p>
 
+## Pensada para ser fácil
+
+- Textos y botones más grandes, con áreas de toque cómodas en el teléfono.
+- La guía de 3 pasos explica el recorrido la primera vez y se puede reabrir con
+  **“Ayuda”**.
+- Las opciones técnicas (precio del dólar, datos opcionales, copias de seguridad)
+  quedan plegadas para no distraer.
+- Todo se puede usar solo con el teclado y los avisos se anuncian al lector de pantalla.
+
 ## Para quién es
 
 Médicos, odontólogos y personal administrativo de **consultorios, clínicas pequeñas y
@@ -88,17 +97,18 @@ unidades quirúrgicas** que hoy hacen los presupuestos a mano o en Word/Excel.
 Elige tu **área de práctica** —Cirugía, Medicina General, Odontología, Traumatología y
 Ortopedia, Pediatría, Ginecología y Obstetricia, o Dermatología— y el catálogo se enfoca en
 lo tuyo sin perder los gastos generales (enfermería, estudios, gastos de clínica), que
-cualquier especialista termina necesitando. Viene con **129 servicios y 12 plantillas**.
+cualquier especialista termina necesitando. Viene con **129 servicios y 12 paquetes**.
 
 También sirve para un **profesional independiente sin clínica propia**: la hoja se encabeza
 con tu nombre y tu título (“Od. Ana Rojas”) y debajo tu área de práctica.
 
 ## Cómo usarlo (paso a paso)
 
-1. **Abre la página** en tu navegador (Chrome, Edge, Safari…).
+1. **Abre la página** en tu navegador (Chrome, Edge, Safari…). La primera vez
+   aparece una guía de 3 pasos; puedes volver a abrirla con **“Ayuda”**.
 2. Escribe el **nombre del paciente**, su cédula y su edad, y el **procedimiento**.
 3. Pulsa **“Agregar servicio”** y elige los que necesites del catálogo, o **“Cargar
-   plantilla”** para traer un conjunto ya armado (por ejemplo, una cirugía completa).
+   paquete”** para traer un conjunto ya armado (por ejemplo, una cirugía completa).
    Arriba del buscador tienes los **chips por área**: elige la tuya para ver solo lo tuyo,
    o “Todo el catálogo” para ver los 129 servicios.
 4. Revisa y ajusta los precios en la tabla. Todo se recalcula al instante.
@@ -123,16 +133,16 @@ navegador. No hay cuentas, no hay registro y no hay base de datos.
 En el navegador del equipo donde trabajas. Además del que estás editando, puedes archivar
 copias en **“Historial”** (se conservan las 100 últimas; al pasar de ahí se descartan las
 más viejas y la app te avisa). Si cambias de computadora o quieres un respaldo, usa
-**“Exportar JSON”** y luego **“Importar JSON”** en el otro equipo.
+**“Descargar archivo”** y luego **“Abrir archivo”** en el otro equipo.
 
 **Me equivoque, ¿puedo volver atrás?**
 Sí. Al borrar una línea, una nota, una categoría o una copia del historial, o al reemplazar
 el presupuesto, aparece un aviso con **“Deshacer”**. Lo que sí borra de verdad es
-**“Limpiar”**: para eso pide confirmación.
+**“Nuevo presupuesto”**: para eso pide confirmación.
 
 **¿Puedo cambiar los precios?**
-Sí. En **“Gestionar catálogo”** puedes editar precios, agregar o borrar servicios, crear
-categorías nuevas y guardar plantillas para los casos que más repites. Cada servicio puede
+Sí. En **“Catálogo y precios”** puedes editar precios, agregar o borrar servicios, crear
+categorías nuevas y guardar paquetes para los casos que más repites. Cada servicio puede
 pertenecer a un **área de práctica** o ser **transversal** (se ofrece en todas).
 
 **¿Sirve para odontología? ¿Y para otras especialidades?**
@@ -142,7 +152,7 @@ restauradora, endodoncia, cirugía oral, periodoncia, ortodoncia, estética y od
 precios de referencia de mercado que puedes editar.
 
 **¿Se actualiza el precio del dólar?**
-Sí, toma solo la **tasa oficial del BCV**. Si prefieres, puedes desmarcar *“Anclar al BCV”*
+Sí, toma solo la **tasa oficial del BCV**. Si prefieres, puedes desmarcar *“Actualizar solo con el BCV”*
 y escribir la tasa a mano.
 
 **¿Puedo poner el logo, el RIF, la firma y el sello de mi clínica?**
@@ -174,7 +184,7 @@ pero **no sustituye tu criterio médico ni administrativo**.
 - La **única** conexión externa es la consulta de la tasa del BCV (que no lleva datos
   tuyos). Si la desmarcas y usas la tasa a mano, no hay ninguna conexión.
 - Los datos quedan guardados **en este navegador**, incluido el **historial** de copias. En
-  una computadora compartida, pulsa **Limpiar** al terminar, vacía el historial (cada copia
+  una computadora compartida, pulsa **Nuevo presupuesto** al terminar, vacía el historial (cada copia
   se puede borrar) o usa una ventana de incógnito.
 - Detalles y cómo reportar un problema: **[política de seguridad](SECURITY.md)**.
 

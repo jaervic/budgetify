@@ -285,16 +285,20 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="clinic-doctor-id">MPPS / Colegio</Label>
+                <Label htmlFor="clinic-doctor-id">Registro profesional (opcional)</Label>
                 <Input
                   id="clinic-doctor-id"
                   maxLength={LIMITS.doctorId}
+                  aria-describedby="clinic-doctor-id-help"
                   placeholder="MPPS 12345 / CM 6789"
                   value={clinic.doctorId ?? ''}
                   onChange={(event) =>
                     setClinic({ doctorId: event.target.value || undefined })
                   }
                 />
+                <p id="clinic-doctor-id-help" className="text-sm text-muted-foreground">
+                  Ej. MPPS 12345 o CM 6789. Puedes dejarlo vacío.
+                </p>
               </div>
             </div>
 

@@ -98,7 +98,7 @@ export function ActionBar({ onDocumentReplaced, onViewPdf }: ActionBarProps) {
   return (
     <div className="grid gap-3">
       <div className="grid gap-2">
-        <span className="text-xs font-medium text-muted-foreground">Tamaño de hoja</span>
+        <span className="text-sm font-medium text-muted-foreground">Tamaño de hoja</span>
         <Select value={pageSize} onValueChange={(value) => setPageSize(value as PageSize)}>
           <SelectTrigger aria-label="Tamaño de hoja">
             <SelectValue />
@@ -153,7 +153,7 @@ export function ActionBar({ onDocumentReplaced, onViewPdf }: ActionBarProps) {
       <div className="grid gap-2">
         <Button type="button" variant="outline" size="sm" onClick={handleSync}>
           <Save />
-          Guardar tarifas en el catálogo
+          Guardar precios en el catálogo
         </Button>
         <Button type="button" variant="outline" size="sm" onClick={handleSaveCopy}>
           <BookmarkPlus />
@@ -167,7 +167,7 @@ export function ActionBar({ onDocumentReplaced, onViewPdf }: ActionBarProps) {
             onClick={() => downloadJson(`presupuesto-${fileStamp()}.json`, budget)}
           >
             <FileDown />
-            Exportar JSON
+            Descargar archivo
           </Button>
           <Button
             type="button"
@@ -176,9 +176,13 @@ export function ActionBar({ onDocumentReplaced, onViewPdf }: ActionBarProps) {
             onClick={() => fileInput.current?.click()}
           >
             <FileUp />
-            Importar JSON
+            Abrir archivo
           </Button>
         </div>
+        <p className="text-sm text-muted-foreground">
+          La copia es un archivo .json. Sirve para guardar el documento o abrirlo en otro
+          equipo.
+        </p>
         <Button
           type="button"
           variant="ghost"
@@ -187,21 +191,21 @@ export function ActionBar({ onDocumentReplaced, onViewPdf }: ActionBarProps) {
           onClick={() => setConfirmClearOpen(true)}
         >
           <Eraser />
-          Limpiar
+          Nuevo presupuesto
         </Button>
       </div>
 
       <ConfirmDialog
         open={confirmClearOpen}
         onOpenChange={setConfirmClearOpen}
-        title="¿Limpiar el presupuesto?"
+        title="¿Empezar un nuevo presupuesto?"
         description={
           <p>
             Se borran los servicios, los datos del paciente y las notas. Podrás
             deshacerlo desde el aviso que aparece al limpiarlo.
           </p>
         }
-        confirmLabel="Limpiar presupuesto"
+        confirmLabel="Nuevo presupuesto"
         destructive
         onConfirm={handleClear}
       />

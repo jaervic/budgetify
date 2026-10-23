@@ -7,7 +7,7 @@ import { withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import type { Pack, PackService } from '@/types'
 
-/** Alta, edición y borrado de plantillas (packs) de servicios. */
+/** Alta, edición y borrado de paquetes de servicios. */
 export function PacksPanel() {
   const catalog = useBudgetStore((state) => state.catalog)
   const addPack = useBudgetStore((state) => state.addPack)
@@ -20,19 +20,17 @@ export function PacksPanel() {
         type="button"
         size="sm"
         className="w-fit"
-        onClick={() =>
-          addPack({ name: 'Nueva plantilla', description: '', services: [] })
-        }
+        onClick={() => addPack({ name: 'Nuevo paquete', description: '', services: [] })}
       >
         <Plus />
-        Nueva plantilla
+        Nuevo paquete
       </Button>
 
       <ScrollArea className="h-[46vh] pr-3">
         <div className="grid gap-3">
           {catalog.packs.length === 0 && (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              No hay plantillas todavía.
+              No hay paquetes todavía.
             </p>
           )}
 
@@ -76,7 +74,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
       <div className="flex items-center gap-2">
         <Input
           className="font-medium"
-          aria-label="Nombre de la plantilla"
+          aria-label="Nombre del paquete"
           maxLength={LIMITS.packName}
           value={pack.name}
           onChange={(event) => onChange({ name: event.target.value })}
@@ -85,12 +83,12 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Eliminar plantilla"
+          aria-label="Eliminar paquete"
           className="text-destructive hover:text-destructive"
           onClick={() =>
             withUndo(
               { catalog: useBudgetStore.getState().catalog },
-              'Plantilla eliminada',
+              'Paquete eliminado',
               () => onRemove(),
             )
           }
@@ -100,8 +98,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
       </div>
 
       <Input
-        className="text-xs"
-        aria-label="Descripción de la plantilla"
+        aria-label="Descripción del paquete"
         placeholder="Descripción (opcional)"
         maxLength={LIMITS.packDescription}
         value={pack.description ?? ''}
@@ -117,7 +114,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
             >
               <input
                 type="checkbox"
-                className="size-4 accent-primary"
+                className="size-5 accent-primary"
                 checked={selected.has(service.id)}
                 onChange={(event) => toggle(service.id, event.target.checked)}
               />

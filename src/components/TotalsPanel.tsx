@@ -29,7 +29,7 @@ export function TotalsPanel({ calc, rate }: TotalsPanelProps) {
                     {formatUsd(subtotal.amountUsd)}
                   </span>
                 </div>
-                <span className="text-right text-xs tabular-nums text-muted-foreground">
+                <span className="text-right text-sm tabular-nums text-muted-foreground">
                   {formatVes(usdToVes(subtotal.amountUsd, rate))}
                 </span>
               </li>
@@ -53,9 +53,9 @@ export function TotalsPanel({ calc, rate }: TotalsPanelProps) {
           </span>
         </div>
 
-        <p className="text-xs text-muted-foreground">
-          Tasa aplicada: Bs. {formatRate(rate)} por $1. El monto en Bs. se recalcula con la
-          tasa oficial del día de pago.
+        <p className="text-sm text-muted-foreground">
+          Precio del dólar: Bs. {formatRate(rate)} por $1. El monto en Bs. se recalcula con
+          el precio oficial del día de pago.
         </p>
       </CardContent>
     </Card>

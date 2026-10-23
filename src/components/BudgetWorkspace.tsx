@@ -86,7 +86,7 @@ export function BudgetWorkspace({
                     onClick={() => setPackOpen(true)}
                   >
                     <Layers />
-                    Cargar plantilla
+                    Cargar paquete
                   </Button>
                   <Button
                     type="button"
@@ -115,7 +115,7 @@ export function BudgetWorkspace({
               ) : (
                 <div className="grid place-items-center gap-3 rounded-lg border border-dashed py-12 text-center">
                   <p className="max-w-sm text-sm text-muted-foreground">
-                    Aún no hay servicios. Agrega del catálogo, carga una plantilla o crea
+                    Aún no hay servicios. Agrega del catálogo, carga un paquete o crea
                     líneas manuales para armar el presupuesto.
                   </p>
                   <div className="flex flex-wrap items-center justify-center gap-2">

@@ -54,6 +54,9 @@ export function QuoteDataForm() {
   }
 
   const dateMissing = !/^\d{4}-\d{2}-\d{2}$/.test(dateText)
+  // En bolívares (o si se muestra el equivalente) el precio del dólar es parte
+  // del cálculo, no una opción avanzada.
+  const needsRate = quote.currency === 'VES' || quote.showBothCurrencies
 
   const handleDate = (value: string) => {
     setDateText(value)
@@ -90,7 +93,7 @@ export function QuoteDataForm() {
             }}
           />
           {dateMissing && (
-            <p id="quote-date-error" className="text-xs text-destructive">
+            <p id="quote-date-error" className="text-sm text-destructive">
               Indica la fecha de emisión
             </p>
           )}
@@ -106,7 +109,7 @@ export function QuoteDataForm() {
             onChange={(event) => setQuoteClient({ name: event.target.value })}
           />
           {quote.client.name.trim() === '' && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Sin nombre, el documento muestra «—». Puedes completarlo más tarde.
             </p>
           )}
@@ -128,7 +131,7 @@ export function QuoteDataForm() {
               <SelectItem value="VES">VES · bolívares</SelectItem>
             </SelectContent>
           </Select>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             La tabla y el PDF muestran los precios en esta moneda.
           </p>
         </div>
@@ -149,16 +152,29 @@ export function QuoteDataForm() {
           <span>
             Mostrar también en{' '}
             {quote.currency === 'USD' ? 'bolívares (VES)' : 'dólares (USD)'}
-            <span className="block text-xs text-muted-foreground">
+            <span className="block text-sm text-muted-foreground">
               Añade el equivalente en cada producto, en los totales y en el PDF.
             </span>
           </span>
         </label>
 
-        <RateField />
-        <p className="text-xs text-muted-foreground sm:col-span-2">
-          Los precios se guardan en USD. Si cotizas en bolívares, la tasa los convierte a
-          Bs.; al cambiar la tasa, los importes en Bs. se recalculan.
+        {needsRate ? (
+          <RateField />
+        ) : (
+          <details className="grid gap-3 rounded-lg border p-3 sm:col-span-2">
+            <summary className="cursor-pointer text-sm font-medium">
+              Opciones avanzadas: precio del dólar
+            </summary>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Se actualiza solo con el BCV. Ábrelo únicamente si necesitas fijar el precio
+              a mano.
+            </p>
+            <RateField />
+          </details>
+        )}
+        <p className="text-sm text-muted-foreground sm:col-span-2">
+          Los precios se guardan en dólares. Si cotizas en bolívares, el precio del dólar
+          los convierte a Bs.; al cambiarlo, los importes se recalculan.
         </p>
 
         <div className="sm:col-span-2">
@@ -174,7 +190,7 @@ export function QuoteDataForm() {
             {extraOpen ? <ChevronUp /> : <ChevronDown />}
             Datos opcionales del cliente y del documento
           </Button>
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             Solo se imprimen los campos que tengan valor. Sirven para completar la
             referencia: código y RIF del cliente, vendedor, oficina, transporte, vencimiento,
             orden de compra y descripción.

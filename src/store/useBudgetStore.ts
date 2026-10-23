@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { cloneDefaultCatalog } from '@/data/catalog'
+import { cloneDefaultCatalog, mergeDefaultProducts } from '@/data/catalog'
 import {
   cloneDefaultClinic,
   createEmptyBcvCache,
@@ -35,6 +35,7 @@ import type {
 } from '@/types'
 import { migratePersisted } from './migrate'
 import { createDebouncedStorage } from './storage'
+import { PERSIST_VERSION } from './versions'
 
 export type NewService = Omit<CatalogService, 'id'>
 export type NewPack = Omit<Pack, 'id'>
@@ -142,6 +143,8 @@ interface AppState {
   removeCatalogProduct: (id: string) => void
   loadCatalog: (catalog: Catalog) => void
   resetCatalog: () => void
+  /** Añade los productos de fábrica que falten. Devuelve cuántos añadió. */
+  mergeDefaultProducts: () => number
   /** Copia las tarifas del presupuesto al catálogo. Devuelve cuántos servicios cambió. */
   syncPricesToCatalog: () => number
 
@@ -646,6 +649,14 @@ export const useBudgetStore = create<AppState>()(
 
       resetCatalog: () => set({ catalog: cloneDefaultCatalog() }),
 
+      mergeDefaultProducts: () => {
+        const { catalog } = get()
+        const next = mergeDefaultProducts(catalog)
+        const added = next.products.length - catalog.products.length
+        if (added > 0) set({ catalog: next })
+        return added
+      },
+
       syncPricesToCatalog: () => {
         const { budget, catalog } = get()
         let updated = 0
@@ -732,8 +743,8 @@ export const useBudgetStore = create<AppState>()(
     }),
     {
       name: 'budgetify:v1',
-      // v8: cotizaciones de productos y catálogo de productos.
-      version: 8,
+      // v9: catálogo ampliado; la migración completa las instalaciones v8.
+      version: PERSIST_VERSION,
       storage: createJSONStorage(() => createDebouncedStorage(500)),
       partialize: (state) => ({
         budget: state.budget,
@@ -751,7 +762,7 @@ export const useBudgetStore = create<AppState>()(
       // Migra y valida lo guardado: si el borrador no encaja con el modelo
       // actual (versión antigua o datos corruptos) se usan los valores por
       // defecto en lugar de romper la app al arrancar.
-      migrate: (persisted) => migratePersisted(persisted),
+      migrate: (persisted, version) => migratePersisted(persisted, version),
     },
   ),
 )
