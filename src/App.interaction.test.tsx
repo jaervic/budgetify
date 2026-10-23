@@ -388,6 +388,26 @@ describe('App · interacciones', () => {
     expect(within(dialog).getAllByText(/Bata de pacientes/).length).toBeGreaterThan(0)
   }, 30_000)
 
+  it('muestra primero los productos personalizados en el selector', async () => {
+    useBudgetStore.getState().addCatalogProduct({
+      code: 'MIO',
+      category: 'General',
+      description: 'Producto personalizado',
+      unit: 'UND',
+      priceUsd: 1,
+      taxRate: 16,
+    })
+
+    render(<App />)
+    await userEvent.click(screen.getByRole('button', { name: 'Cotización' }))
+    await userEvent.click(screen.getAllByRole('button', { name: 'Agregar productos' })[0])
+
+    const dialog = screen.getByRole('dialog')
+    const checkboxes = within(dialog).getAllByRole('checkbox')
+    expect(checkboxes[0].getAttribute('aria-label')).toContain('Producto personalizado')
+    expect(within(dialog).getByText('Personalizado')).toBeTruthy()
+  }, 30_000)
+
   it('cotiza en bolívares y convierte los importes con la tasa', async () => {
     render(<App />)
 

@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { PRODUCT_CATEGORIES } from '@/data/products'
+import { DEFAULT_PRODUCTS, PRODUCT_CATEGORIES } from '@/data/products'
 import { formatQuoteMoney, formatQuoteOtherMoney } from '@/lib/quoteMoney'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import { cn } from '@/lib/utils'
@@ -62,16 +62,29 @@ function PickerContent({ onClose }: { onClose: () => void }) {
     [products, categoryOrder],
   )
 
+  // Los productos creados por el usuario no están en la base de fábrica. Se
+  // muestran primero para que el alta reciente no quede al final de una lista
+  // larga y parezca que no se guardó.
+  const defaultIds = useMemo(
+    () => new Set(DEFAULT_PRODUCTS.map((product) => product.id)),
+    [],
+  )
+  const orderedProducts = useMemo(() => {
+    const custom = products.filter((product) => !defaultIds.has(product.id))
+    const factory = products.filter((product) => defaultIds.has(product.id))
+    return [...custom, ...factory]
+  }, [products, defaultIds])
+
   const visible = useMemo(() => {
     const term = query.trim().toLowerCase()
-    return products.filter((product) => {
+    return orderedProducts.filter((product) => {
       if (activeCategory !== ALL && product.category !== activeCategory) return false
       if (!term) return true
       return `${product.code} ${product.category} ${product.description}`
         .toLowerCase()
         .includes(term)
     })
-  }, [products, query, activeCategory])
+  }, [orderedProducts, query, activeCategory])
 
   const groups = useMemo(() => {
     const map = new Map<string, Product[]>()
@@ -105,7 +118,7 @@ function PickerContent({ onClose }: { onClose: () => void }) {
   }
 
   const handleAdd = () => {
-    const chosen = products.filter((product) => selectedSet.has(product.id))
+    const chosen = orderedProducts.filter((product) => selectedSet.has(product.id))
     if (chosen.length === 0) return
     addQuoteProducts(chosen)
     toast.success(
@@ -156,15 +169,30 @@ function PickerContent({ onClose }: { onClose: () => void }) {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={toggleAll}
-          disabled={visible.length === 0}
-        >
-          {allVisibleSelected ? 'Quitar selección' : 'Seleccionar todos los visibles'}
-        </Button>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={toggleAll}
+            disabled={visible.length === 0}
+          >
+            {allVisibleSelected ? 'Quitar selección' : 'Seleccionar todos los visibles'}
+          </Button>
+          {(query.trim() !== '' || activeCategory !== ALL) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setQuery('')
+                setActiveCategory(ALL)
+              }}
+            >
+              Limpiar filtros
+            </Button>
+          )}
+        </div>
         <Badge variant="secondary" aria-live="polite" aria-atomic="true">
           {selected.length} seleccionados
         </Badge>
@@ -206,6 +234,11 @@ function PickerContent({ onClose }: { onClose: () => void }) {
                           <span className="text-sm font-medium break-words">
                             {product.description}
                           </span>
+                          {!defaultIds.has(product.id) && (
+                            <Badge variant="outline" className="text-[10px]">
+                              Personalizado
+                            </Badge>
+                          )}
                         </span>
                         <span className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                           <span>
