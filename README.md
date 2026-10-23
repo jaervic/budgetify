@@ -133,7 +133,7 @@ navegador. No hay cuentas, no hay registro y no hay base de datos.
 En el navegador del equipo donde trabajas. Además del que estás editando, puedes archivar
 copias en **“Historial”** (se conservan las 100 últimas; al pasar de ahí se descartan las
 más viejas y la app te avisa). Si cambias de computadora o quieres un respaldo, usa
-**“Descargar”** y luego **“Abrir”** (en “Guardar copia”) en el otro equipo.
+**“Descargar”** y luego **“Abrir”** en el otro equipo.
 
 **Me equivoque, ¿puedo volver atrás?**
 Sí. Al borrar una línea, una nota, una categoría o una copia del historial, o al reemplazar
