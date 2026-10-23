@@ -137,7 +137,7 @@ interface AppState {
   addPack: (pack: NewPack) => void
   updatePack: (id: string, patch: Partial<NewPack>) => void
   removePack: (id: string) => void
-  addCatalogProduct: (product: NewProduct) => void
+  addCatalogProduct: (product: NewProduct) => Product
   updateCatalogProduct: (id: string, patch: Partial<NewProduct>) => void
   removeCatalogProduct: (id: string) => void
   loadCatalog: (catalog: Catalog) => void
@@ -613,13 +613,16 @@ export const useBudgetStore = create<AppState>()(
           },
         })),
 
-      addCatalogProduct: (product) =>
+      addCatalogProduct: (product) => {
+        const created: Product = { ...product, id: newId('prod') }
         set((state) => ({
           catalog: {
             ...state.catalog,
-            products: [...state.catalog.products, { ...product, id: newId('prod') }],
+            products: [...state.catalog.products, created],
           },
-        })),
+        }))
+        return created
+      },
 
       updateCatalogProduct: (id, patch) =>
         set((state) => ({

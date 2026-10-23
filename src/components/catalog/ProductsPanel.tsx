@@ -1,5 +1,6 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { NumberInput } from '@/components/NumberInput'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,7 +40,25 @@ export function ProductsPanel() {
   const removeCatalogProduct = useBudgetStore((state) => state.removeCatalogProduct)
   const [query, setQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState(ALL)
+  const [focusId, setFocusId] = useState<string | null>(null)
   const addProductRef = useRef<HTMLButtonElement>(null)
+  const rowRefs = useRef(new Map<string, HTMLDivElement>())
+
+  // Después de crear un producto, la lista puede ser muy larga y el scroll
+  // seguir arriba. Se lleva la vista a la fila nueva y se enfoca la
+  // descripción para poder escribir el nombre de inmediato.
+  useEffect(() => {
+    if (!focusId) return
+    const node = rowRefs.current.get(focusId)
+    if (!node) return
+
+    const frame = requestAnimationFrame(() => {
+      node.scrollIntoView?.({ block: 'nearest' })
+      node.querySelector<HTMLInputElement>('[data-field="description"]')?.focus()
+      setFocusId(null)
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [focusId, products.length, query, activeCategory])
 
   const categories = useMemo(
     () =>
@@ -81,7 +100,7 @@ export function ProductsPanel() {
   }
 
   const handleAdd = () => {
-    addCatalogProduct({
+    const created = addCatalogProduct({
       code: '',
       category: activeCategory === ALL ? PRODUCT_CATEGORIES[0] : activeCategory,
       description: 'Nuevo producto',
@@ -89,6 +108,10 @@ export function ProductsPanel() {
       priceUsd: 0,
       taxRate: DEFAULT_TAX_RATE,
     })
+    // Si había una búsqueda escrita, el producto nuevo podría quedar oculto.
+    setQuery('')
+    setFocusId(created.id)
+    toast.success('Producto agregado')
   }
 
   return (
@@ -180,15 +203,19 @@ export function ProductsPanel() {
 
             <div className="grid gap-2" role="list">
               {visible.map((product) => (
-              <div
-                key={product.id}
-                role="listitem"
-                className={cn(
-                  'grid gap-2 rounded-lg border p-3',
-                  'lg:items-center lg:gap-0 lg:px-0 lg:py-0',
-                  PRODUCT_GRID,
-                )}
-              >
+                <div
+                  key={product.id}
+                  ref={(node) => {
+                    if (node) rowRefs.current.set(product.id, node)
+                    else rowRefs.current.delete(product.id)
+                  }}
+                  role="listitem"
+                  className={cn(
+                    'grid gap-2 rounded-lg border p-3',
+                    'lg:items-center lg:gap-0 lg:px-0 lg:py-0',
+                    PRODUCT_GRID,
+                  )}
+                >
                 <div className="grid gap-1 lg:px-3 lg:py-2">
                   <span className="text-xs text-muted-foreground lg:hidden">Código</span>
                   <Input
@@ -209,6 +236,7 @@ export function ProductsPanel() {
                   </span>
                   <Input
                     className="h-8 font-medium"
+                    data-field="description"
                     aria-label={`Descripción de ${product.description || 'producto'}`}
                     placeholder="Descripción"
                     maxLength={LIMITS.productDescription}

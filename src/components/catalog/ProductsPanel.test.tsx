@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { ProductsPanel } from '@/components/catalog/ProductsPanel'
@@ -51,6 +51,11 @@ describe('ProductsPanel', () => {
     expect(created).toBeTruthy()
     expect(created?.category).toBe('Medicamentos')
 
+    const description = screen.getByDisplayValue('Nuevo producto')
+    await waitFor(() => {
+      expect(document.activeElement).toBe(description)
+    })
+
     const price = screen.getByLabelText('Precio en USD de Nuevo producto')
     await userEvent.clear(price)
     await userEvent.type(price, '12,5')
@@ -59,5 +64,21 @@ describe('ProductsPanel', () => {
       useBudgetStore.getState().catalog.products.find((p) => p.id === created?.id)
         ?.priceUsd,
     ).toBe(12.5)
+  }, 30_000)
+
+  it('muestra y enfoca el producto nuevo aunque haya una búsqueda activa', async () => {
+    render(<ProductsPanel />)
+
+    const search = screen.getByLabelText('Buscar productos') as HTMLInputElement
+    await userEvent.type(search, 'gasa')
+    await userEvent.click(screen.getByRole('button', { name: 'Nuevo producto' }))
+
+    const description = screen.getByDisplayValue('Nuevo producto') as HTMLInputElement
+    expect(description).toBeTruthy()
+    expect(search.value).toBe('')
+
+    await waitFor(() => {
+      expect(document.activeElement).toBe(description)
+    })
   }, 30_000)
 })
