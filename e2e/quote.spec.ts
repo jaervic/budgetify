@@ -14,6 +14,8 @@ test('cambia a cotización, agrega productos y calcula el IVA', async ({ page })
   page.on('pageerror', (error) => errores.push(error.message))
 
   await page.goto('/')
+  // En una visita nueva, la guía de inicio tapa la app hasta cerrarla.
+  await page.getByRole('button', { name: 'Cerrar' }).click()
   await page.getByRole('button', { name: 'Cotización', exact: true }).click()
   await expect(page.getByText('Datos de la cotización')).toBeVisible()
 
@@ -22,7 +24,7 @@ test('cambia a cotización, agrega productos y calcula el IVA', async ({ page })
   await page.getByRole('button', { name: 'Agregar (1)' }).click()
 
   await expect(page.getByTestId('quote-total')).toHaveText('$7.89')
-  await expect(page.getByLabel('Código').first()).toHaveValue('BAYP')
+  await expect(page.getByLabel('Código', { exact: true }).first()).toHaveValue('BAYP')
 
   const bothCurrencies = page.getByRole('checkbox', {
     name: /Mostrar también en bolívares/,

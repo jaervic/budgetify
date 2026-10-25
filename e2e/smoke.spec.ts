@@ -73,6 +73,11 @@ test('arranca, suma una línea y es legible en claro y en oscuro', async ({ page
   page.on('pageerror', (error) => errores.push(error.message))
 
   await page.goto('/')
+  // La primera visita abre la guía de 3 pasos; ciérrala para probar la app.
+  await expect(
+    page.getByRole('dialog', { name: /Cómo hacer un documento en 3 pasos/ }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Cerrar' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   // El camino más corto hasta un presupuesto con importe.
@@ -85,7 +90,9 @@ test('arranca, suma una línea y es legible en claro y en oscuro', async ({ page
 
   await comprobarContraste(page, 'claro')
 
-  await page.getByRole('button', { name: 'Cambiar tema' }).click()
+  await page
+    .getByRole('button', { name: 'Cambiar entre modo claro y oscuro' })
+    .click()
   await expect(page.locator('html')).toHaveClass(/dark/)
   await comprobarContraste(page, 'oscuro')
 
