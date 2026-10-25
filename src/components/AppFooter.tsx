@@ -1,4 +1,5 @@
 import { GithubIcon } from '@/components/GithubIcon'
+import { SYNC_ENABLED } from '@/lib/sync/config'
 
 const REPO_URL = 'https://github.com/jaervic/budgetify'
 
@@ -16,7 +17,11 @@ export function AppFooter() {
           <GithubIcon className="size-4" />
           Código abierto en GitHub
         </a>
-        <p>Gratis y sin servidores · tus datos no salen de tu equipo</p>
+        <p>
+          {SYNC_ENABLED
+            ? 'Gratis y sin rastreadores · tus datos se quedan en tu equipo salvo que actives la cuenta'
+            : 'Gratis y sin servidores · tus datos no salen de tu equipo'}
+        </p>
       </div>
     </footer>
   )

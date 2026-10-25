@@ -56,6 +56,19 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        // El cliente de Supabase es un chunk diferido: no se precarga en la
+        // instalación. Se cachea la primera vez que la persona abre su cuenta.
+        globIgnores: ['**/supabase-*.js'],
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/supabase-.*\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'budgetify-supabase',
+              expiration: { maxEntries: 2, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+        ],
       },
     }),
   ],
@@ -83,6 +96,7 @@ export default defineConfig({
           if (/[\\/]node_modules[\\/](zod)[\\/]/.test(id)) {
             return 'validation'
           }
+          if (/[\\/]node_modules[\\/]@supabase[\\/]/.test(id)) return 'supabase'
           return undefined
         },
       },

@@ -18,6 +18,7 @@ import { computeQuote } from '@/lib/quoteCalc'
 import { formatQuoteMoney } from '@/lib/quoteMoney'
 import { keepOpenForToast, withUndo } from '@/lib/undo'
 import { useBudgetStore } from '@/store/useBudgetStore'
+import { useSyncStore } from '@/store/useSyncStore'
 import type { DocMode } from '@/types'
 
 interface HistoryDialogProps {
@@ -41,6 +42,7 @@ export function HistoryDialog({
   const history = useBudgetStore((state) => state.history)
   const loadSavedDocument = useBudgetStore((state) => state.loadSavedDocument)
   const removeSavedBudget = useBudgetStore((state) => state.removeSavedBudget)
+  const synced = useSyncStore((state) => state.user !== null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -124,9 +126,9 @@ export function HistoryDialog({
             Historial
           </DialogTitle>
           <DialogDescription>
-            Presupuestos y cotizaciones guardados en este navegador (hasta{' '}
-            {HISTORY_LIMIT}). No se suben a ningún servidor: si borras los datos del
-            navegador, se van con ellos.
+            {synced
+              ? `Presupuestos y cotizaciones guardados en este navegador y sincronizados con tu cuenta (hasta ${HISTORY_LIMIT}). Puedes abrirlos desde otro equipo.`
+              : `Presupuestos y cotizaciones guardados en este navegador (hasta ${HISTORY_LIMIT}). No se suben a ningún servidor: si borras los datos del navegador, se van con ellos.`}
           </DialogDescription>
         </DialogHeader>
 

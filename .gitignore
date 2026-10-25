@@ -29,3 +29,7 @@ presupuestoejemplo.pdf
 # Salidas de Playwright (prueba de humo en navegador)
 playwright-report/
 test-results/
+
+# Metadatos locales de Supabase CLI
+supabase/.temp/
+**/supabase/.temp/

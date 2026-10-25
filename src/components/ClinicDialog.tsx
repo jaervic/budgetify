@@ -16,6 +16,7 @@ import { DOCTOR_TITLES, doctorFullName, specialtyName } from '@/data/specialties
 import { LIMITS } from '@/lib/limits'
 import { fileToLogoDataUrl } from '@/lib/logo'
 import { useBudgetStore } from '@/store/useBudgetStore'
+import { useSyncStore } from '@/store/useSyncStore'
 import { cn } from '@/lib/utils'
 
 interface ImageUploadProps {
@@ -110,6 +111,7 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
   const docMode = useBudgetStore((state) => state.docMode)
   const setClinic = useBudgetStore((state) => state.setClinic)
   const catalog = useBudgetStore((state) => state.catalog)
+  const synced = useSyncStore((state) => state.user !== null)
   const [busy, setBusy] = useState(false)
   const areaName = specialtyName(clinic.specialtyId, catalog.specialties)
 
@@ -134,8 +136,16 @@ export function ClinicDialog({ open, onOpenChange }: ClinicDialogProps) {
           <DialogTitle>Datos de la empresa</DialogTitle>
           <DialogDescription>
             {docMode === 'quote'
-              ? 'Encabezan la cotización y su PDF. Se guardan solo en este navegador.'
-              : 'Encabezan el presupuesto y su PDF. Se guardan solo en este navegador.'}
+              ? `Encabezan la cotización y su PDF. Se guardan ${
+                  synced
+                    ? 'en este navegador y se sincronizan con tu cuenta'
+                    : 'solo en este navegador'
+                }.`
+              : `Encabezan el presupuesto y su PDF. Se guardan ${
+                  synced
+                    ? 'en este navegador y se sincronizan con tu cuenta'
+                    : 'solo en este navegador'
+                }.`}
           </DialogDescription>
         </DialogHeader>
 

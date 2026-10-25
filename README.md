@@ -7,13 +7,15 @@ Escribes los datos del paciente, agregas los servicios (cirugía, consulta, exá
 cambias a la modalidad de **cotización** para escoger productos del catálogo, y descargas un
 **PDF listo para imprimir, guardar o enviar por WhatsApp**.
 
-> ✅ No hay que instalar nada · ✅ no hay que crear cuenta · ✅ funciona sin internet ·
-> ✅ **tus datos no salen de tu computadora**
+> ✅ No hay que instalar nada · ✅ se puede usar sin crear cuenta · ✅ funciona sin internet ·
+> ✅ **por defecto tus datos no salen de tu computadora** ·
+> ✅ **opcional: tu propia cuenta para ver el mismo historial en el teléfono y la computadora**
 
 ### ▶️ Pruébala ahora: **[budgetify-silk.vercel.app](https://budgetify-silk.vercel.app)**
 
 Se abre directo en el navegador, también en el teléfono. *(Es una demostración pública: no
-escribas datos reales de pacientes en ella.)*
+escribas datos reales de pacientes en ella. La sincronización con cuenta está desactivada
+en la demo; para probarla, despliega tu propia copia.)*
 
 ![Pantalla de edición](docs/capturas/edicion.png)
 
@@ -31,6 +33,8 @@ escribas datos reales de pacientes en ella.)*
 - **Descarga el PDF**, lo imprimes o lo compartes por WhatsApp.
 - **Historial**: guarda copias dentro del navegador (hasta 100) y vuelve a abrir
   cualquier presupuesto anterior cuando el paciente regrese.
+- **Cuenta opcional**: si la activas, el historial, la empresa y el catálogo se
+  sincronizan entre tus equipos. Sin cuenta, todo sigue siendo 100 % local.
 - **Cotizaciones de productos**: cambia la modalidad, escoge varios productos del catálogo,
   ajusta cantidades, unidades, precios e **IVA por producto**, y obtén Subtotal, IVA y Neto.
 - **Respaldo en archivo**: Descargar / Abrir archivo para llevarte todo a otro equipo.
@@ -118,22 +122,46 @@ con tu nombre y tu título (“Od. Ana Rojas”) y debajo tu área de práctica.
 6. La primera vez, entra en **“Empresa”**: elige si los documentos son de una **clínica** o
    de un **profesional independiente**, escribe tu **título** (Dr., Dra., Od., Lcda.…) y tu
    **área de práctica**, y carga el RIF, el logo, la firma y el sello.
+7. Si quieres continuar en otro equipo, pulsa **“Sincronizar”** (arriba). Puedes crear
+   una cuenta con **correo y contraseña** o pedir un **enlace mágico** por correo. La app
+   sigue funcionando sin conexión; los cambios se suben cuando vuelve la red.
 
 ## Preguntas frecuentes
 
 **¿Necesito internet?**
-Solo la primera vez, para abrir la página. Después funciona sin conexión. Si hay internet,
-aprovecha para actualizar sola la tasa del dólar del BCV.
+Para abrirla la primera vez y, si usas cuenta, para iniciar sesión y sincronizar. Después
+se puede trabajar sin conexión. Si hay internet, la app aprovecha para actualizar la tasa
+del BCV y —si activaste tu cuenta— para sincronizar los cambios. Sin conexión sigues
+editando; lo pendiente se sube al volver la red.
 
 **¿Mis datos se envían a algún servidor? ¿Son privados?**
-Sí, son privados. **Nada se envía a ningún servidor**: todo se guarda únicamente en tu
-navegador. No hay cuentas, no hay registro y no hay base de datos.
+**Por defecto, no.** Sin cuenta, todo se guarda únicamente en tu navegador: no hay
+registro, no hay base de datos y nada sale de tu equipo.
+
+Si tú activas la **cuenta opcional**, el historial, la empresa y el catálogo se guardan
+también en Supabase para que los veas en tus otros equipos. Viajan por HTTPS y se guardan
+cifrados en el proveedor; cada fila está aislada por usuario con reglas RLS. No es cifrado
+de extremo a extremo: el proveedor aplica el cifrado, no una clave que solo tú tengas.
+La contraseña la guarda Supabase como hash; la app nunca la almacena. Los correos de
+acceso o recuperación pasan por el SMTP configurado (por ejemplo, Gmail). Puedes cerrar
+sesión, borrar la cuenta y todos sus datos desde **Cuenta**.
+
+**¿Cómo entro desde otro equipo?**
+Pulsa **“Sincronizar”** y entra con el mismo correo y contraseña. Si creaste la cuenta con
+un enlace mágico y nunca le pusiste contraseña, entra con otro enlace y usa **Cuenta →
+Cambiar contraseña** para crear una.
+
+**¿Olvidé mi contraseña?**
+En **Cuenta → ¿Olvidaste tu contraseña?** escribes tu correo y recibes un enlace para
+crear una nueva. Ese correo sale por el SMTP configurado (por ejemplo, Gmail). Si el
+enlace no llega, revisa spam o pide al administrador que restablezca la contraseña.
 
 **¿Dónde quedan los presupuestos guardados?**
 En el navegador del equipo donde trabajas. Además del que estás editando, puedes archivar
 copias en **“Historial”** (se conservan las 100 últimas; al pasar de ahí se descartan las
-más viejas y la app te avisa). Si cambias de computadora o quieres un respaldo, usa
-**“Descargar”** y luego **“Abrir”** en el otro equipo.
+más viejas y la app te avisa). Si activas la cuenta, el historial también queda en la nube
+y aparece en tus otros equipos. Para un respaldo manual siempre tienes **“Descargar”** y
+**“Abrir”**.
 
 **Me equivoque, ¿puedo volver atrás?**
 Sí. Al borrar una línea, una nota, una categoría o una copia del historial, o al reemplazar
@@ -170,11 +198,14 @@ título y tu área.
 Sí: **A4**, Carta u Oficio.
 
 **¿Sirve como historia médica?**
-No. Es solo para **armar el presupuesto**. No guarda historias clínicas ni datos de
-pacientes en ningún sistema.
+No. Es solo para **armar el presupuesto**. No es un sistema de historia clínica: solo
+guarda el documento que tú decides archivar, en el navegador o en tu cuenta si la activas.
 
 **¿Cuánto cuesta?**
-Nada. Es **gratis y de código abierto** (licencia MIT).
+Nada para quien la usa. Es **gratis y de código abierto** (licencia MIT). Si activas la
+sincronización, el operador de esa instancia paga el proveedor: Supabase tiene plan
+gratuito y, para uso real sin pausas, unos **$25/mes** (ver
+[documentación técnica](docs/DESARROLLO.md)).
 
 ## ⚠️ Aviso importante
 
@@ -184,14 +215,22 @@ pero **no sustituye tu criterio médico ni administrativo**.
 
 ## 🔒 Privacidad y seguridad
 
-- **No hay servidores**: nada de lo que escribes se envía a internet. No hay cuentas,
+- **Sin cuenta, no hay servidores**: nada de lo que escribes se envía a internet. No hay
   registro ni base de datos.
+- **La cuenta es opcional y explícita**: solo se sincroniza lo que decidas guardar en ella.
+  La app sigue funcionando sin conexión y sin cuenta.
 - **Sin rastreadores**: no hay analítica ni cookies de terceros.
-- La **única** conexión externa es la consulta de la tasa del BCV (que no lleva datos
-  tuyos). Si la desmarcas y usas la tasa a mano, no hay ninguna conexión.
+- Las conexiones externas son la consulta de la tasa del BCV (que no lleva datos tuyos) y,
+  si activas la cuenta, Supabase para la sesión y la sincronización. Si no usas cuenta y
+  escribes la tasa a mano, no hay conexión con Supabase.
 - Los datos quedan guardados **en este navegador**, incluido el **historial** de copias. En
-  una computadora compartida, pulsa **Nuevo presupuesto** al terminar, vacía el historial (cada copia
-  se puede borrar) o usa una ventana de incógnito.
+  una computadora compartida, usa **Cuenta → Cerrar sesión → borrar los datos de este
+  equipo**, o pulsa **Nuevo presupuesto** al terminar y vacía el historial.
+- En la **demo pública** la sincronización está desactivada para no almacenar datos reales
+  de pacientes. Para usar la cuenta, despliega tu propia instancia (ver
+  [documentación técnica](docs/DESARROLLO.md)).
+- Si vas a operar una instancia con cuentas, adapta la
+  **[plantilla de política de privacidad](docs/PRIVACIDAD.md)**.
 - Detalles y cómo reportar un problema: **[política de seguridad](SECURITY.md)**.
 
 ## ¿Quieres colaborar?
@@ -219,10 +258,15 @@ nursing and lab work, and the document can be headed either by a clinic or by th
 professional ("Dr. Jane Doe" over her specialty). It keeps a **local history** of up to 100
 estimates you can reopen, and every destructive action offers an undo.
 
+It works **without an account** and offline. An **optional account** (email + password,
+or a magic email link) syncs the history, company data and catalogue across phone and
+computer through Supabase, with per-user row-level security. The public demo keeps sync
+disabled so no real patient data is stored.
+
 **Live demo:** [budgetify-silk.vercel.app](https://budgetify-silk.vercel.app)
 
-**100 % frontend** — no backend, no sign-up, no tracking. Everything is stored in the
-browser, and it works offline. Built with React, TypeScript, Tailwind and
-[`@react-pdf/renderer`](docs/DESARROLLO.md).
+**Local-first** — no backend unless you enable the optional account, no tracking.
+Everything is stored in the browser by default. Built with React, TypeScript, Tailwind,
+[`@react-pdf/renderer`](docs/DESARROLLO.md) and optionally Supabase.
 
 *Not a medical records system — it only builds the estimate.*

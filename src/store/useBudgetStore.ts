@@ -36,7 +36,7 @@ import type {
   RateMode,
   SavedDocument,
 } from '@/types'
-import { migratePersisted } from './migrate'
+import { migratePersisted, type PersistedState } from './migrate'
 import { createDebouncedStorage } from './storage'
 import { PERSIST_VERSION } from './versions'
 
@@ -174,6 +174,12 @@ interface AppState {
   /** Consulta la tasa oficial del BCV y, si el modo es `auto`, la aplica. */
   refreshBcvRate: () => Promise<void>
   setPageSize: (pageSize: PageSize) => void
+
+  // ── Sincronización ───────────────────────────────────────────────────
+  /** Aplica un estado validado que viene de la nube (no marca cambios locales). */
+  applyRemoteState: (patch: Partial<PersistedState>) => void
+  /** Vuelve a los valores de fábrica y borra el historial local. */
+  resetLocalData: () => void
 }
 
 /** Condiciones predeterminadas: vacío si el usuario guardó «sin condiciones». */
@@ -802,6 +808,29 @@ export const useBudgetStore = create<AppState>()(
       },
 
       setPageSize: (pageSize) => set({ pageSize }),
+
+      // ── Sincronización ─────────────────────────────────────────────────
+      applyRemoteState: (patch) => set(patch),
+
+      resetLocalData: () =>
+        set({
+          budget: { ...createEmptyBudget(), notes: [...DEFAULT_NOTES] },
+          catalog: cloneDefaultCatalog(),
+          clinic: cloneDefaultClinic(),
+          rateMode: 'auto',
+          bcv: createEmptyBcvCache(),
+          pageSize: DEFAULT_PAGE_SIZE,
+          docMode: 'budget',
+          quote: {
+            ...createEmptyQuote(formatQuoteNumber(1)),
+            terms: DEFAULT_QUOTE_TERMS,
+          },
+          quotePageSize: DEFAULT_QUOTE_PAGE_SIZE,
+          quoteCounter: 1,
+          history: [],
+          savedBudgetNotes: null,
+          savedQuoteTerms: null,
+        }),
     }),
     {
       name: 'budgetify:v1',

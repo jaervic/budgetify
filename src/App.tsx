@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Building2, HelpCircle, History, Settings2, Stethoscope } from 'lucide-react'
+import { AccountButton } from '@/components/AccountButton'
+import { AccountDialog } from '@/components/AccountDialog'
 import { AppFooter } from '@/components/AppFooter'
 import { BudgetWorkspace } from '@/components/BudgetWorkspace'
 import { CatalogManagerDialog } from '@/components/CatalogManagerDialog'
 import { ClinicDialog } from '@/components/ClinicDialog'
 import { DocumentModeSwitch } from '@/components/DocumentModeSwitch'
 import { HistoryDialog } from '@/components/HistoryDialog'
+import { MergeDialog } from '@/components/MergeDialog'
 import { MobileActionBar } from '@/components/MobileActionBar'
+import { PasswordRecoveryDialog } from '@/components/PasswordRecoveryDialog'
 import { PdfPreviewDialog } from '@/components/PdfPreviewDialog'
 import { QuoteWorkspace } from '@/components/QuoteWorkspace'
 import { ThemeToggle } from '@/components/ThemeToggle'
@@ -15,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Toaster } from '@/components/ui/sonner'
 import { usePdfActions } from '@/hooks/usePdfActions'
 import { useStorageWarning } from '@/hooks/useStorageWarning'
+import { useSync } from '@/hooks/useSync'
 import { useTheme } from '@/hooks/useTheme'
 import { useBudgetStore } from '@/store/useBudgetStore'
 
@@ -30,6 +35,8 @@ export default function App() {
   const refreshBcvRate = useBudgetStore((state) => state.refreshBcvRate)
   const { resolved } = useTheme()
   const { openPdf } = usePdfActions()
+  // Sincronización opcional: sin credenciales no hace nada ni carga Supabase.
+  useSync()
   // Avisa si el navegador deja de poder guardar el borrador (cuota llena).
   useStorageWarning()
 
@@ -87,6 +94,7 @@ export default function App() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            <AccountButton />
             <ThemeToggle />
             <Button
               type="button"
@@ -160,6 +168,9 @@ export default function App() {
       />
       <PdfPreviewDialog open={pdfOpen} onOpenChange={setPdfOpen} />
       <WelcomeDialog open={helpOpen} onOpenChange={handleHelpOpenChange} />
+      <AccountDialog />
+      <MergeDialog />
+      <PasswordRecoveryDialog />
       <Toaster position="top-center" theme={resolved} />
     </div>
   )
