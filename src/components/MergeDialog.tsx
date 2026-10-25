@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Cloud, GitMerge, ShieldAlert } from 'lucide-react'
+import { Cloud, GitMerge, ShieldAlert, Upload } from 'lucide-react'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,9 +12,14 @@ import {
 import { resolveMerge, signOut } from '@/lib/sync/engine'
 import { useSyncStore } from '@/store/useSyncStore'
 
+function documentCount(count: number): string {
+  return `${count} ${count === 1 ? 'documento' : 'documentos'}`
+}
+
 /**
- * Este equipo ya tenía datos de otra cuenta. Nunca se suben solos a la cuenta
- * nueva: la persona elige combinarlos o descartarlos.
+ * Este equipo ya tenía datos. Nunca se suben solos a la cuenta: la persona
+ * elige conservarlos o descartarlos. Si la nube está vacía, descartarlos no
+ * tiene sentido, así que solo se ofrece subirlos.
  */
 export function MergeDialog() {
   const open = useSyncStore((state) => state.mergeOpen)
@@ -23,6 +28,9 @@ export function MergeDialog() {
   const remoteCount = useSyncStore((state) => state.mergeRemoteCount)
   const error = useSyncStore((state) => state.error)
   const [confirmCloud, setConfirmCloud] = useState(false)
+
+  const cloudEmpty = remoteCount === 0
+  const cloudUnknown = remoteCount < 0
 
   return (
     <Dialog open={open}>
@@ -35,29 +43,42 @@ export function MergeDialog() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShieldAlert className="size-5 text-amber-600" />
-            Este equipo ya tiene datos
+            {cloudEmpty
+              ? 'Tus documentos están en este equipo'
+              : 'Este equipo ya tiene datos'}
           </DialogTitle>
           <DialogDescription>
-            Ya hay datos guardados en este equipo. Elige qué hacer antes de sincronizar;
-            nada se sube sin tu permiso. Si son de otra persona, usa «solo la nube».
+            {cloudEmpty
+              ? `Hay ${documentCount(localCount)} en este equipo y la nube está vacía. Para conservarlos, súbelos a tu cuenta.`
+              : 'Ya hay datos guardados en este equipo. Elige qué hacer antes de sincronizar; nada se sube sin tu permiso.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-3 text-sm">
           <div className="rounded-lg border p-3">
-            <p className="font-medium">Este equipo: {localCount} documento(s)</p>
+            <p className="font-medium">Este equipo: {documentCount(localCount)}</p>
             <p className="text-muted-foreground">
-              Se conservarán y se subirán a la cuenta que acabas de abrir.
+              {cloudEmpty
+                ? 'Se conservarán y se subirán a la cuenta que acabas de abrir.'
+                : 'Se conservarán y se unirán con lo que ya esté en la nube.'}
             </p>
           </div>
           <div className="rounded-lg border p-3">
             <p className="font-medium">
               La nube:{' '}
-              {remoteCount < 0
+              {cloudUnknown
                 ? 'no se pudo comprobar (sin conexión)'
-                : `${remoteCount} documento(s)`}
+                : cloudEmpty
+                  ? 'vacía'
+                  : documentCount(remoteCount)}
             </p>
-            <p className="text-muted-foreground">Se unirán con los de este equipo.</p>
+            <p className="text-muted-foreground">
+              {cloudUnknown
+                ? 'Puedes conservar los documentos de este equipo y sincronizar cuando vuelva la conexión.'
+                : cloudEmpty
+                  ? 'No hay nada que descargar. Subir es la opción segura.'
+                  : 'Se unirán con los de este equipo.'}
+            </p>
           </div>
         </div>
 
@@ -77,46 +98,51 @@ export function MergeDialog() {
 
         <div className="grid gap-2">
           <Button type="button" disabled={busy} onClick={() => void resolveMerge('merge')}>
-            <GitMerge />
-            Combinar ambos
+            {cloudEmpty ? <Upload /> : <GitMerge />}
+            {cloudEmpty ? 'Subir mis documentos' : 'Combinar ambos'}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy || remoteCount < 0}
-            onClick={() => setConfirmCloud(true)}
-          >
-            <Cloud />
-            Usar solo la nube
-          </Button>
+          {!cloudEmpty && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy || cloudUnknown}
+              onClick={() => setConfirmCloud(true)}
+            >
+              <Cloud />
+              Usar solo la nube
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
             disabled={busy}
             onClick={() => void signOut(false)}
           >
-            Ahora no
+            Ahora no, conservar aquí
           </Button>
         </div>
 
         <p className="text-xs text-muted-foreground">
-          «Usar solo la nube» borra los datos locales de este navegador. No afecta a los
-          datos que ya estén en la nube.
+          {cloudEmpty
+            ? 'Tus documentos siguen en este equipo. «Ahora no» cierra la sesión sin borrarlos.'
+            : '«Usar solo la nube» borra los datos locales de este navegador. No afecta a los datos que ya estén en la nube.'}
         </p>
       </DialogContent>
 
-      <ConfirmDialog
-        open={confirmCloud}
-        onOpenChange={setConfirmCloud}
-        title="Borrar los datos de este equipo"
-        description="Se borrarán el borrador, el historial y la empresa guardados en este navegador. Los datos de la nube no se tocan."
-        confirmLabel="Borrar y usar la nube"
-        destructive
-        onConfirm={() => {
-          setConfirmCloud(false)
-          void resolveMerge('cloud')
-        }}
-      />
+      {!cloudEmpty && (
+        <ConfirmDialog
+          open={confirmCloud}
+          onOpenChange={setConfirmCloud}
+          title="Borrar los datos de este equipo"
+          description="Se borrarán el borrador, el historial y la empresa guardados en este navegador. Los datos de la nube no se tocan."
+          confirmLabel="Borrar y usar la nube"
+          destructive
+          onConfirm={() => {
+            setConfirmCloud(false)
+            void resolveMerge('cloud')
+          }}
+        />
+      )}
     </Dialog>
   )
 }

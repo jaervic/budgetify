@@ -132,29 +132,49 @@ export function ProductsPanel() {
 
   return (
     <div className="grid gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <Button ref={addProductRef} type="button" size="sm" onClick={handleAdd}>
-          <Plus />
-          Nuevo producto
-        </Button>
-        {missingDefaults > 0 && (
-          <Button type="button" size="sm" variant="outline" onClick={handleMergeDefaults}>
-            <PackagePlus />
-            Completar catálogo ({missingDefaults})
+      <div className="grid gap-2">
+        <div className="grid gap-2 sm:flex sm:flex-wrap">
+          <Button
+            ref={addProductRef}
+            type="button"
+            size="sm"
+            className="h-10 w-full sm:h-9 sm:w-auto"
+            onClick={handleAdd}
+          >
+            <Plus />
+            Nuevo producto
           </Button>
-        )}
-        <div className="w-full sm:w-64">
-          <Input
-            className="h-10 text-sm"
-            placeholder="Buscar código, descripción o categoría…"
-            aria-label="Buscar productos"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
+          {missingDefaults > 0 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-10 w-full sm:h-9 sm:w-auto"
+              aria-label={`Completar catálogo (${missingDefaults} productos)`}
+              onClick={handleMergeDefaults}
+            >
+              <PackagePlus />
+              <span className="sm:hidden">Completar ({missingDefaults})</span>
+              <span className="hidden sm:inline">
+                Completar catálogo ({missingDefaults})
+              </span>
+            </Button>
+          )}
         </div>
-        <span className="text-sm text-muted-foreground" aria-live="polite">
-          {visible.length} de {products.length} productos
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full sm:w-64">
+            <Input
+              className="h-10 text-sm"
+              placeholder="Buscar código, descripción o categoría…"
+              aria-label="Buscar productos"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </div>
+          <span className="text-sm text-muted-foreground" aria-live="polite">
+            {visible.length} de {products.length} productos
+          </span>
+        </div>
       </div>
 
       <div

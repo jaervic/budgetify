@@ -200,6 +200,16 @@ describe('motor de sincronización (servidor en memoria)', () => {
 
   it('sube los datos locales, descarga los remotos y resuelve conflictos', async () => {
     const local = storedBudget('saved_local', '2026-10-01T10:00:00.000Z', 'Ana local')
+    const local2 = storedBudget(
+      'saved_local_2',
+      '2026-10-02T10:00:00.000Z',
+      'Paciente local 2',
+    )
+    const local3 = storedBudget(
+      'saved_local_3',
+      '2026-10-03T10:00:00.000Z',
+      'Paciente local 3',
+    )
     useBudgetStore.setState({
       clinic: { ...cloneDefaultClinic(), name: 'Clínica local' },
       catalog: cloneDefaultCatalog(),
@@ -215,7 +225,7 @@ describe('motor de sincronización (servidor en memoria)', () => {
         notes: [...createEmptyBudget().notes],
       },
       quote: { ...createEmptyQuote(), terms: DEFAULT_QUOTE_TERMS },
-      history: [local],
+      history: [local, local2, local3],
     })
 
     initSync()
@@ -233,8 +243,10 @@ describe('motor de sincronización (servidor en memoria)', () => {
 
     expect(readOwner().userId).toBe('user-1')
     expect(fake.profileWrites).toBe(1)
-    expect(fake.documentWrites).toBe(1)
-    expect(fake.remote.documents.map((row) => row.id)).toContain('saved_local')
+    expect(fake.documentWrites).toBe(3)
+    expect(fake.remote.documents.map((row) => row.id)).toEqual(
+      expect.arrayContaining(['saved_local', 'saved_local_2', 'saved_local_3']),
+    )
     expect(fake.draftWrites).toBe(1) // solo el presupuesto tiene datos
 
     // Llega un documento de otro equipo.

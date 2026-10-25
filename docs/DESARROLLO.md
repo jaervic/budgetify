@@ -298,6 +298,9 @@ pendientes permiten reconstruir la subida en el siguiente arranque.
   los números del historial. Si dos equipos offline emitieron el mismo número, se avisa
   para renumerar; no se renumeran solos.
 - Los documentos descartados por el tope de 100 se borran también en la nube.
+- Si la nube está vacía, el diálogo de adopción solo ofrece **subir** los documentos
+  locales; no permite descartarlos por error. Si hay datos remotos, ofrece combinar o
+  usar solo la nube, con confirmación destructiva.
 
 ### Equipos compartidos
 

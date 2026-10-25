@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import {
   CloudOff,
+  FolderOpen,
   KeyRound,
   LogOut,
   Mail,
@@ -32,6 +33,7 @@ import {
   signUpWithPassword,
   syncNow,
 } from '@/lib/sync/engine'
+import { useBudgetStore } from '@/store/useBudgetStore'
 import { useSyncStore } from '@/store/useSyncStore'
 
 function statusText(status: string, pending: number): string {
@@ -61,6 +63,7 @@ export function AccountDialog() {
   const pending = useSyncStore((state) => state.pending)
   const lastSyncedAt = useSyncStore((state) => state.lastSyncedAt)
   const setStoreError = useSyncStore((state) => state.setError)
+  const localDocuments = useBudgetStore((state) => state.history.length)
 
   const [mode, setMode] = useState<AuthMode>('signin')
   const [sent, setSent] = useState<SentView>(null)
@@ -243,9 +246,11 @@ export function AccountDialog() {
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Tu cuenta</DialogTitle>
+            <DialogTitle>{user ? 'Tu cuenta' : 'Iniciar sesión'}</DialogTitle>
             <DialogDescription>
-              Sincroniza el historial y la empresa entre tu teléfono y tu computadora.
+              {user
+                ? 'Sincroniza el historial y la empresa entre tu teléfono y tu computadora.'
+                : 'Entra o crea una cuenta para sincronizar el historial y la empresa.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -415,6 +420,20 @@ export function AccountDialog() {
                     ? 'Crea una cuenta con tu correo y una contraseña.'
                     : 'Escribe tu correo y te enviamos un enlace para cambiar la contraseña.'}
               </p>
+
+              {localDocuments > 0 && (
+                <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+                  <FolderOpen className="mt-0.5 size-4 shrink-0 text-primary" />
+                  <p>
+                    Tienes {localDocuments}{' '}
+                    {localDocuments === 1
+                      ? 'documento guardado'
+                      : 'documentos guardados'}{' '}
+                    en este equipo. Al entrar con tu cuenta podrás subirlos o
+                    combinarlos; no se borrarán.
+                  </p>
+                </div>
+              )}
 
               <div className="grid gap-2">
                 <Label htmlFor="sync-email">Correo electrónico</Label>

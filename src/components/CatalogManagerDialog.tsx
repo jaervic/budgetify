@@ -79,8 +79,14 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={handleExport}>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-10 w-full sm:h-9 sm:w-auto"
+            onClick={handleExport}
+          >
             <Download />
             Guardar copia
           </Button>
@@ -88,12 +94,19 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
             type="button"
             variant="outline"
             size="sm"
+            className="h-10 w-full sm:h-9 sm:w-auto"
             onClick={() => fileInput.current?.click()}
           >
             <Upload />
             Restaurar copia
           </Button>
-          <Button type="button" variant="outline" size="sm" onClick={() => setConfirmResetOpen(true)}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="col-span-2 h-10 w-full sm:col-span-1 sm:h-9 sm:w-auto"
+            onClick={() => setConfirmResetOpen(true)}
+          >
             <RotateCcw />
             Volver a fábrica
           </Button>
@@ -125,7 +138,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
         </div>
 
         <Tabs defaultValue="services">
-          <TabsList className="w-full overflow-x-auto">
+          <TabsList className="catalog-tabs">
             <TabsTrigger value="services">Servicios</TabsTrigger>
             <TabsTrigger value="products">Productos</TabsTrigger>
             <TabsTrigger value="categories">Categorías</TabsTrigger>

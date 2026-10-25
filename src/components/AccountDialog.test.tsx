@@ -3,7 +3,10 @@ import { cleanup, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AccountDialog } from './AccountDialog'
+import { createEmptyBudget } from '@/data/defaults'
+import { useBudgetStore } from '@/store/useBudgetStore'
 import { useSyncStore } from '@/store/useSyncStore'
+import type { SavedDocument } from '@/types'
 
 const auth = vi.hoisted(() => ({
   signIn: vi.fn(async () => {}),
@@ -45,9 +48,19 @@ function openSignedOut() {
   })
 }
 
+function storedDocuments(count: number): SavedDocument[] {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `saved_test_${index}`,
+    savedAt: `2026-10-0${index + 1}T10:00:00.000Z`,
+    kind: 'budget' as const,
+    budget: createEmptyBudget(),
+  }))
+}
+
 describe('AccountDialog', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    useBudgetStore.setState({ history: [] })
     openSignedOut()
   })
 
@@ -62,6 +75,14 @@ describe('AccountDialog', () => {
       pending: 0,
       lastSyncedAt: null,
     })
+    useBudgetStore.setState({ history: [] })
+  })
+
+  it('avisa de los documentos locales antes de registrarse', () => {
+    useBudgetStore.setState({ history: storedDocuments(3) })
+    render(<AccountDialog />)
+
+    expect(screen.getByText(/Tienes 3 documentos guardados/)).toBeTruthy()
   })
 
   it('entra con correo y contraseña', async () => {

@@ -26,7 +26,7 @@ export function AccountButton() {
 
   if (!enabled) return null
 
-  const label = user ? 'Cuenta' : 'Sincronizar'
+  const label = user ? 'Cuenta' : 'Iniciar sesión'
   const statusDescription =
     status === 'syncing'
       ? 'sincronizando'
@@ -39,7 +39,7 @@ export function AccountButton() {
     ? `Cuenta de ${user.email ?? 'usuario'}, ${statusDescription}${
         pending > 0 ? `, ${pending} cambios pendientes` : ''
       }`
-    : 'Sincroniza en tu teléfono y computadora'
+    : 'Inicia sesión para sincronizar en tu teléfono y computadora'
 
   return (
     <Button

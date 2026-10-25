@@ -122,7 +122,7 @@ con tu nombre y tu título (“Od. Ana Rojas”) y debajo tu área de práctica.
 6. La primera vez, entra en **“Empresa”**: elige si los documentos son de una **clínica** o
    de un **profesional independiente**, escribe tu **título** (Dr., Dra., Od., Lcda.…) y tu
    **área de práctica**, y carga el RIF, el logo, la firma y el sello.
-7. Si quieres continuar en otro equipo, pulsa **“Sincronizar”** (arriba). Puedes crear
+7. Si quieres continuar en otro equipo, pulsa **“Iniciar sesión”** (arriba). Puedes crear
    una cuenta con **correo y contraseña** o pedir un **enlace mágico** por correo. La app
    sigue funcionando sin conexión; los cambios se suben cuando vuelve la red.
 
@@ -147,9 +147,16 @@ acceso o recuperación pasan por el SMTP configurado (por ejemplo, Gmail). Puede
 sesión, borrar la cuenta y todos sus datos desde **Cuenta**.
 
 **¿Cómo entro desde otro equipo?**
-Pulsa **“Sincronizar”** y entra con el mismo correo y contraseña. Si creaste la cuenta con
-un enlace mágico y nunca le pusiste contraseña, entra con otro enlace y usa **Cuenta →
+Pulsa **“Iniciar sesión”** y entra con el mismo correo y contraseña. Si creaste la cuenta
+con un enlace mágico y nunca le pusiste contraseña, entra con otro enlace y usa **Cuenta →
 Cambiar contraseña** para crear una.
+
+**Ya usaba la app sin cuenta y tengo presupuestos en el historial. ¿Qué pasa si me registro?**
+Regístrate en el **mismo navegador y equipo** donde están guardados. Después de crear la
+cuenta, la app te preguntará qué hacer: elige **“Subir mis documentos”** o
+**“Combinar ambos”**. No elijas **“Usar solo la nube”** si el historial local es lo que
+quieres conservar. Si cambias de equipo, usa **“Descargar”** y **“Abrir”**, o registra
+primero el equipo que tiene los documentos.
 
 **¿Olvidé mi contraseña?**
 En **Cuenta → ¿Olvidaste tu contraseña?** escribes tu correo y recibes un enlace para
