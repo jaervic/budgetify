@@ -13,9 +13,9 @@ cambias a la modalidad de **cotización** para escoger productos del catálogo, 
 
 ### ▶️ Pruébala ahora: **[budgetify-silk.vercel.app](https://budgetify-silk.vercel.app)**
 
-Se abre directo en el navegador, también en el teléfono. *(Es una demostración pública: no
-escribas datos reales de pacientes en ella. La sincronización con cuenta está desactivada
-en la demo; para probarla, despliega tu propia copia.)*
+Se abre directo en el navegador, también en el teléfono. *(Es una instancia pública de
+demostración: no escribas datos reales de pacientes en ella. La cuenta está activa y
+sincroniza con Supabase; para producción, despliega tu propia copia.)*
 
 ![Pantalla de edición](docs/capturas/edicion.png)
 
@@ -226,9 +226,9 @@ pero **no sustituye tu criterio médico ni administrativo**.
 - Los datos quedan guardados **en este navegador**, incluido el **historial** de copias. En
   una computadora compartida, usa **Cuenta → Cerrar sesión → borrar los datos de este
   equipo**, o pulsa **Nuevo presupuesto** al terminar y vacía el historial.
-- En la **demo pública** la sincronización está desactivada para no almacenar datos reales
-  de pacientes. Para usar la cuenta, despliega tu propia instancia (ver
-  [documentación técnica](docs/DESARROLLO.md)).
+- En esta **instancia pública de demostración** la cuenta está activa y los datos se
+  guardan en Supabase. No uses datos reales de pacientes aquí; para producción, despliega
+  tu propia copia (ver [documentación técnica](docs/DESARROLLO.md)).
 - Si vas a operar una instancia con cuentas, adapta la
   **[plantilla de política de privacidad](docs/PRIVACIDAD.md)**.
 - Detalles y cómo reportar un problema: **[política de seguridad](SECURITY.md)**.
@@ -260,8 +260,9 @@ estimates you can reopen, and every destructive action offers an undo.
 
 It works **without an account** and offline. An **optional account** (email + password,
 or a magic email link) syncs the history, company data and catalogue across phone and
-computer through Supabase, with per-user row-level security. The public demo keeps sync
-disabled so no real patient data is stored.
+computer through Supabase, with per-user row-level security. The public demo has the
+optional account enabled; do not enter real patient data there. For production, deploy
+your own copy with your own Supabase project.
 
 **Live demo:** [budgetify-silk.vercel.app](https://budgetify-silk.vercel.app)
 
