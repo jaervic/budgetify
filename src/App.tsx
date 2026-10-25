@@ -7,6 +7,7 @@ import { BudgetWorkspace } from '@/components/BudgetWorkspace'
 import { CatalogManagerDialog } from '@/components/CatalogManagerDialog'
 import { ClinicDialog } from '@/components/ClinicDialog'
 import { DocumentModeSwitch } from '@/components/DocumentModeSwitch'
+import { HeaderMenu } from '@/components/HeaderMenu'
 import { HistoryDialog } from '@/components/HistoryDialog'
 import { MergeDialog } from '@/components/MergeDialog'
 import { MobileActionBar } from '@/components/MobileActionBar'
@@ -96,11 +97,16 @@ export default function App() {
           <div className="flex items-center gap-1.5">
             <AccountButton />
             <ThemeToggle />
+            <HeaderMenu
+              onOpenClinic={() => setClinicOpen(true)}
+              onOpenHistory={() => setHistoryOpen(true)}
+              onOpenCatalog={() => setManagerOpen(true)}
+            />
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="h-10 sm:h-9"
+              className="hidden h-10 lg:inline-flex lg:h-9"
               aria-label="Datos de la empresa"
               onClick={() => setClinicOpen(true)}
             >
@@ -113,7 +119,7 @@ export default function App() {
               type="button"
               variant="outline"
               size="sm"
-              className="h-10 sm:h-9"
+              className="hidden h-10 lg:inline-flex lg:h-9"
               aria-label="Historial"
               onClick={() => setHistoryOpen(true)}
             >
@@ -124,7 +130,7 @@ export default function App() {
               type="button"
               variant="outline"
               size="sm"
-              className="h-10 sm:h-9"
+              className="hidden h-10 lg:inline-flex lg:h-9"
               onClick={() => setManagerOpen(true)}
             >
               <Settings2 />

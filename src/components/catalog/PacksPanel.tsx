@@ -19,7 +19,7 @@ export function PacksPanel() {
       <Button
         type="button"
         size="sm"
-        className="w-fit"
+        className="h-11 w-full sm:h-9 sm:w-fit"
         onClick={() => addPack({ name: 'Nuevo paquete', description: '', services: [] })}
       >
         <Plus />
@@ -70,7 +70,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
   const selected = new Set(pack.services.map((entry) => entry.serviceId))
 
   return (
-    <div className="grid gap-2 rounded-lg border p-3">
+    <div className="grid gap-2 rounded-lg border p-3 transition-colors hover:border-primary/30">
       <div className="flex items-center gap-2">
         <Input
           className="font-medium"
@@ -84,7 +84,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
           variant="ghost"
           size="icon-sm"
           aria-label="Eliminar paquete"
-          className="text-destructive hover:text-destructive"
+          className="size-10 text-destructive hover:text-destructive sm:size-9"
           onClick={() =>
             withUndo(
               { catalog: useBudgetStore.getState().catalog },
@@ -110,7 +110,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
           {services.map((service) => (
             <label
               key={service.id}
-              className="flex items-center gap-2 rounded px-1 py-0.5 text-sm hover:bg-accent"
+              className="flex min-h-9 cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-accent"
             >
               <input
                 type="checkbox"

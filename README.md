@@ -126,6 +126,9 @@ con tu nombre y tu título (“Od. Ana Rojas”) y debajo tu área de práctica.
    una cuenta con **correo y contraseña** o pedir un **enlace mágico** por correo. La app
    sigue funcionando sin conexión; los cambios se suben cuando vuelve la red.
 
+En móvil o tablet, **Empresa**, **Historial** y **Catálogo y precios** están dentro del
+menú **Más opciones** (⋮) de la cabecera.
+
 ## Preguntas frecuentes
 
 **¿Necesito internet?**

@@ -33,10 +33,11 @@ export function ServicesPanel() {
 
   return (
     <div className="grid gap-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="grid gap-2">
         <Button
           type="button"
           size="sm"
+          className="h-11 w-full sm:h-9 sm:w-auto"
           onClick={() =>
             addCatalogService({
               category: categories[0] ?? 'General',
@@ -49,19 +50,21 @@ export function ServicesPanel() {
           <Plus />
           Nuevo servicio
         </Button>
-        <div className="w-full sm:w-64">
-          <SpecialtySelect
-            specialties={catalog.specialties}
-            value={areaFilter}
-            onChange={setAreaFilter}
-            noneLabel="Todas las áreas"
-            className="h-10 text-sm"
-            ariaLabel="Filtrar servicios por área"
-          />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="w-full sm:w-64">
+            <SpecialtySelect
+              specialties={catalog.specialties}
+              value={areaFilter}
+              onChange={setAreaFilter}
+              noneLabel="Todas las áreas"
+              className="h-11 text-sm sm:h-10"
+              ariaLabel="Filtrar servicios por área"
+            />
+          </div>
+          <span className="text-sm text-muted-foreground" aria-live="polite">
+            {visible.length} de {catalog.services.length} servicios
+          </span>
         </div>
-        <span className="text-sm text-muted-foreground" aria-live="polite">
-          {visible.length} de {catalog.services.length} servicios
-        </span>
       </div>
 
       <ScrollArea className="h-[42vh] pr-3">
@@ -72,7 +75,10 @@ export function ServicesPanel() {
             </p>
           )}
           {visible.map((service) => (
-            <div key={service.id} className="grid gap-2 rounded-lg border p-3">
+            <div
+              key={service.id}
+              className="grid gap-2 rounded-lg border p-3 transition-colors hover:border-primary/30"
+            >
               <div className="flex items-center gap-2">
                 <Input
                   className="font-medium"
@@ -88,7 +94,7 @@ export function ServicesPanel() {
                   variant="ghost"
                   size="icon-sm"
                   aria-label="Eliminar servicio"
-                  className="text-destructive hover:text-destructive"
+                  className="size-10 text-destructive hover:text-destructive sm:size-9"
                   onClick={() =>
                     withUndo(
                       { catalog: useBudgetStore.getState().catalog },

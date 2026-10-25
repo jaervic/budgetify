@@ -40,8 +40,10 @@ export function CategoriesPanel() {
 
   return (
     <div className="grid gap-3">
-      <div className="flex items-center gap-2">
+      <div className="grid gap-2 sm:flex sm:items-center">
         <Input
+          className="h-11 sm:h-10"
+          aria-label="Nueva categoría"
           placeholder="Nueva categoría (ej. Consulta, Emergencia…)"
           maxLength={LIMITS.category}
           value={draft}
@@ -50,7 +52,12 @@ export function CategoriesPanel() {
             if (event.key === 'Enter') add()
           }}
         />
-        <Button type="button" size="sm" onClick={add}>
+        <Button
+          type="button"
+          size="sm"
+          className="h-11 w-full sm:h-9 sm:w-auto"
+          onClick={add}
+        >
           <Plus />
           Añadir
         </Button>
@@ -123,8 +130,10 @@ function CategoryRow({
   }
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border p-2">
+    <div className="grid gap-2 rounded-lg border p-2 transition-colors hover:border-primary/30 sm:flex sm:items-center">
       <Input
+        className="h-11 sm:h-10"
+        aria-label="Nombre de la categoría"
         value={value}
         maxLength={LIMITS.category}
         onChange={(event) => setValue(event.target.value)}
@@ -133,36 +142,40 @@ function CategoryRow({
           if (event.key === 'Enter') event.currentTarget.blur()
         }}
       />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        aria-label="Subir categoría"
-        disabled={!canMoveUp}
-        onClick={() => onMove(-1)}
-      >
-        <ChevronUp />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        aria-label="Bajar categoría"
-        disabled={!canMoveDown}
-        onClick={() => onMove(1)}
-      >
-        <ChevronDown />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        aria-label="Eliminar categoría"
-        className="text-destructive hover:text-destructive"
-        onClick={onRemove}
-      >
-        <Trash2 />
-      </Button>
+      <div className="flex justify-end gap-1">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Subir categoría"
+          className="size-10 sm:size-9"
+          disabled={!canMoveUp}
+          onClick={() => onMove(-1)}
+        >
+          <ChevronUp />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Bajar categoría"
+          className="size-10 sm:size-9"
+          disabled={!canMoveDown}
+          onClick={() => onMove(1)}
+        >
+          <ChevronDown />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Eliminar categoría"
+          className="size-10 text-destructive hover:text-destructive sm:size-9"
+          onClick={onRemove}
+        >
+          <Trash2 />
+        </Button>
+      </div>
     </div>
   )
 }
