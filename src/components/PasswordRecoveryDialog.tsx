@@ -111,15 +111,18 @@ export function PasswordRecoveryDialog() {
           </div>
         ) : (
           <form className="grid gap-3" onSubmit={handleSubmit}>
-            <PasswordInput
-              id="recovery-password"
-              label="Contraseña nueva"
-              value={password}
-              onChange={setPassword}
-              autoComplete="new-password"
-              minLength={8}
-              disabled={busy}
-            />
+            <div className="grid gap-1">
+              <PasswordInput
+                id="recovery-password"
+                label="Contraseña nueva"
+                value={password}
+                onChange={setPassword}
+                autoComplete="new-password"
+                minLength={8}
+                disabled={busy}
+              />
+              <p className="text-sm text-muted-foreground">Mínimo 8 caracteres.</p>
+            </div>
             <PasswordInput
               id="recovery-confirm"
               label="Repite la contraseña"

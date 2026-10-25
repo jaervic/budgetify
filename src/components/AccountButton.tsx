@@ -46,6 +46,7 @@ export function AccountButton() {
       type="button"
       variant="outline"
       size="sm"
+      className="h-10 sm:h-9"
       aria-label={description}
       onClick={() => setAccountOpen(true)}
     >

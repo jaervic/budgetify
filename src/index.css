@@ -87,6 +87,7 @@
     }
   body {
     @apply bg-background text-foreground;
+    font-variant-numeric: tabular-nums;
     }
   html {
     @apply font-sans;
@@ -121,12 +122,12 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   width: 100%;
-  height: auto !important;
+  height: auto;
   gap: 0.25rem;
 }
 
 .catalog-tabs [data-slot='tabs-trigger'] {
-  height: 2.5rem;
+  height: 2.75rem;
 }
 
 @media (min-width: 640px) {
@@ -138,5 +139,23 @@
 
   .catalog-tabs [data-slot='tabs-trigger'] {
     height: calc(100% - 1px);
+  }
+}
+
+/* Respeta a quien prefiere menos movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }

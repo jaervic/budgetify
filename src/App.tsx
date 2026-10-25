@@ -100,6 +100,7 @@ export default function App() {
               type="button"
               variant="outline"
               size="sm"
+              className="h-10 sm:h-9"
               aria-label="Datos de la empresa"
               onClick={() => setClinicOpen(true)}
             >
@@ -112,6 +113,7 @@ export default function App() {
               type="button"
               variant="outline"
               size="sm"
+              className="h-10 sm:h-9"
               aria-label="Historial"
               onClick={() => setHistoryOpen(true)}
             >
@@ -122,6 +124,7 @@ export default function App() {
               type="button"
               variant="outline"
               size="sm"
+              className="h-10 sm:h-9"
               onClick={() => setManagerOpen(true)}
             >
               <Settings2 />

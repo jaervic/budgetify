@@ -82,7 +82,7 @@ export function MergeDialog() {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Al combinar, la empresa y el catálogo se mezclan campo a campo; lo que exista
           solo en la nube se conserva.
         </p>
@@ -122,7 +122,7 @@ export function MergeDialog() {
           </Button>
         </div>
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           {cloudEmpty
             ? 'Tus documentos siguen en este equipo. «Ahora no» cierra la sesión sin borrarlos.'
             : '«Usar solo la nube» borra los datos locales de este navegador. No afecta a los datos que ya estén en la nube.'}

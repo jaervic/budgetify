@@ -22,7 +22,7 @@ const UNITS = ['UND', 'CAJA', 'PAQ', 'PAR', 'FRASCO', 'TUBO', 'ROLLO', 'KIT', 'A
 
 const chipClass = (active: boolean) =>
   cn(
-    'shrink-0 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
+    'shrink-0 rounded-full border px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 min-h-11',
     active
       ? 'border-primary bg-primary text-primary-foreground'
       : 'border-border bg-background text-muted-foreground hover:border-primary/40 hover:text-foreground',
@@ -138,7 +138,7 @@ export function ProductsPanel() {
             ref={addProductRef}
             type="button"
             size="sm"
-            className="h-10 w-full sm:h-9 sm:w-auto"
+            className="h-11 w-full sm:h-9 sm:w-auto"
             onClick={handleAdd}
           >
             <Plus />
@@ -149,7 +149,7 @@ export function ProductsPanel() {
               type="button"
               size="sm"
               variant="outline"
-              className="h-10 w-full sm:h-9 sm:w-auto"
+              className="h-11 w-full sm:h-9 sm:w-auto"
               aria-label={`Completar catálogo (${missingDefaults} productos)`}
               onClick={handleMergeDefaults}
             >
@@ -164,7 +164,7 @@ export function ProductsPanel() {
         <div className="flex flex-wrap items-center gap-2">
           <div className="w-full sm:w-64">
             <Input
-              className="h-10 text-sm"
+              className="h-11 sm:h-10"
               placeholder="Buscar código, descripción o categoría…"
               aria-label="Buscar productos"
               value={query}
@@ -255,12 +255,12 @@ export function ProductsPanel() {
                   }}
                   role="listitem"
                   className={cn(
-                    'grid gap-2 rounded-lg border p-3',
+                    'grid grid-cols-2 gap-3 rounded-lg border p-3 transition-colors hover:border-primary/30',
                     'lg:items-center lg:gap-0 lg:px-0 lg:py-0',
                     PRODUCT_GRID,
                   )}
                 >
-                <div className="grid gap-1 lg:px-3 lg:py-2">
+                <div className="grid gap-1 max-lg:order-1 lg:px-3 lg:py-2">
                   <span className="text-sm text-muted-foreground lg:hidden">Código</span>
                   <Input
                     className="h-10"
@@ -274,7 +274,7 @@ export function ProductsPanel() {
                   />
                 </div>
 
-                <div className="grid gap-1 lg:px-3 lg:py-2">
+                <div className="grid gap-1 max-lg:order-3 max-lg:col-span-2 lg:px-3 lg:py-2">
                   <span className="text-sm text-muted-foreground lg:hidden">
                     Descripción
                   </span>
@@ -293,7 +293,7 @@ export function ProductsPanel() {
                   />
                 </div>
 
-                <div className="grid gap-1 lg:px-3 lg:py-2">
+                <div className="grid gap-1 max-lg:order-2 lg:px-3 lg:py-2">
                   <span className="text-sm text-muted-foreground lg:hidden">
                     Categoría
                   </span>
@@ -312,7 +312,7 @@ export function ProductsPanel() {
                   />
                 </div>
 
-                <div className="grid gap-1 lg:px-3 lg:py-2">
+                <div className="grid gap-1 max-lg:order-4 lg:px-3 lg:py-2">
                   <span className="text-sm text-muted-foreground lg:hidden">Unidad</span>
                   <Input
                     className="h-10 text-center"
@@ -327,7 +327,7 @@ export function ProductsPanel() {
                   />
                 </div>
 
-                <div className="grid gap-1 lg:px-3 lg:py-2">
+                <div className="grid gap-1 max-lg:order-5 lg:px-3 lg:py-2">
                   <span className="text-sm text-muted-foreground lg:hidden">
                     Precio USD
                   </span>
@@ -342,7 +342,7 @@ export function ProductsPanel() {
                   />
                 </div>
 
-                <div className="grid gap-1 lg:px-3 lg:py-2">
+                <div className="grid gap-1 max-lg:order-6 lg:px-3 lg:py-2">
                   <span className="text-sm text-muted-foreground lg:hidden">% IVA</span>
                   <NumberInput
                     className="h-10"
@@ -357,12 +357,12 @@ export function ProductsPanel() {
                   />
                 </div>
 
-                <div className="flex justify-end lg:px-2 lg:py-1">
+                <div className="flex justify-end max-lg:order-7 lg:px-2 lg:py-1">
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    className="text-destructive hover:text-destructive"
+                    className="size-10 text-destructive hover:text-destructive lg:size-9"
                     aria-label={`Eliminar ${product.description || 'producto'}`}
                     onClick={() => handleRemove(product.id, product.description)}
                   >

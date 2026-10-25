@@ -263,10 +263,10 @@ export function AccountDialog() {
             <div className="grid gap-4">
               <div className="rounded-lg border p-3">
                 <p className="font-medium">{user.email ?? 'Cuenta sin correo'}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground" aria-live="polite">
                   {statusText(status, pending)}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {lastSyncedAt
                     ? `Última sincronización: ${formatTimestamp(lastSyncedAt)}`
                     : 'Todavía no se ha sincronizado.'}
@@ -323,15 +323,20 @@ export function AccountDialog() {
                     Si entraste con un enlace por correo, aquí puedes crear una contraseña
                     para entrar directamente la próxima vez.
                   </p>
-                  <PasswordInput
-                    id="new-password"
-                    label="Nueva contraseña"
-                    value={newPassword}
-                    onChange={setNewPassword}
-                    autoComplete="new-password"
-                    minLength={8}
-                    disabled={busy}
-                  />
+                  <div className="grid gap-1">
+                    <PasswordInput
+                      id="new-password"
+                      label="Nueva contraseña"
+                      value={newPassword}
+                      onChange={setNewPassword}
+                      autoComplete="new-password"
+                      minLength={8}
+                      disabled={busy}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Mínimo 8 caracteres.
+                    </p>
+                  </div>
                   <PasswordInput
                     id="confirm-new-password"
                     label="Repite la contraseña"
@@ -363,7 +368,7 @@ export function AccountDialog() {
                 </form>
               )}
 
-              <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3 text-sm leading-relaxed text-muted-foreground">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0" />
                 <p>
                   Los datos viajan cifrados y se guardan en Supabase para tu cuenta. La
@@ -422,7 +427,7 @@ export function AccountDialog() {
               </p>
 
               {localDocuments > 0 && (
-                <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
+                <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm leading-relaxed">
                   <FolderOpen className="mt-0.5 size-4 shrink-0 text-primary" />
                   <p>
                     Tienes {localDocuments}{' '}
@@ -449,15 +454,20 @@ export function AccountDialog() {
               </div>
 
               {mode !== 'reset' && (
-                <PasswordInput
-                  id="sync-password"
-                  label="Contraseña"
-                  value={password}
-                  onChange={setPassword}
-                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                  minLength={mode === 'signup' ? 8 : undefined}
-                  disabled={busy}
-                />
+                <div className="grid gap-1">
+                  <PasswordInput
+                    id="sync-password"
+                    label="Contraseña"
+                    value={password}
+                    onChange={setPassword}
+                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                    minLength={mode === 'signup' ? 8 : undefined}
+                    disabled={busy}
+                  />
+                  {mode === 'signup' && (
+                    <p className="text-sm text-muted-foreground">Mínimo 8 caracteres.</p>
+                  )}
+                </div>
               )}
 
               {mode === 'signup' && (
@@ -553,16 +563,16 @@ export function AccountDialog() {
                     onClick={() => void handleMagicLink()}
                   >
                     <Mail />
-                    Enviar enlace de acceso por correo
+                    Entrar con enlace por correo
                   </Button>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     El enlace mágico usa el correo configurado en Supabase. No necesitas
                     contraseña.
                   </p>
                 </>
               )}
 
-              <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2 rounded-lg bg-muted/50 p-3 text-sm leading-relaxed text-muted-foreground">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0" />
                 <p>
                   Al usar una cuenta aceptas que guardemos tu correo y los documentos
@@ -572,7 +582,7 @@ export function AccountDialog() {
                   cuenta.
                 </p>
               </div>
-              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <CloudOff className="size-3.5" />
                 No uses datos reales de pacientes en una demo pública.
               </p>

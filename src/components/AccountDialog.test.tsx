@@ -119,7 +119,7 @@ describe('AccountDialog', () => {
 
     await userEvent.type(screen.getByLabelText('Correo electrónico'), 'ana@example.com')
     await userEvent.click(
-      screen.getByRole('button', { name: 'Enviar enlace de acceso por correo' }),
+      screen.getByRole('button', { name: 'Entrar con enlace por correo' }),
     )
 
     expect(auth.signIn).toHaveBeenCalledWith('ana@example.com')

@@ -84,7 +84,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
             type="button"
             variant="outline"
             size="sm"
-            className="h-10 w-full sm:h-9 sm:w-auto"
+            className="h-11 w-full sm:h-9 sm:w-auto"
             onClick={handleExport}
           >
             <Download />
@@ -94,7 +94,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
             type="button"
             variant="outline"
             size="sm"
-            className="h-10 w-full sm:h-9 sm:w-auto"
+            className="h-11 w-full sm:h-9 sm:w-auto"
             onClick={() => fileInput.current?.click()}
           >
             <Upload />
@@ -104,7 +104,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
             type="button"
             variant="outline"
             size="sm"
-            className="col-span-2 h-10 w-full sm:col-span-1 sm:h-9 sm:w-auto"
+            className="col-span-2 h-11 w-full sm:col-span-1 sm:h-9 sm:w-auto"
             onClick={() => setConfirmResetOpen(true)}
           >
             <RotateCcw />

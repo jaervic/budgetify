@@ -11,6 +11,7 @@ export function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon-sm"
+      className="size-10 sm:size-9"
       aria-label="Cambiar entre modo claro y oscuro"
       onClick={toggle}
     >
