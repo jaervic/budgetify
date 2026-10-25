@@ -89,7 +89,7 @@ export default function App() {
             </span>
             <div className="min-w-0">
               <h1 className="text-lg leading-tight font-semibold">Budgetify</h1>
-              <p className="hidden text-sm text-muted-foreground sm:block">
+              <p className="hidden text-sm text-muted-foreground md:block">
                 Presupuestos médicos y cotizaciones · gratis y sin instalar
               </p>
             </div>

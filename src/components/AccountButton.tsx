@@ -46,7 +46,7 @@ export function AccountButton() {
       type="button"
       variant="outline"
       size="sm"
-      className="h-10 lg:h-9"
+      className="h-10 sm:h-9"
       aria-label={description}
       onClick={() => setAccountOpen(true)}
     >
@@ -61,7 +61,7 @@ export function AccountButton() {
           />
         )}
       </span>
-      <span aria-hidden="true" className="hidden lg:inline">
+      <span aria-hidden="true" className="hidden sm:inline">
         {label}
       </span>
       {pending > 0 && (
