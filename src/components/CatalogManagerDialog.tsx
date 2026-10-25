@@ -68,10 +68,7 @@ export function CatalogManagerDialog({ open, onOpenChange }: CatalogManagerDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="max-h-[90vh] overflow-y-auto sm:max-w-3xl"
-        onInteractOutside={keepOpenForToast}
-      >
+      <DialogContent className="sm:max-w-3xl" onInteractOutside={keepOpenForToast}>
         <DialogHeader>
           <DialogTitle>Catálogo y precios</DialogTitle>
           <DialogDescription>

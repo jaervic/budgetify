@@ -44,7 +44,7 @@ export function CategoriesPanel() {
         <Input
           className="h-11 sm:h-10"
           aria-label="Nueva categoría"
-          placeholder="Nueva categoría (ej. Consulta, Emergencia…)"
+          placeholder="Nueva categoría (ej. Consulta)"
           maxLength={LIMITS.category}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}

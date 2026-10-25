@@ -51,6 +51,7 @@ export function MobileActionBar({ onViewPdf }: MobileActionBarProps) {
 
   return (
     <div
+      data-mobile-action-bar
       aria-hidden={hidden || undefined}
       className={cn(
         'fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 py-2 backdrop-blur transition-transform duration-150 lg:hidden',

@@ -159,3 +159,9 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Con un diálogo abierto, la barra fija de móvil no debe asomar por debajo. */
+body:has([data-slot='dialog-content'], [data-slot='alert-dialog-content'])
+  [data-mobile-action-bar] {
+  display: none;
+}

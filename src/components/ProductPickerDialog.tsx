@@ -283,7 +283,7 @@ function PickerContent({ onClose }: { onClose: () => void }) {
 export function ProductPickerDialog({ open, onOpenChange }: ProductPickerDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Agregar productos</DialogTitle>
           <DialogDescription>

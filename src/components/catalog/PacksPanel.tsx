@@ -118,7 +118,7 @@ function PackEditor({ pack, services, onChange, onRemove }: PackEditorProps) {
                 checked={selected.has(service.id)}
                 onChange={(event) => toggle(service.id, event.target.checked)}
               />
-              <span className="truncate">{service.label}</span>
+              <span className="line-clamp-2 min-w-0">{service.label}</span>
             </label>
           ))}
         </div>

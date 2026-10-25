@@ -17,4 +17,13 @@ test('en móvil agrupa las acciones secundarias en Más opciones', async ({ page
   await page.getByRole('menuitem', { name: 'Historial' }).click()
 
   await expect(page.getByRole('dialog', { name: 'Historial' })).toBeVisible()
+  await page.getByRole('button', { name: 'Cerrar' }).click()
+
+  await page.getByRole('button', { name: 'Más opciones' }).click()
+  await page.getByRole('menuitem', { name: 'Catálogo y precios' }).click()
+
+  await expect(page.getByRole('dialog', { name: 'Catálogo y precios' })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'Servicios' })).toBeVisible()
+  await expect(page.getByRole('tab', { name: 'Productos' })).toBeVisible()
+  await expect(page.locator('[data-mobile-action-bar]')).toBeHidden()
 })
