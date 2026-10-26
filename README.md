@@ -166,6 +166,13 @@ En **Cuenta → ¿Olvidaste tu contraseña?** escribes tu correo y recibes un en
 crear una nueva. Ese correo sale por el SMTP configurado (por ejemplo, Gmail). Si el
 enlace no llega, revisa spam o pide al administrador que restablezca la contraseña.
 
+**¿La cuenta da un error al cargar después de una actualización?**
+La app reintenta la descarga del módulo de la cuenta y, si aun así falla, muestra un
+aviso con un botón **“Reintentar”** en vez del error técnico. También puedes cerrar la
+PWA y abrirla desde el navegador, o hacer una recarga forzada. **No borres los datos del
+sitio**: ahí están tus presupuestos locales. Si el problema continúa, espera unos minutos
+y recarga; puede coincidir con el despliegue de una versión nueva.
+
 **¿Dónde quedan los presupuestos guardados?**
 En el navegador del equipo donde trabajas. Además del que estás editando, puedes archivar
 copias en **“Historial”** (se conservan las 100 últimas; al pasar de ahí se descartan las

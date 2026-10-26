@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AccountDialog } from './AccountDialog'
 import { createEmptyBudget } from '@/data/defaults'
+import { SUPABASE_LOAD_ERROR } from '@/lib/sync/client'
 import { useBudgetStore } from '@/store/useBudgetStore'
 import { useSyncStore } from '@/store/useSyncStore'
 import type { SavedDocument } from '@/types'
@@ -83,6 +84,14 @@ describe('AccountDialog', () => {
     render(<AccountDialog />)
 
     expect(screen.getByText(/Tienes 3 documentos guardados/)).toBeTruthy()
+  })
+
+  it('ofrece reintentar si no se pudo cargar el módulo de la cuenta', () => {
+    useSyncStore.setState({ error: SUPABASE_LOAD_ERROR })
+    render(<AccountDialog />)
+
+    expect(screen.getByRole('alert').textContent).toContain('No se pudo cargar')
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeTruthy()
   })
 
   it('entra con correo y contraseña', async () => {

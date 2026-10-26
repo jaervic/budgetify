@@ -16,6 +16,56 @@ import type { SavedDocument } from '@/types'
 
 let clientPromise: Promise<SupabaseClient> | null = null
 
+const MODULE_LOAD_RETRY_MS = 600
+
+/** Error comprensible cuando el navegador no puede descargar el chunk. */
+export const SUPABASE_LOAD_ERROR =
+  'No se pudo cargar el módulo de la cuenta. Revisa tu conexión y vuelve a intentarlo.'
+
+function messageOf(error: unknown): string | null {
+  if (error instanceof Error && error.message) return error.message
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = (error as { message: unknown }).message
+    if (typeof message === 'string' && message) return message
+  }
+  return null
+}
+
+/**
+ * Los navegadores no usan el mismo texto para un import dinámico fallido.
+ * Se reconoce también el mensaje propio para poder ofrecer el botón de recarga.
+ */
+export function isModuleLoadError(error: unknown): boolean {
+  const message = typeof error === 'string' ? error : messageOf(error)
+  if (!message) return false
+  return (
+    message === SUPABASE_LOAD_ERROR ||
+    /dynamically imported module|module script failed|error loading dynamically imported module/i.test(
+      message,
+    )
+  )
+}
+
+/**
+ * Descarga el cliente de Supabase. Un fallo de red puntual puede ocurrir
+ * justo cuando Vercel cambia de despliegue; se reintenta una vez. Después se
+ * devuelve un mensaje útil en vez de la URL interna del chunk.
+ */
+async function loadSupabaseModule() {
+  let lastError: unknown
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      return await import('@supabase/supabase-js')
+    } catch (error) {
+      lastError = error
+      if (attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, MODULE_LOAD_RETRY_MS))
+      }
+    }
+  }
+  throw new Error(SUPABASE_LOAD_ERROR, { cause: lastError })
+}
+
 /**
  * Carga Supabase solo cuando hace falta. El arranque sin cuenta no descarga
  * este chunk ni necesita red.
@@ -24,16 +74,24 @@ export function getSupabaseClient(): Promise<SupabaseClient> {
   if (!SYNC_CONFIGURED) {
     return Promise.reject(new Error('La sincronización no está configurada.'))
   }
-  clientPromise ??= import('@supabase/supabase-js').then(({ createClient }) =>
-    createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-      },
-      global: { headers: { 'x-application-name': 'budgetify' } },
-    }),
-  )
+  if (!clientPromise) {
+    clientPromise = loadSupabaseModule()
+      .then(({ createClient }) =>
+        createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+          },
+          global: { headers: { 'x-application-name': 'budgetify' } },
+        }),
+      )
+      .catch((error: unknown) => {
+        // Permite que un nuevo intento vuelva a descargar el módulo.
+        clientPromise = null
+        throw error
+      })
+  }
   return clientPromise
 }
 
@@ -291,12 +349,8 @@ export async function fetchRemoteCounts(userId: string): Promise<RemoteCounts> {
 }
 
 export function errorMessage(error: unknown): string {
-  if (error instanceof Error && error.message) return error.message
-  if (error && typeof error === 'object' && 'message' in error) {
-    const message = (error as { message: unknown }).message
-    if (typeof message === 'string' && message) return message
-  }
-  return 'No se pudo sincronizar. Inténtalo de nuevo.'
+  if (isModuleLoadError(error)) return SUPABASE_LOAD_ERROR
+  return messageOf(error) ?? 'No se pudo sincronizar. Inténtalo de nuevo.'
 }
 
 export function isOnline(): boolean {

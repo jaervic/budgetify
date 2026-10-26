@@ -23,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { formatTimestamp } from '@/lib/date'
+import { isModuleLoadError } from '@/lib/sync/client'
 import {
   changePassword,
   deleteAccount,
@@ -274,12 +275,21 @@ export function AccountDialog() {
               </div>
 
               {feedback && (
-                <p
-                  role="alert"
-                  className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
-                >
-                  {feedback}
-                </p>
+                <div className="grid gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                  <p role="alert">{feedback}</p>
+                  {isModuleLoadError(feedback) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-10 w-fit text-foreground"
+                      onClick={() => window.location.reload()}
+                    >
+                      <RefreshCw />
+                      Reintentar
+                    </Button>
+                  )}
+                </div>
               )}
 
               <div className="grid gap-2">
@@ -483,12 +493,21 @@ export function AccountDialog() {
               )}
 
               {feedback && (
-                <p
-                  role="alert"
-                  className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
-                >
-                  {feedback}
-                </p>
+                <div className="grid gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                  <p role="alert">{feedback}</p>
+                  {isModuleLoadError(feedback) && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-10 w-fit text-foreground"
+                      onClick={() => window.location.reload()}
+                    >
+                      <RefreshCw />
+                      Reintentar
+                    </Button>
+                  )}
+                </div>
               )}
 
               {info && (

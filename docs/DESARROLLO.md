@@ -269,7 +269,9 @@ pendientes permiten reconstruir la subida en el siguiente arranque.
 ### Flujo
 
 1. Al arrancar, si no hay sesión guardada ni un enlace de acceso/recuperación en la URL, no se descarga
-   el chunk de Supabase (`supabase-*.js`, excluido del precache de la PWA).
+   el chunk de Supabase (`supabase-*.js`, excluido del precache de la PWA). Si la descarga
+   falla, se reintenta una vez y se muestra un mensaje en español con opción de recargar;
+   nunca se enseña la URL interna del chunk.
 2. Con sesión, `pullRemote()` trae perfil, borradores y documentos cambiados desde el
    cursor (con 1 s de solapamiento). Todo se valida con Zod antes de aplicarlo.
 3. `applyRemoteSnapshot()` fusiona:
@@ -429,7 +431,10 @@ Los detalles de puesta en marcha y una lista de comprobación de RLS están en
   imprimir, compartir o ver el PDF.
 - El cliente de Supabase también es un chunk dinámico (`supabase-*.js`) y está excluido
   del precache de la PWA. Solo se descarga al abrir la cuenta o al volver de un enlace
-  mágico; después queda en caché.
+  mágico. Su ruta usa `NetworkFirst` (con caché de respaldo y solo respuestas `200`) para
+  no quedarse con un chunk roto de un despliegue anterior. `vite:preloadError` recarga una
+  vez los demás chunks obsoletos, pero no el de Supabase: ahí se prefiere reintentar para
+  no perder el correo y la contraseña escritos.
 - Los vendors grandes (React, Radix, formularios) se separan en chunks estables.
 
 ## 🧭 Decisiones de diseño
