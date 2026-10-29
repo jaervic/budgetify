@@ -23,15 +23,15 @@
     "@react-pdf/renderer": "^4.9.0",
     "@supabase/supabase-js": "^2.118.0",
     "class-variance-authority": "^0.7.1",
-    "cn": "^0.4.0",
+    "cn": "^0.5.0",
     "decimal.js": "^10.6.0",
-    "lucide-react": "^1.57.0",
+    "lucide-react": "^1.61.0",
     "radix-ui": "^1.8.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "sonner": "^2.0.8",
     "zod": "^4.6.7",
-    "zustand": "^5.0.15"
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",
